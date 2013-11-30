@@ -7,7 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#include <CoreLocation/CoreLocation.h>
 
-@interface GPSViewController : UIViewController
+@interface GPSViewController : UIViewController {
+
+IBOutlet UILabel* latitude;
+IBOutlet UILabel* longitude;
+    
+}
 
 @end

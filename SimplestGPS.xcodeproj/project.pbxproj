@@ -16,11 +16,9 @@
 		B9AD65B01849733200E9C380 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65AE1849733200E9C380 /* Main.storyboard */; };
 		B9AD65B31849733200E9C380 /* GPSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD65B21849733200E9C380 /* GPSViewController.m */; };
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
-		B9AD65BC1849733200E9C380 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65BB1849733200E9C380 /* XCTest.framework */; };
 		B9AD65BD1849733200E9C380 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659C1849733200E9C380 /* Foundation.framework */; };
 		B9AD65BE1849733200E9C380 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65A01849733200E9C380 /* UIKit.framework */; };
-		B9AD65C61849733200E9C380 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65C41849733200E9C380 /* InfoPlist.strings */; };
-		B9AD65C81849733200E9C380 /* SimplestGPSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD65C71849733200E9C380 /* SimplestGPSTests.m */; };
+		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,10 +47,7 @@
 		B9AD65B21849733200E9C380 /* GPSViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPSViewController.m; sourceTree = "<group>"; };
 		B9AD65B41849733200E9C380 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		B9AD65BA1849733200E9C380 /* SimplestGPSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SimplestGPSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		B9AD65BB1849733200E9C380 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		B9AD65C31849733200E9C380 /* SimplestGPSTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SimplestGPSTests-Info.plist"; sourceTree = "<group>"; };
-		B9AD65C51849733200E9C380 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		B9AD65C71849733200E9C380 /* SimplestGPSTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SimplestGPSTests.m; sourceTree = "<group>"; };
+		B9AD65D118497AAB00E9C380 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */,
 				B9AD659F1849733200E9C380 /* CoreGraphics.framework in Frameworks */,
 				B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */,
 				B9AD659D1849733200E9C380 /* Foundation.framework in Frameworks */,
@@ -70,7 +66,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B9AD65BC1849733200E9C380 /* XCTest.framework in Frameworks */,
 				B9AD65BE1849733200E9C380 /* UIKit.framework in Frameworks */,
 				B9AD65BD1849733200E9C380 /* Foundation.framework in Frameworks */,
 			);
@@ -83,7 +78,6 @@
 			isa = PBXGroup;
 			children = (
 				B9AD65A21849733200E9C380 /* SimplestGPS */,
-				B9AD65C11849733200E9C380 /* SimplestGPSTests */,
 				B9AD659B1849733200E9C380 /* Frameworks */,
 				B9AD659A1849733200E9C380 /* Products */,
 			);
@@ -101,10 +95,10 @@
 		B9AD659B1849733200E9C380 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B9AD65D118497AAB00E9C380 /* CoreLocation.framework */,
 				B9AD659C1849733200E9C380 /* Foundation.framework */,
 				B9AD659E1849733200E9C380 /* CoreGraphics.framework */,
 				B9AD65A01849733200E9C380 /* UIKit.framework */,
-				B9AD65BB1849733200E9C380 /* XCTest.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -130,24 +124,6 @@
 				B9AD65A51849733200E9C380 /* InfoPlist.strings */,
 				B9AD65A81849733200E9C380 /* main.m */,
 				B9AD65AA1849733200E9C380 /* SimplestGPS-Prefix.pch */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		B9AD65C11849733200E9C380 /* SimplestGPSTests */ = {
-			isa = PBXGroup;
-			children = (
-				B9AD65C71849733200E9C380 /* SimplestGPSTests.m */,
-				B9AD65C21849733200E9C380 /* Supporting Files */,
-			);
-			path = SimplestGPSTests;
-			sourceTree = "<group>";
-		};
-		B9AD65C21849733200E9C380 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				B9AD65C31849733200E9C380 /* SimplestGPSTests-Info.plist */,
-				B9AD65C41849733200E9C380 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -239,7 +215,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B9AD65C61849733200E9C380 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,7 +235,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B9AD65C81849733200E9C380 /* SimplestGPSTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,14 +263,6 @@
 				B9AD65AF1849733200E9C380 /* Base */,
 			);
 			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		B9AD65C41849733200E9C380 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				B9AD65C51849733200E9C380 /* en */,
-			);
-			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
