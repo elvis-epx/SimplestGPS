@@ -11,9 +11,16 @@
 
 @interface GPSViewController : UIViewController {
 
-IBOutlet UILabel* latitude;
-IBOutlet UILabel* longitude;
-    
+    IBOutlet UILabel* latitude;
+    IBOutlet UILabel* latitude2;
+    IBOutlet UILabel* longitude;
+    IBOutlet UILabel* longitude2;
+    IBOutlet UILabel* altitude;
+    IBOutlet UILabel* accuracy;
+    IBOutlet UILabel* speed;
+    IBOutlet UILabel* heading;
+    IBOutlet UISwitch *dms_switch;
+    IBOutlet UISwitch *metric_switch;
 }
 
 @end
