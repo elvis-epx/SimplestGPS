@@ -1,0 +1,5 @@
+#!/bin/bash
+
+convert icon1024.png -resize '120x120!' icon120.png
+convert icon1024.png -resize '80x80!' icon80.png
+convert icon1024.png -resize '58x58!' icon58.png

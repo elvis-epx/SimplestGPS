@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B90AAEEB184C1E59003A302E /* icon58.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEA184C1E59003A302E /* icon58.png */; };
+		B90AAEED184C1E5F003A302E /* icon80.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEC184C1E5F003A302E /* icon80.png */; };
+		B90AAEEF184C1E64003A302E /* icon120.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEE184C1E64003A302E /* icon120.png */; };
+		B90AAEF1184C1EAE003A302E /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEF0184C1EAE003A302E /* Default-568h@2x.png */; };
+		B90AAEF3184C1EB5003A302E /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEF2184C1EB5003A302E /* Default@2x.png */; };
 		B9AD659D1849733200E9C380 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659C1849733200E9C380 /* Foundation.framework */; };
 		B9AD659F1849733200E9C380 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659E1849733200E9C380 /* CoreGraphics.framework */; };
 		B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65A01849733200E9C380 /* UIKit.framework */; };
@@ -16,22 +21,15 @@
 		B9AD65B01849733200E9C380 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65AE1849733200E9C380 /* Main.storyboard */; };
 		B9AD65B31849733200E9C380 /* GPSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD65B21849733200E9C380 /* GPSViewController.m */; };
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
-		B9AD65BD1849733200E9C380 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659C1849733200E9C380 /* Foundation.framework */; };
-		B9AD65BE1849733200E9C380 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65A01849733200E9C380 /* UIKit.framework */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		B9AD65BF1849733200E9C380 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B9AD65911849733200E9C380 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = B9AD65981849733200E9C380;
-			remoteInfo = SimplestGPS;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
+		B90AAEEA184C1E59003A302E /* icon58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon58.png; sourceTree = "<group>"; };
+		B90AAEEC184C1E5F003A302E /* icon80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon80.png; sourceTree = "<group>"; };
+		B90AAEEE184C1E64003A302E /* icon120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon120.png; sourceTree = "<group>"; };
+		B90AAEF0184C1EAE003A302E /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		B90AAEF2184C1EB5003A302E /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		B9AD65991849733200E9C380 /* SimplestGPS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimplestGPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9AD659C1849733200E9C380 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B9AD659E1849733200E9C380 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -46,7 +44,6 @@
 		B9AD65B11849733200E9C380 /* GPSViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPSViewController.h; sourceTree = "<group>"; };
 		B9AD65B21849733200E9C380 /* GPSViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPSViewController.m; sourceTree = "<group>"; };
 		B9AD65B41849733200E9C380 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		B9AD65BA1849733200E9C380 /* SimplestGPSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SimplestGPSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9AD65D118497AAB00E9C380 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -62,21 +59,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B9AD65B71849733200E9C380 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B9AD65BE1849733200E9C380 /* UIKit.framework in Frameworks */,
-				B9AD65BD1849733200E9C380 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		B9AD65901849733200E9C380 = {
 			isa = PBXGroup;
 			children = (
+				B90AAEF2184C1EB5003A302E /* Default@2x.png */,
+				B90AAEF0184C1EAE003A302E /* Default-568h@2x.png */,
+				B90AAEEE184C1E64003A302E /* icon120.png */,
+				B90AAEEC184C1E5F003A302E /* icon80.png */,
+				B90AAEEA184C1E59003A302E /* icon58.png */,
 				B9AD65A21849733200E9C380 /* SimplestGPS */,
 				B9AD659B1849733200E9C380 /* Frameworks */,
 				B9AD659A1849733200E9C380 /* Products */,
@@ -87,7 +80,6 @@
 			isa = PBXGroup;
 			children = (
 				B9AD65991849733200E9C380 /* SimplestGPS.app */,
-				B9AD65BA1849733200E9C380 /* SimplestGPSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -148,24 +140,6 @@
 			productReference = B9AD65991849733200E9C380 /* SimplestGPS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		B9AD65B91849733200E9C380 /* SimplestGPSTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = B9AD65CE1849733200E9C380 /* Build configuration list for PBXNativeTarget "SimplestGPSTests" */;
-			buildPhases = (
-				B9AD65B61849733200E9C380 /* Sources */,
-				B9AD65B71849733200E9C380 /* Frameworks */,
-				B9AD65B81849733200E9C380 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				B9AD65C01849733200E9C380 /* PBXTargetDependency */,
-			);
-			name = SimplestGPSTests;
-			productName = SimplestGPSTests;
-			productReference = B9AD65BA1849733200E9C380 /* SimplestGPSTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -175,11 +149,6 @@
 				CLASSPREFIX = GPS;
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Elvis Pfutzenreuter";
-				TargetAttributes = {
-					B9AD65B91849733200E9C380 = {
-						TestTargetID = B9AD65981849733200E9C380;
-					};
-				};
 			};
 			buildConfigurationList = B9AD65941849733200E9C380 /* Build configuration list for PBXProject "SimplestGPS" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -195,7 +164,6 @@
 			projectRoot = "";
 			targets = (
 				B9AD65981849733200E9C380 /* SimplestGPS */,
-				B9AD65B91849733200E9C380 /* SimplestGPSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -205,16 +173,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B90AAEF3184C1EB5003A302E /* Default@2x.png in Resources */,
 				B9AD65B51849733200E9C380 /* Images.xcassets in Resources */,
 				B9AD65A71849733200E9C380 /* InfoPlist.strings in Resources */,
+				B90AAEEF184C1E64003A302E /* icon120.png in Resources */,
 				B9AD65B01849733200E9C380 /* Main.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		B9AD65B81849733200E9C380 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				B90AAEEB184C1E59003A302E /* icon58.png in Resources */,
+				B90AAEF1184C1EAE003A302E /* Default-568h@2x.png in Resources */,
+				B90AAEED184C1E5F003A302E /* icon80.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,22 +197,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B9AD65B61849733200E9C380 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		B9AD65C01849733200E9C380 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = B9AD65981849733200E9C380 /* SimplestGPS */;
-			targetProxy = B9AD65BF1849733200E9C380 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		B9AD65A51849733200E9C380 /* InfoPlist.strings */ = {
@@ -343,8 +294,8 @@
 		B9AD65CC1849733200E9C380 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-2";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
 				INFOPLIST_FILE = "SimplestGPS/SimplestGPS-Info.plist";
@@ -356,55 +307,13 @@
 		B9AD65CD1849733200E9C380 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-2";
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
 				INFOPLIST_FILE = "SimplestGPS/SimplestGPS-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
-			};
-			name = Release;
-		};
-		B9AD65CF1849733200E9C380 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/SimplestGPS.app/SimplestGPS";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = "SimplestGPSTests/SimplestGPSTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
-			};
-			name = Debug;
-		};
-		B9AD65D01849733200E9C380 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/SimplestGPS.app/SimplestGPS";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-					"$(DEVELOPER_FRAMEWORKS_DIR)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
-				INFOPLIST_FILE = "SimplestGPSTests/SimplestGPSTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
-				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
 		};
@@ -427,14 +336,7 @@
 				B9AD65CD1849733200E9C380 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-		};
-		B9AD65CE1849733200E9C380 /* Build configuration list for PBXNativeTarget "SimplestGPSTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				B9AD65CF1849733200E9C380 /* Debug */,
-				B9AD65D01849733200E9C380 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
