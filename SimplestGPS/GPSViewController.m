@@ -43,8 +43,8 @@
      [NSDictionary dictionaryWithObjectsAndKeys:
       [NSNumber numberWithInt: 1], @"dms", nil]];
 
-    metric = [prefs integerForKey: @"metric"];
-    dms = [prefs integerForKey: @"dms"];
+    metric = (int) [prefs integerForKey: @"metric"];
+    dms = (int) [prefs integerForKey: @"dms"];
     
     [metric_switch setOn: metric];
     [dms_switch setOn: dms];
@@ -52,7 +52,7 @@
     self.currentLocation = nil;
 
     locationManager = [[CLLocationManager alloc] init];
-	locationManager.delegate = self;
+	locationManager.delegate = (id<CLLocationManagerDelegate>) self;
 	locationManager.distanceFilter = kCLDistanceFilterNone;
 	locationManager.desiredAccuracy = kCLLocationAccuracyBest;
     [locationManager startUpdatingLocation];
@@ -114,9 +114,9 @@ NSString *format_heading(double n)
     n = (n - floor(n)) * 60;
     int minutes = floor(n);
     n = (n - floor(n)) * 60;
-    int seconds = floor(n);
+    // int seconds = floor(n);
     n = (n - floor(n)) * 100;
-    int cents = floor(n);
+    // int cents = floor(n);
     
     if (dms) {
         return [NSString stringWithFormat: @"%d°%02d'",
@@ -129,10 +129,10 @@ NSString *format_heading(double n)
 
 - (NSString *) format_deg2: (double) n
 {
-    int deg = floor(n);
+    // int deg = floor(n);
     if (dms) {
         n = (n - floor(n)) * 60;
-        int minutes = floor(n);
+        // int minutes = floor(n);
         n = (n - floor(n)) * 60;
         int seconds = floor(n);
         n = (n - floor(n)) * 100;
@@ -197,8 +197,14 @@ NSString *format_heading(double n)
     if (h > 10000 || v > 10000) {
         return @"imprecise";
     }
-    return [NSString stringWithFormat: @"%@↔︎ %@↕︎", [self format_altitude: h],
+    if (v >= 0) {
+        return [NSString stringWithFormat: @"%@↔︎ %@↕︎", [self format_altitude: h],
             [self format_altitude: v]];
+    } else if (h >= 0) {
+        return [NSString stringWithFormat: @"%@↔︎", [self format_altitude: h]];
+    } else {
+        return @"";
+    }
 }
 
 
