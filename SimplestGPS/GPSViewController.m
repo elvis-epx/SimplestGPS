@@ -55,6 +55,11 @@
 	locationManager.delegate = (id<CLLocationManagerDelegate>) self;
 	locationManager.distanceFilter = kCLDistanceFilterNone;
 	locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+
+    if ([locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
+        [locationManager requestAlwaysAuthorization];
+    }
+
     [locationManager startUpdatingLocation];
 }
 
