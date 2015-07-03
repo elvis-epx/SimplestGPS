@@ -20,11 +20,6 @@
     UIViewController *sourceViewController = sender.sourceViewController;
 }
 
-- (IBAction) backToTable: (UIStoryboardSegue*) sender
-{
-    UIViewController *sourceViewController = sender.sourceViewController;
-}
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];

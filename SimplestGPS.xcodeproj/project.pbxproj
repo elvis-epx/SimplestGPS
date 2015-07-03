@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 47;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -26,6 +26,9 @@
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
 		B9BA425E1B46222D00429F3C /* GPSModel.m in Sources */ = {isa = PBXBuildFile; fileRef = B9BA425D1B46222D00429F3C /* GPSModel.m */; };
+		B9C3FB0D1B47190F003D525C /* TargetsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9C3FB0C1B47190F003D525C /* TargetsViewController.m */; };
+		B9C3FB101B471924003D525C /* TargetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9C3FB0F1B471924003D525C /* TargetViewController.m */; };
+		B9C3FB131B471D66003D525C /* TargetCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B9C3FB121B471D66003D525C /* TargetCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +57,12 @@
 		B9AD65D118497AAB00E9C380 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		B9BA425C1B46222D00429F3C /* GPSModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPSModel.h; sourceTree = "<group>"; };
 		B9BA425D1B46222D00429F3C /* GPSModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPSModel.m; sourceTree = "<group>"; };
+		B9C3FB0B1B47190F003D525C /* TargetsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TargetsViewController.h; sourceTree = "<group>"; };
+		B9C3FB0C1B47190F003D525C /* TargetsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TargetsViewController.m; sourceTree = "<group>"; };
+		B9C3FB0E1B471924003D525C /* TargetViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TargetViewController.h; sourceTree = "<group>"; };
+		B9C3FB0F1B471924003D525C /* TargetViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TargetViewController.m; sourceTree = "<group>"; };
+		B9C3FB111B471D66003D525C /* TargetCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TargetCell.h; sourceTree = "<group>"; };
+		B9C3FB121B471D66003D525C /* TargetCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TargetCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,12 +122,17 @@
 				B9BA425C1B46222D00429F3C /* GPSModel.h */,
 				B9BA425D1B46222D00429F3C /* GPSModel.m */,
 				B9AD65AB1849733200E9C380 /* GPSAppDelegate.h */,
+				B9AD65A31849733200E9C380 /* Supporting Files */,
 				B9AD65AC1849733200E9C380 /* GPSAppDelegate.m */,
-				B9AD65AE1849733200E9C380 /* Main.storyboard */,
 				B9AD65B11849733200E9C380 /* GPSViewController.h */,
 				B9AD65B21849733200E9C380 /* GPSViewController.m */,
-				B9AD65B41849733200E9C380 /* Images.xcassets */,
-				B9AD65A31849733200E9C380 /* Supporting Files */,
+				B9AD65AE1849733200E9C380 /* Main.storyboard */,
+				B9C3FB111B471D66003D525C /* TargetCell.h */,
+				B9C3FB121B471D66003D525C /* TargetCell.m */,
+				B9C3FB0B1B47190F003D525C /* TargetsViewController.h */,
+				B9C3FB0C1B47190F003D525C /* TargetsViewController.m */,
+				B9C3FB0E1B471924003D525C /* TargetViewController.h */,
+				B9C3FB0F1B471924003D525C /* TargetViewController.m */,
 			);
 			path = SimplestGPS;
 			sourceTree = "<group>";
@@ -130,6 +144,7 @@
 				B9AD65A51849733200E9C380 /* InfoPlist.strings */,
 				B9AD65A81849733200E9C380 /* main.m */,
 				B9AD65AA1849733200E9C380 /* SimplestGPS-Prefix.pch */,
+				B9AD65B41849733200E9C380 /* Images.xcassets */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -161,7 +176,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = GPS;
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = "Elvis Pfutzenreuter";
 				TargetAttributes = {
 					B9AD65981849733200E9C380 = {
@@ -170,7 +185,7 @@
 				};
 			};
 			buildConfigurationList = B9AD65941849733200E9C380 /* Build configuration list for PBXProject "SimplestGPS" */;
-			compatibilityVersion = "Xcode 6.3";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -214,9 +229,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9BA425E1B46222D00429F3C /* GPSModel.m in Sources */,
+				B9C3FB0D1B47190F003D525C /* TargetsViewController.m in Sources */,
 				B9AD65B31849733200E9C380 /* GPSViewController.m in Sources */,
 				B9AD65A91849733200E9C380 /* main.m in Sources */,
 				B9AD65AD1849733200E9C380 /* GPSAppDelegate.m in Sources */,
+				B9C3FB101B471924003D525C /* TargetViewController.m in Sources */,
+				B9C3FB131B471D66003D525C /* TargetCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
