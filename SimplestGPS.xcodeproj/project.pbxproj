@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 47;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -25,6 +25,7 @@
 		B9AD65B31849733200E9C380 /* GPSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD65B21849733200E9C380 /* GPSViewController.m */; };
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
+		B9BA425E1B46222D00429F3C /* GPSModel.m in Sources */ = {isa = PBXBuildFile; fileRef = B9BA425D1B46222D00429F3C /* GPSModel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +52,8 @@
 		B9AD65B21849733200E9C380 /* GPSViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPSViewController.m; sourceTree = "<group>"; };
 		B9AD65B41849733200E9C380 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		B9AD65D118497AAB00E9C380 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		B9BA425C1B46222D00429F3C /* GPSModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPSModel.h; sourceTree = "<group>"; };
+		B9BA425D1B46222D00429F3C /* GPSModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GPSModel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +110,8 @@
 		B9AD65A21849733200E9C380 /* SimplestGPS */ = {
 			isa = PBXGroup;
 			children = (
+				B9BA425C1B46222D00429F3C /* GPSModel.h */,
+				B9BA425D1B46222D00429F3C /* GPSModel.m */,
 				B9AD65AB1849733200E9C380 /* GPSAppDelegate.h */,
 				B9AD65AC1849733200E9C380 /* GPSAppDelegate.m */,
 				B9AD65AE1849733200E9C380 /* Main.storyboard */,
@@ -165,7 +170,7 @@
 				};
 			};
 			buildConfigurationList = B9AD65941849733200E9C380 /* Build configuration list for PBXProject "SimplestGPS" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -208,6 +213,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9BA425E1B46222D00429F3C /* GPSModel.m in Sources */,
 				B9AD65B31849733200E9C380 /* GPSViewController.m in Sources */,
 				B9AD65A91849733200E9C380 /* main.m in Sources */,
 				B9AD65AD1849733200E9C380 /* GPSAppDelegate.m in Sources */,
@@ -268,7 +274,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -300,7 +306,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -314,7 +320,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
 				INFOPLIST_FILE = "SimplestGPS/SimplestGPS-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -329,7 +335,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
 				INFOPLIST_FILE = "SimplestGPS/SimplestGPS-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;

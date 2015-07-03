@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#include <CoreLocation/CoreLocation.h>
+#import "GPSModel.h"
 
-@interface GPSViewController : UIViewController {
+@interface GPSViewController : UIViewController<ModelObserver> {
 
     IBOutlet UILabel* latitude;
     IBOutlet UILabel* latitude2;
@@ -19,7 +19,7 @@
     IBOutlet UILabel* accuracy;
     IBOutlet UILabel* speed;
     IBOutlet UILabel* heading;
-    IBOutlet UISwitch *dms_switch;
+    IBOutlet UIButton* targets;
     IBOutlet UISwitch *metric_switch;
 }
 
