@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "GPSModel.h"
 
-@interface TargetsViewController : UIViewController<ModelObserver, UITableViewDelegate, UITableViewDataSource> {
+@interface TargetsViewController : UIViewController<ModelObserver, UITableViewDelegate, UITableViewDataSource, UIGestureRecognizerDelegate> {
     IBOutlet UITableView *table;
+    IBOutlet UIButton *new_target;
 }
 
 @end

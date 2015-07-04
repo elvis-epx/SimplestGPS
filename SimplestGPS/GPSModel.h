@@ -13,6 +13,7 @@
 }
 
 + (GPSModel*) model;
+
 - (int) getMetric;
 - (void) setMetric: (int) value;
 - (void) addObs: (id) observer;
@@ -25,6 +26,18 @@
 - (NSString*) format_heading;
 - (NSString*) format_speed;
 - (NSString*) format_accuracy;
+
+- (NSInteger) target_count;
+- (NSString*) target_name: (NSInteger) index;
+- (NSString*) target_flatitude: (NSInteger) index;
+- (NSString*) target_flongitude: (NSInteger) index;
+- (NSString*) target_fdistance: (NSInteger) index;
+- (NSString*) target_fheading: (NSInteger) index;
+- (NSString*) target_set: (NSInteger) index name: (NSString*) name latitude: (NSString*) latitude longitude: (NSString*) longitude;
+- (NSString*) target_delete: (NSInteger) index;
+
+- (NSInteger) target_getEdit;
+- (NSInteger) target_setEdit: (NSInteger) index;
 
 @end
 

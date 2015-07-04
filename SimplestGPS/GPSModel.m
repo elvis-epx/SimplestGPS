@@ -9,10 +9,6 @@
 #import "GPSModel.h"
 
 @interface GPSModel () {
-    CLGeocoder *geocoder;
-    CLPlacemark *placemark;
-    CLLocationManager *locationManager;
-    int metric;
 }
 
 @property (nonatomic, retain) CLLocation *currentLocation;
@@ -21,6 +17,18 @@
 
 @implementation GPSModel {
     NSMutableArray *observers;
+    
+    NSMutableDictionary *names;
+    NSMutableDictionary *lats;
+    NSMutableDictionary *longs;
+    NSArray *target_list;
+    
+    CLGeocoder *geocoder;
+    CLPlacemark *placemark;
+    CLLocationManager *locationManager;
+    int metric;
+    
+    NSInteger editing;
 }
 
 + (GPSModel*) model {
@@ -42,6 +50,36 @@
          [NSDictionary dictionaryWithObjectsAndKeys:
           [NSNumber numberWithInt: 1], @"metric", nil]];
 
+        [prefs registerDefaults:
+         [NSDictionary dictionaryWithObjectsAndKeys:
+          [NSNumber numberWithInt: 3], @"tgtcounter", nil]];
+        
+        [prefs registerDefaults:
+         [NSDictionary dictionaryWithObjectsAndKeys:
+          [[NSDictionary alloc] init], @"names",
+            @"Joinville, Brazil", @"1",
+            @"Blumenau, Brazil", @"2",
+             nil]];
+
+        [prefs registerDefaults:
+         [NSDictionary dictionaryWithObjectsAndKeys:
+          [[NSDictionary alloc] init], @"lats",
+           [NSNumber numberWithDouble: parse_lat(@"26.18.19.50S")], @"1",
+           [NSNumber numberWithDouble: parse_lat(@"26.54.46.10S")], @"2",
+           nil]];
+
+        [prefs registerDefaults:
+         [NSDictionary dictionaryWithObjectsAndKeys:
+          [[NSDictionary alloc] init], @"longs",
+           [NSNumber numberWithDouble: parse_long(@"48.50.44.44W")], @"1",
+           [NSNumber numberWithDouble: parse_long(@"49.04.04.47W")], @"2",
+           nil]];
+
+        names = [[prefs dictionaryForKey: @"names"] mutableCopy];
+        lats = [[prefs dictionaryForKey: @"lats"] mutableCopy];
+        longs = [[prefs dictionaryForKey: @"longs"] mutableCopy];
+        [self updateTargetList];
+
         metric = (int) [prefs integerForKey: @"metric"];
     
         self.currentLocation = nil;
@@ -58,6 +96,16 @@
         [locationManager startUpdatingLocation];
     }
     return self;
+}
+
+- (void) updateTargetList
+{
+    target_list = [[names allKeys] sortedArrayUsingComparator:
+                    ^(id obj1, id obj2) {
+                        NSString* s1 = obj1;
+                        NSString* s2 = obj2;
+                        return [s1 caseInsensitiveCompare: s2];
+                    }];
 }
 
 - (void) setMetric: (int) value
@@ -291,6 +339,78 @@ NSString *do_format_heading(double n)
     for (NSObject<ModelObserver> *observer in observers) {
         [observer update];
     }
+}
+
+- (NSInteger) target_count
+{
+    return [target_list count];
+}
+
+- (NSString*) target_name: (NSInteger) index
+{
+    return [names valueForKey: [target_list objectAtIndex: index]];
+}
+
+- (NSString*) target_flatitude: (NSInteger) index
+{
+    return [self format_latitude_t:
+              [lats valueForKey: [target_list objectAtIndex: index]]];
+}
+
+- (NSString*) target_flongitude : (NSInteger) index
+{
+    return [self format_longitude_t:
+            [longs valueForKey: [target_list objectAtIndex: index]]];
+}
+
+- (NSString*) target_fdistance: (NSInteger) index
+{
+    return [self format_distance_t: [self calculate_distance_t: index]];
+}
+
+- (NSString*) target_fheading: (NSInteger) index
+{
+    return [self format_heading_t: [self calculate_heading_t: index]];
+}
+
+- (NSString*) target_set: (NSInteger) index name: (NSString*) name latitude: (NSString*) latitude longitude: (NSString*) longitude
+{
+    // FIXME implement add if name < 0
+    // FIXME ratchet up counter, make key
+    // FIXME implement update
+    // FIXME parse, errors
+    // FIXME fill dicts
+    
+    [self update];
+}
+
+- (NSString*) target_delete: (NSInteger) index
+{
+    // FIXME delete
+    // FIXME fill dicts
+    
+    [self update];
+}
+
+- (void) update
+{
+    // FIXME save dicts, save new_index
+    
+    [self updateTargetList];
+    
+    for (NSObject<ModelObserver> *observer in observers) {
+        [observer update];
+    }
+}
+
+- (NSInteger) target_getEdit
+{
+    return editing;
+}
+
+- (NSInteger) target_setEdit: (NSInteger) index
+{
+    editing = index;
 }
 
 @end

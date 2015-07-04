@@ -77,7 +77,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="nfc-wt-9rG" kind="showDetail" id="pjq-Cx-CrX"/>
+                                    <segue destination="nfc-wt-9rG" kind="showDetail" identifier="openTargets" id="pjq-Cx-CrX"/>
                                 </connections>
                             </button>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Metric system" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ami-V8-fwC">
@@ -142,7 +142,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="cgf-OK-JfV" kind="showDetail" id="iU3-n9-ddI"/>
+                                    <segue destination="cgf-OK-JfV" kind="showDetail" identifier="openTarget" id="iU3-n9-ddI"/>
                                 </connections>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="102" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="9v4-Xt-iPm">
@@ -192,6 +192,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="Mpi-2o-Ss4"/>
                     <connections>
+                        <outlet property="new_target" destination="cx0-tc-xA7" id="qh0-GP-SWt"/>
                         <outlet property="table" destination="9v4-Xt-iPm" id="UDA-HD-vsA"/>
                     </connections>
                 </viewController>

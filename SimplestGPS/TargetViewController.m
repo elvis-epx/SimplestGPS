@@ -13,14 +13,23 @@
 
 @implementation TargetViewController
 
+- (void)viewDidLoad
+{
+    // FIXME load data from chosen index
+}
+
 - (IBAction) back: (id) sender
 {
     [self performSegueWithIdentifier:@"backToTable" sender:self];
+    // FIXME save in model, with test
+    // FIXME confirm wrong
 }
 
 - (IBAction) del: (id) sender
 {
     [self performSegueWithIdentifier:@"backToTable" sender:self];
+    // FIXME confirm
+    // FIXME delete in model
 }
 
 @end
