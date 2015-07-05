@@ -34,10 +34,10 @@
 - (NSString*) target_fdistance: (NSInteger) index;
 - (NSString*) target_fheading: (NSInteger) index;
 - (NSString*) target_set: (NSInteger) index name: (NSString*) name latitude: (NSString*) latitude longitude: (NSString*) longitude;
-- (NSString*) target_delete: (NSInteger) index;
+- (void) target_delete: (NSInteger) index;
 
 - (NSInteger) target_getEdit;
-- (NSInteger) target_setEdit: (NSInteger) index;
+- (void) target_setEdit: (NSInteger) index;
 
 @end
 

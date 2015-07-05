@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 Elvis Pfutzenreuter. All rights reserved.
 //
 
+#include <math.h>
 #import "GPSModel.h"
 
 @interface GPSModel () {
@@ -22,6 +23,7 @@
     NSMutableDictionary *lats;
     NSMutableDictionary *longs;
     NSArray *target_list;
+    int next_target;
     
     CLGeocoder *geocoder;
     CLPlacemark *placemark;
@@ -52,7 +54,7 @@
 
         [prefs registerDefaults:
          [NSDictionary dictionaryWithObjectsAndKeys:
-          [NSNumber numberWithInt: 3], @"tgtcounter", nil]];
+          [NSNumber numberWithInt: 3], @"next_target", nil]];
         
         [prefs registerDefaults:
          [NSDictionary dictionaryWithObjectsAndKeys:
@@ -64,15 +66,15 @@
         [prefs registerDefaults:
          [NSDictionary dictionaryWithObjectsAndKeys:
           [[NSDictionary alloc] init], @"lats",
-           [NSNumber numberWithDouble: parse_lat(@"26.18.19.50S")], @"1",
-           [NSNumber numberWithDouble: parse_lat(@"26.54.46.10S")], @"2",
+          [NSNumber numberWithDouble: [self parse_lat: @"26.18.19.50S"]], @"1",
+          [NSNumber numberWithDouble: [self parse_lat: @"26.54.46.10S"]], @"2",
            nil]];
 
         [prefs registerDefaults:
          [NSDictionary dictionaryWithObjectsAndKeys:
           [[NSDictionary alloc] init], @"longs",
-           [NSNumber numberWithDouble: parse_long(@"48.50.44.44W")], @"1",
-           [NSNumber numberWithDouble: parse_long(@"49.04.04.47W")], @"2",
+          [NSNumber numberWithDouble: [self parse_long: @"48.50.44.44W"]], @"1",
+          [NSNumber numberWithDouble: [self parse_long: @"49.04.04.47W"]], @"2",
            nil]];
 
         names = [[prefs dictionaryForKey: @"names"] mutableCopy];
@@ -81,6 +83,7 @@
         [self updateTargetList];
 
         metric = (int) [prefs integerForKey: @"metric"];
+        next_target = (int) [prefs integerForKey: @"next_target"];
     
         self.currentLocation = nil;
 
@@ -116,9 +119,8 @@
     if (! self.currentLocation) {
         return;
     }
-    for (NSObject<ModelObserver> *observer in observers) {
-        [observer update];
-    }
+
+    [self update];
 }
 
 - (int) getMetric
@@ -203,6 +205,20 @@ NSString *do_format_heading(double n)
     }
 }
 
+- (NSString *) format_deg_t: (double) n
+{
+    int deg = floor(n);
+    n = (n - floor(n)) * 60;
+    int minutes = floor(n);
+    n = (n - floor(n)) * 60;
+    int seconds = floor(n);
+    n = (n - floor(n)) * 100;
+    int cents = floor(n);
+    
+    return [NSString stringWithFormat: @"%d.%02d.%02d.%02d'",
+                deg, minutes, seconds, cents];
+}
+
 - (NSString *) format_latitude
 {
     if (! self.currentLocation) {
@@ -210,6 +226,35 @@ NSString *do_format_heading(double n)
     }
     return [self do_format_latitude: self.currentLocation.coordinate.latitude];
 }
+
+- (NSString *) format_latitude_t: (double) lat
+{
+    if (lat != lat) {
+        return @"---";
+    }
+    NSString *suffix = (lat < 0 ? @"S" : @"N");
+    return [NSString stringWithFormat: @"%@%@",
+            [self format_deg_t: fabs(lat)], suffix];
+}
+
+- (NSString *) format_longitude_t: (double) lo
+{
+    if (lo != lo) {
+        return @"---";
+    }
+    NSString *suffix = (lo < 0 ? @"W" : @"E");
+    return [NSString stringWithFormat: @"%@%@",
+            [self format_deg_t: fabs(lo)], suffix];
+}
+
+- (NSString*) format_heading_t: (double) course
+{
+    if (course != course) {
+        return @"---";
+    }
+    return do_format_heading(course);
+}
+
 
 - (NSString*) format_heading
 {
@@ -288,6 +333,15 @@ NSString *do_format_heading(double n)
     return [NSString stringWithFormat:@"%.0f%@", alt, (metric ? @"m" : @"ft")];
 }
 
+- (NSString*) format_distance_t: (double) alt
+{
+    if (! metric) {
+        alt *= 3.28084;
+    }
+    
+    return [NSString stringWithFormat:@"%.0f%@", alt, (metric ? @"m" : @"ft")];
+}
+
 - (NSString*) format_speed
 {
     if (self.currentLocation) {
@@ -335,10 +389,7 @@ NSString *do_format_heading(double n)
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
 {
     self.currentLocation = newLocation;
-    
-    for (NSObject<ModelObserver> *observer in observers) {
-        [observer update];
-    }
+    [self update];
 }
 
 - (NSInteger) target_count
@@ -353,14 +404,14 @@ NSString *do_format_heading(double n)
 
 - (NSString*) target_flatitude: (NSInteger) index
 {
-    return [self format_latitude_t:
-              [lats valueForKey: [target_list objectAtIndex: index]]];
+    NSNumber *n = [lats valueForKey: [target_list objectAtIndex: index]];
+    return [self format_latitude_t: [n doubleValue]];
 }
 
-- (NSString*) target_flongitude : (NSInteger) index
+- (NSString*) target_flongitude: (NSInteger) index
 {
-    return [self format_longitude_t:
-            [longs valueForKey: [target_list objectAtIndex: index]]];
+    NSNumber *n = [longs valueForKey: [target_list objectAtIndex: index]];
+    return [self format_longitude_t: [n doubleValue]];
 }
 
 - (NSString*) target_fdistance: (NSInteger) index
@@ -373,31 +424,141 @@ NSString *do_format_heading(double n)
     return [self format_heading_t: [self calculate_heading_t: index]];
 }
 
+double harvesine(double lat1, double lat2, double long1, double long2)
+{
+    // http://www.movable-type.co.uk/scripts/latlong.html
+    
+    double R = 6371000; // metres
+    double phi1 = lat1 * M_PI / 180.0;
+    double phi2 = lat2 * M_PI / 180.0;
+    double deltaphi = (lat2-lat1) * M_PI / 180.0;
+    double deltalambda = (long2-long1) * M_PI / 180.0;
+    
+    double a = sin(deltaphi/2) * sin(deltaphi/2) +
+        cos(phi1) * cos(phi2) *
+        sin(deltalambda/2) * sin(deltalambda/2);
+    double c = 2 * atan2(sqrt(a), sqrt(1.0 - a));
+    double d = R * c;
+    return d;
+}
+
+double azimuth(double lat1, double lat2, double long1, double long2)
+{
+    double phi1 = lat1 * M_PI / 180.0;
+    double phi2 = lat2 * M_PI / 180.0;
+    double lambda1 = long1 * M_PI / 180.0;
+    double lambda2 = long2 * M_PI / 180.0;
+
+    double y = sin(lambda2-lambda1) * cos(phi2);
+    double x = cos(phi1) * sin(phi2) -
+        sin(phi1) * cos(phi2) * cos(lambda2 - lambda1);
+    double brng = atan2(y, x) * 180.0 / M_PI;
+    return brng;
+}
+
+- (double) calculate_distance_t: (NSInteger) index
+{
+    if (! self.currentLocation || index < 0 || index >= [target_list count]) {
+        return 0.0/0.0;
+    }
+    double lat1 = self.currentLocation.coordinate.latitude;
+    double long1 = self.currentLocation.coordinate.longitude;
+
+    NSString *key = [target_list objectAtIndex: index];
+    NSNumber *lat2 = [lats objectForKey: key];
+    NSNumber *long2 = [longs objectForKey: key];
+
+    return harvesine(lat1, [lat2 doubleValue], long1, [long2 doubleValue]);
+}
+
+- (double) calculate_heading_t: (NSInteger) index
+{
+    if (! self.currentLocation || index < 0 || index >= [target_list count]) {
+        return 0.0/0.0;
+    }
+    double lat1 = self.currentLocation.coordinate.latitude;
+    double long1 = self.currentLocation.coordinate.longitude;
+
+    NSString *key = [target_list objectAtIndex: index];
+    NSNumber *lat2 = [lats objectForKey: key];
+    NSNumber *long2 = [longs objectForKey: key];
+
+    return azimuth(lat1, [lat2 doubleValue], long1, [long2 doubleValue]);
+}
+
+- (double) parse_lat: (NSString*) lat
+{
+    // FIXME implement, NaN
+    return -23.1;
+}
+
+- (double) parse_long: (NSString*) lo
+{
+    // FIXME implement, NaN
+    return -48.5;
+}
+
 - (NSString*) target_set: (NSInteger) index name: (NSString*) name latitude: (NSString*) latitude longitude: (NSString*) longitude
 {
-    // FIXME implement add if name < 0
-    // FIXME ratchet up counter, make key
-    // FIXME implement update
-    // FIXME parse, errors
-    // FIXME fill dicts
+    if ([name length] <= 0) {
+        return @"Name must not be empty";
+    }
     
+    double dlatitude = [self parse_lat: latitude];
+    if (dlatitude != dlatitude) {
+        return @"Latitude is invalid.";
+    }
+    
+    double dlongitude = [self parse_long: longitude];
+    if (dlongitude != dlongitude) {
+        return @"Longitude is invalid.";
+    }
+    
+    NSString *key;
+    if (index < 0 || index >= [target_list count]) {
+        index = ++next_target;
+        key = [NSString stringWithFormat: @"k%ld", index];
+    } else {
+        key = [target_list objectAtIndex: index];
+    }
+    
+    [names setObject: name forKey: key];
+    [lats setObject: [NSNumber numberWithDouble: dlatitude] forKey: key];
+    [longs setObject: [NSNumber numberWithDouble: dlongitude] forKey: key];
+
+    [self saveTargets];
+    [self update];
+    
+    return nil;
+}
+
+- (void) target_delete: (NSInteger) index
+{
+    if (index < 0 || index >= [target_list count]) {
+        return;
+    }
+    NSString *key = [target_list objectAtIndex: index];
+    [names removeObjectForKey: key];
+    [lats removeObjectForKey: key];
+    [longs removeObjectForKey: key];
+
+    [self saveTargets];
     [self update];
 }
 
-- (NSString*) target_delete: (NSInteger) index
+- (void) saveTargets
 {
-    // FIXME delete
-    // FIXME fill dicts
+    [self updateTargetList];
     
-    [self update];
+    NSUserDefaults* prefs = [NSUserDefaults standardUserDefaults];
+    [prefs setObject: names forKey: @"names"];
+    [prefs setObject: lats forKey: @"lats"];
+    [prefs setObject: longs forKey: @"longs"];
+    [prefs setInteger: next_target forKey: @"next_target"];
 }
 
 - (void) update
 {
-    // FIXME save dicts, save new_index
-    
-    [self updateTargetList];
-    
     for (NSObject<ModelObserver> *observer in observers) {
         [observer update];
     }
@@ -408,7 +569,7 @@ NSString *do_format_heading(double n)
     return editing;
 }
 
-- (NSInteger) target_setEdit: (NSInteger) index
+- (void) target_setEdit: (NSInteger) index
 {
     editing = index;
 }
