@@ -58,24 +58,27 @@
         
         [prefs registerDefaults:
          [NSDictionary dictionaryWithObjectsAndKeys:
-          [[NSDictionary alloc] init], @"names",
+          [NSDictionary dictionaryWithObjectsAndKeys:
             @"Joinville, Brazil", @"1",
             @"Blumenau, Brazil", @"2",
-             nil]];
+             nil], @"names",
+          nil]];
 
         [prefs registerDefaults:
          [NSDictionary dictionaryWithObjectsAndKeys:
-          [[NSDictionary alloc] init], @"lats",
-          [NSNumber numberWithDouble: [self parse_lat: @"26.18.19.50S"]], @"1",
-          [NSNumber numberWithDouble: [self parse_lat: @"26.54.46.10S"]], @"2",
-           nil]];
+          [NSDictionary dictionaryWithObjectsAndKeys:
+           [NSNumber numberWithDouble: [self parse_lat: @"26.18.19.50S"]], @"1",
+           [NSNumber numberWithDouble: [self parse_lat: @"26.54.46.10S"]], @"2",
+           nil], @"lats",
+          nil]];
 
         [prefs registerDefaults:
          [NSDictionary dictionaryWithObjectsAndKeys:
-          [[NSDictionary alloc] init], @"longs",
-          [NSNumber numberWithDouble: [self parse_long: @"48.50.44.44W"]], @"1",
-          [NSNumber numberWithDouble: [self parse_long: @"49.04.04.47W"]], @"2",
-           nil]];
+          [NSDictionary dictionaryWithObjectsAndKeys:
+           [NSNumber numberWithDouble: [self parse_long: @"48.50.44.44W"]], @"1",
+           [NSNumber numberWithDouble: [self parse_long: @"49.04.04.47W"]], @"2",
+           nil], @"longs",
+          nil]];
 
         names = [[prefs dictionaryForKey: @"names"] mutableCopy];
         lats = [[prefs dictionaryForKey: @"lats"] mutableCopy];
@@ -109,6 +112,7 @@
                         NSString* s2 = obj2;
                         return [s1 caseInsensitiveCompare: s2];
                     }];
+    NSLog(@"Number of targets: %ld", [target_list count]);
 }
 
 - (void) setMetric: (int) value
@@ -399,28 +403,48 @@ NSString *do_format_heading(double n)
 
 - (NSString*) target_name: (NSInteger) index
 {
+    if (index < 0 || index >= [target_list count]) {
+        NSLog(@"Index %ld out of range", (long) index);
+        return @"ERR";
+    }
     return [names valueForKey: [target_list objectAtIndex: index]];
 }
 
 - (NSString*) target_flatitude: (NSInteger) index
 {
+    if (index < 0 || index >= [target_list count]) {
+        NSLog(@"Index %ld out of range", (long) index);
+        return @"ERR";
+    }
     NSNumber *n = [lats valueForKey: [target_list objectAtIndex: index]];
     return [self format_latitude_t: [n doubleValue]];
 }
 
 - (NSString*) target_flongitude: (NSInteger) index
 {
+    if (index < 0 || index >= [target_list count]) {
+        NSLog(@"Index %ld out of range", (long) index);
+        return @"ERR";
+    }
     NSNumber *n = [longs valueForKey: [target_list objectAtIndex: index]];
     return [self format_longitude_t: [n doubleValue]];
 }
 
 - (NSString*) target_fdistance: (NSInteger) index
 {
+    if (index < 0 || index >= [target_list count]) {
+        NSLog(@"Index %ld out of range", (long) index);
+        return @"ERR";
+    }
     return [self format_distance_t: [self calculate_distance_t: index]];
 }
 
 - (NSString*) target_fheading: (NSInteger) index
 {
+    if (index < 0 || index >= [target_list count]) {
+        NSLog(@"Index %ld out of range", (long) index);
+        return @"ERR";
+    }
     return [self format_heading_t: [self calculate_heading_t: index]];
 }
 
@@ -538,7 +562,7 @@ double azimuth(double lat1, double lat2, double long1, double long2)
         NSLog(@"Invalid cent %ld", (long) cent);
         return value;
     }
-    if (! [s scanString: @"ALL" intoString: &cardinal]) {
+    if (! [s scanUpToString: @"FOOBAR" intoString: &cardinal]) {
         NSLog(@"Did not find cardinal in %@", coord);
         return value;
     }
