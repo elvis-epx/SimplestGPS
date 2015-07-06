@@ -342,6 +342,9 @@ NSString *do_format_heading(double n)
 
 - (NSString*) format_distance_t: (double) alt
 {
+    if (alt != alt) {
+        return @"---";
+    }
     NSNumberFormatter *f = [[NSNumberFormatter alloc] init];
     [f setNumberStyle: NSNumberFormatterDecimalStyle];
     [f setMaximumFractionDigits:0];
@@ -611,7 +614,8 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     }
 
     value = sign * (deg + min / 60.0 + sec / 3600.0 + cent / 360000.0);
-    NSLog(@"Parsed %@ as %f %d %d %d %d %@ %f", coord, sign, deg, min, sec, cent, cardinal, value);
+    NSLog(@"Parsed %@ as %f %ld %ld %ld %ld %@ %f", coord, sign, (long) deg,
+          (long) min, (long) sec, (long) cent, cardinal, value);
     return value;
 }
 
@@ -628,7 +632,7 @@ double azimuth(double lat1, double lat2, double long1, double long2)
 - (NSString*) target_set: (NSInteger) index name: (NSString*) name latitude: (NSString*) latitude longitude: (NSString*) longitude
 {
     if ([name length] <= 0) {
-        return @"Name must not be empty";
+        return @"Name must not be empty.";
     }
     
     double dlatitude = [self parse_lat: latitude];

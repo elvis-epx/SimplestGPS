@@ -152,7 +152,7 @@
                                     <segue destination="cgf-OK-JfV" kind="showDetail" identifier="openTarget" id="iU3-n9-ddI"/>
                                 </connections>
                             </button>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" alwaysBounceVertical="YES" showsVerticalScrollIndicator="NO" indicatorStyle="black" dataMode="prototypes" style="plain" rowHeight="139" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="9v4-Xt-iPm">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsVerticalScrollIndicator="NO" indicatorStyle="black" dataMode="prototypes" style="plain" rowHeight="139" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="9v4-Xt-iPm">
                                 <rect key="frame" x="0.0" y="28" width="600" height="499"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="separatorColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -217,11 +217,13 @@
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="9v4-Xt-iPm" secondAttribute="trailing" constant="-16" id="2X4-45-Hv8"/>
+                            <constraint firstItem="9v4-Xt-iPm" firstAttribute="top" secondItem="qIk-NG-1VF" secondAttribute="bottom" constant="8" id="4J6-HL-nIw"/>
                             <constraint firstItem="mjj-HO-i3M" firstAttribute="top" secondItem="cx0-tc-xA7" secondAttribute="bottom" constant="9" id="9CK-ak-61A"/>
                             <constraint firstItem="mjj-HO-i3M" firstAttribute="top" secondItem="LfJ-eF-cPs" secondAttribute="bottom" constant="9" id="F9l-PF-0fr"/>
-                            <constraint firstItem="9v4-Xt-iPm" firstAttribute="top" secondItem="qIk-NG-1VF" secondAttribute="bottom" constant="8" id="NyO-cu-WLB"/>
+                            <constraint firstItem="LfJ-eF-cPs" firstAttribute="top" secondItem="9v4-Xt-iPm" secondAttribute="bottom" constant="16" id="kwc-ji-BeX"/>
                             <constraint firstAttribute="trailingMargin" secondItem="LfJ-eF-cPs" secondAttribute="trailing" constant="-7" id="kxo-u8-4oz"/>
-                            <constraint firstItem="LfJ-eF-cPs" firstAttribute="top" secondItem="9v4-Xt-iPm" secondAttribute="bottom" constant="16" id="q0o-I8-r9t"/>
+                            <constraint firstItem="9v4-Xt-iPm" firstAttribute="leading" secondItem="U7z-fw-36S" secondAttribute="leadingMargin" constant="-16" id="sMz-LO-RMH"/>
                             <constraint firstItem="cx0-tc-xA7" firstAttribute="leading" secondItem="U7z-fw-36S" secondAttribute="leadingMargin" constant="-6" id="uYO-OX-cwh"/>
                         </constraints>
                     </view>
@@ -269,25 +271,25 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Target name" minimumFontSize="22" translatesAutoresizingMaskIntoConstraints="NO" id="0SC-j8-jkO">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Target name" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="0SC-j8-jkO">
                                 <rect key="frame" x="16" y="59" width="568" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" returnKeyType="next"/>
                                 <connections>
                                     <outlet property="delegate" destination="cgf-OK-JfV" id="oKq-bE-Coa"/>
                                 </connections>
                             </textField>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Latitude" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="q3Z-2n-V8t">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Latitude" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="q3Z-2n-V8t">
                                 <rect key="frame" x="16" y="114" width="568" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" returnKeyType="next"/>
                                 <connections>
                                     <outlet property="delegate" destination="cgf-OK-JfV" id="b0e-gF-zyB"/>
                                 </connections>
                             </textField>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Longitude" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="J9F-3d-tsg">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Longitude" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="J9F-3d-tsg">
                                 <rect key="frame" x="16" y="167" width="568" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" returnKeyType="done"/>
                                 <connections>
                                     <outlet property="delegate" destination="cgf-OK-JfV" id="mPq-Dh-w9A"/>
