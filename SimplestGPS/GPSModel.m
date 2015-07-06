@@ -112,7 +112,7 @@
                         NSString* s2 = obj2;
                         return [s1 caseInsensitiveCompare: s2];
                     }];
-    NSLog(@"Number of targets: %ld", [target_list count]);
+    NSLog(@"Number of targets: %ld", (unsigned long)[target_list count]);
 }
 
 - (void) setMetric: (int) value
@@ -135,13 +135,16 @@
 - (void) addObs: (id) observer
 {
     if (! [observers containsObject: observer]) {
+        NSLog(@"Added observer %@", observer);
         [observers addObject: observer];
     }
+    [self update];
 }
 
 - (void) delObs: (id) observer
 {
     while ([observers containsObject: observer]) {
+        NSLog(@"Removed observer %@", observer);
         [observers removeObject: observer];
     }
 }
@@ -219,7 +222,7 @@ NSString *do_format_heading(double n)
     n = (n - floor(n)) * 100;
     int cents = floor(n);
     
-    return [NSString stringWithFormat: @"%d.%02d.%02d.%02d'",
+    return [NSString stringWithFormat: @"%d.%02d.%02d.%02d",
                 deg, minutes, seconds, cents];
 }
 
@@ -477,6 +480,9 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     double x = cos(phi1) * sin(phi2) -
         sin(phi1) * cos(phi2) * cos(lambda2 - lambda1);
     double brng = atan2(y, x) * 180.0 / M_PI;
+    if (brng < 0) {
+        brng += 360.0;
+    }
     return brng;
 }
 
@@ -574,6 +580,7 @@ double azimuth(double lat1, double lat2, double long1, double long2)
             sign = -1.0;
         } else {
             NSLog(@"Invalid cardinal for latitude: %@", cardinal);
+            return value;
         }
     } else {
         if ([cardinal isEqualToString: @"E"]) {
@@ -581,10 +588,12 @@ double azimuth(double lat1, double lat2, double long1, double long2)
             sign = -1.0;
         } else {
             NSLog(@"Invalid cardinal for longitude: %@", cardinal);
+            return value;
         }
     }
 
-    value = sign * deg + min / 60.0 + sec / 3600.0 + cent / 360000.0;
+    value = sign * (deg + min / 60.0 + sec / 3600.0 + cent / 360000.0);
+    NSLog(@"Parsed %@ as %f %d %d %d %d %@ %f", coord, sign, deg, min, sec, cent, cardinal, value);
     return value;
 }
 
@@ -617,7 +626,7 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     NSString *key;
     if (index < 0 || index >= [target_list count]) {
         index = ++next_target;
-        key = [NSString stringWithFormat: @"k%ld", index];
+        key = [NSString stringWithFormat: @"k%ld", (long)index];
     } else {
         key = [target_list objectAtIndex: index];
     }

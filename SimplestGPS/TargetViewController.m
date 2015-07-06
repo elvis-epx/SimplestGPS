@@ -19,9 +19,11 @@
 - (void)viewDidLoad
 {
     index = [[GPSModel model] target_getEdit];
-    [name setText: [[GPSModel model] target_name: index]];
-    [latitude setText: [[GPSModel model] target_flatitude: index]];
-    [longitude setText: [[GPSModel model] target_flongitude: index]];
+    if (index >= 0) {
+        [name setText: [[GPSModel model] target_name: index]];
+        [latitude setText: [[GPSModel model] target_flatitude: index]];
+        [longitude setText: [[GPSModel model] target_flongitude: index]];
+    }
 }
 
 - (void) quitEdit
@@ -37,10 +39,11 @@
     if (err == nil) {
         // Done
         [self quitEdit];
+        return;
     }
     
     NSString *msg = [NSString stringWithFormat:
-                         @"%@. Do you want to abandon changes?", err];
+                         @"%@ Do you want to abandon changes?", err];
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid location"
                                                         message:msg
                                                        delegate:self
@@ -72,7 +75,9 @@
     if (index < 0) {
         // deleting a new, unsaved target is a no-op
         [self quitEdit];
+        return;
     }
+    
     NSString *msg = @"Do you want to delete this target?";
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Confirm deletion"
                                                     message:msg
@@ -81,6 +86,17 @@
                                               otherButtonTitles:@"Yes", nil];
     dialog = 2;
     [alert show];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    if (textField == name) {
+        [latitude becomeFirstResponder];
+    } else if (textField == latitude) {
+        [longitude becomeFirstResponder];
+    }
+    return textField == longitude;
 }
 
 @end

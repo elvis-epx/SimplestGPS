@@ -17,9 +17,21 @@
     
     UILongPressGestureRecognizer *lpgr = [[UILongPressGestureRecognizer alloc]
                                           initWithTarget:self action:@selector(handleLongPress:)];
-    lpgr.minimumPressDuration = 1.0; //seconds
+    lpgr.minimumPressDuration = 0.5; //seconds
     lpgr.delegate = self;
     [table addGestureRecognizer:lpgr];
+}
+
+- (void) viewWillAppear:(BOOL)anim
+{
+    [super viewWillAppear: anim];
+    [[GPSModel model] addObs: self];
+}
+
+- (void) viewWillDisappear:(BOOL)anim
+{
+    [super viewWillDisappear: anim];
+    [[GPSModel model] delObs: self];
 }
 
 -(void)handleLongPress:(UILongPressGestureRecognizer *)gestureRecognizer
@@ -30,9 +42,9 @@
     if (indexPath == nil) {
         NSLog(@"long press on table view but not on a row");
     } else if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {
-        NSLog(@"long press on table view at row %ld", indexPath.row);
-    } else {
-        NSLog(@"gestureRecognizer.state = %ld", gestureRecognizer.state);
+        NSLog(@"long press on table view at row %ld", (long)indexPath.row);
+    } else if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
+        NSLog(@"gestureRecognizer.state = %ld", (long) gestureRecognizer.state);
         [[GPSModel model] target_setEdit: indexPath.row];
         [self performSegueWithIdentifier: @"openTarget" sender: self];
     }
@@ -87,6 +99,7 @@
 
 - (void) update
 {
+    // NSLog(@"Reloading table");
     [table reloadData];
 }
 

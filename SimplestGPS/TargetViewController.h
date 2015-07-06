@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 
-@interface TargetViewController : UIViewController {
+@interface TargetViewController : UIViewController<UITextFieldDelegate> {
     IBOutlet UITextField *name;
     IBOutlet UITextField *latitude;
     IBOutlet UITextField *longitude;
