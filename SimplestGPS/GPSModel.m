@@ -486,16 +486,92 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     return azimuth(lat1, [lat2 doubleValue], long1, [long2 doubleValue]);
 }
 
+- (double) parse_coord: (NSString *) coord latitude: (BOOL) is_lat
+{
+    double value = 0.0 / 0.0;
+    NSInteger deg, min, sec, cent;
+    NSString *cardinal;
+    coord = [coord stringByReplacingOccurrencesOfString:@" " withString:@""];
+    coord = [coord uppercaseString];
+    NSScanner *s = [NSScanner scannerWithString: coord];
+    if (! [s scanInteger: &deg]) {
+        NSLog(@"Did not find degree in %@", coord);
+        return value;
+    }
+    if (deg < 0 || deg > 179 || (is_lat && deg > 89)) {
+        NSLog(@"Invalid deg %ld", (long) deg);
+        return value;
+    }
+    if (! [s scanString: @"." intoString: NULL]) {
+        NSLog(@"Did not find degree point in %@", coord);
+        return value;
+    }
+    if (! [s scanInteger: &min]) {
+        NSLog(@"Did not find minute in %@", coord);
+        return value;
+    }
+    if (min < 0 || min > 59) {
+        NSLog(@"Invalid minute %ld", (long) min);
+        return value;
+    }
+    if (! [s scanString: @"." intoString: NULL]) {
+        NSLog(@"Did not find minute point in %@", coord);
+        return value;
+    }
+    if (! [s scanInteger: &sec]) {
+        NSLog(@"Did not find second in %@", coord);
+        return value;
+    }
+    if (sec < 0 || sec > 59) {
+        NSLog(@"Invalid second %ld", (long) sec);
+        return value;
+    }
+    if (! [s scanString: @"." intoString: NULL]) {
+        NSLog(@"Did not find second point in %@", coord);
+        return value;
+    }
+    if (! [s scanInteger: &cent]) {
+        NSLog(@"Did not find cent in %@", coord);
+        return value;
+    }
+    if (cent < 0 || cent > 99) {
+        NSLog(@"Invalid cent %ld", (long) cent);
+        return value;
+    }
+    if (! [s scanString: @"ALL" intoString: &cardinal]) {
+        NSLog(@"Did not find cardinal in %@", coord);
+        return value;
+    }
+
+    double sign = 1.0;
+    if (is_lat) {
+        if ([cardinal isEqualToString: @"N"]) {
+        } else if ([cardinal isEqualToString: @"S"]) {
+            sign = -1.0;
+        } else {
+            NSLog(@"Invalid cardinal for latitude: %@", cardinal);
+        }
+    } else {
+        if ([cardinal isEqualToString: @"E"]) {
+        } else if ([cardinal isEqualToString: @"W"]) {
+            sign = -1.0;
+        } else {
+            NSLog(@"Invalid cardinal for longitude: %@", cardinal);
+        }
+    }
+
+    value = sign * deg + min / 60.0 + sec / 3600.0 + cent / 360000.0;
+    return value;
+}
+
 - (double) parse_lat: (NSString*) lat
 {
-    // FIXME implement, NaN
-    return -23.1;
+    return [self parse_coord: lat latitude: TRUE];
 }
 
 - (double) parse_long: (NSString*) lo
 {
-    // FIXME implement, NaN
-    return -48.5;
+    return [self parse_coord: lo latitude: FALSE];
 }
 
 - (NSString*) target_set: (NSInteger) index name: (NSString*) name latitude: (NSString*) latitude longitude: (NSString*) longitude
