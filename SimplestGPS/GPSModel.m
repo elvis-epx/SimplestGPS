@@ -342,11 +342,29 @@ NSString *do_format_heading(double n)
 
 - (NSString*) format_distance_t: (double) alt
 {
-    if (! metric) {
+    NSNumberFormatter *f = [[NSNumberFormatter alloc] init];
+    [f setNumberStyle: NSNumberFormatterDecimalStyle];
+    [f setMaximumFractionDigits:0];
+    [f setRoundingMode:NSNumberFormatterRoundHalfEven];
+
+    NSString *m = @"m";
+    NSString *i = @"ft";
+    if (metric) {
+        if (alt >= 5000) {
+            alt /= 1000;
+            m = @"km";
+        }
+    } else {
         alt *= 3.28084;
+        if (alt >= (5280 * 5)) {
+            alt /= 5280;
+            i = @"mi";
+        }
     }
     
-    return [NSString stringWithFormat:@"%.0f%@", alt, (metric ? @"m" : @"ft")];
+    return [NSString stringWithFormat:@"%@%@",
+            [f stringFromNumber: [NSNumber numberWithDouble: alt]],
+            (metric ? m : i)];
 }
 
 - (NSString*) format_speed

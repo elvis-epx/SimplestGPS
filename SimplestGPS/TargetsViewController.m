@@ -86,6 +86,10 @@
     cell.distance.text = [[GPSModel model] target_fdistance: indexPath.row];
     cell.heading.text = [[GPSModel model] target_fheading: indexPath.row];
     cell.name.text = [[GPSModel model] target_name: indexPath.row];
+    UIView *bgColorView = [[UIView alloc] init];
+    bgColorView.backgroundColor = [UIColor darkGrayColor];
+    [cell setSelectedBackgroundView:bgColorView];
+
     return cell;
 }
 
@@ -100,7 +104,9 @@
 - (void) update
 {
     // NSLog(@"Reloading table");
+    NSIndexPath *path = [table indexPathForSelectedRow];
     [table reloadData];
+    [table selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
 }
 
 @end
