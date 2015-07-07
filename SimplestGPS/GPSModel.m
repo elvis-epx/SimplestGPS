@@ -540,11 +540,12 @@ double azimuth(double lat1, double lat2, double long1, double long2)
 - (double) parse_coord: (NSString *) coord latitude: (BOOL) is_lat
 {
     double value = 0.0 / 0.0;
-    NSInteger deg, min, sec, cent;
-    NSString *cardinal;
-    coord = [coord stringByReplacingOccurrencesOfString:@" " withString:@""];
+
+    NSInteger deg = 0, min = 0, sec = 0, cent = 0;
     coord = [coord uppercaseString];
     NSScanner *s = [NSScanner scannerWithString: coord];
+    s.charactersToBeSkipped = [NSCharacterSet characterSetWithCharactersInString: @". ;,:/"];
+
     if (! [s scanInteger: &deg]) {
         NSLog(@"Did not find degree in %@", coord);
         return value;
@@ -553,59 +554,62 @@ double azimuth(double lat1, double lat2, double long1, double long2)
         NSLog(@"Invalid deg %ld", (long) deg);
         return value;
     }
-    if (! [s scanString: @"." intoString: NULL]) {
-        NSLog(@"Did not find degree point in %@", coord);
-        return value;
+    
+    NSUInteger bt = s.scanLocation;
+    if ([s scanInteger: &min]) {
+        if (min < 0 || min > 59) {
+            NSLog(@"Invalid minute %ld", (long) min);
+            return value;
+        }
+        bt = s.scanLocation;
+        if ([s scanInteger: &sec]) {
+            if (sec < 0 || sec > 59) {
+                NSLog(@"Invalid second %ld", (long) sec);
+                return value;
+            }
+            bt = s.scanLocation;
+            if ([s scanInteger: &cent]) {
+                if (cent < 0 || cent > 99) {
+                    NSLog(@"Invalid cent %ld", (long) cent);
+                    return value;
+                }
+            } else {
+                s.scanLocation = bt;
+                NSLog(@"Did not find cent in %@ (may not be error)", coord);
+            }
+        } else {
+            s.scanLocation = bt;
+            NSLog(@"Did not find second in %@ (may not be error)", coord);
+        }
+    } else {
+        s.scanLocation = bt;
+        NSLog(@"Did not find minute in %@ (may not be error)", coord);
     }
-    if (! [s scanInteger: &min]) {
-        NSLog(@"Did not find minute in %@", coord);
-        return value;
-    }
-    if (min < 0 || min > 59) {
-        NSLog(@"Invalid minute %ld", (long) min);
-        return value;
-    }
-    if (! [s scanString: @"." intoString: NULL]) {
-        NSLog(@"Did not find minute point in %@", coord);
-        return value;
-    }
-    if (! [s scanInteger: &sec]) {
-        NSLog(@"Did not find second in %@", coord);
-        return value;
-    }
-    if (sec < 0 || sec > 59) {
-        NSLog(@"Invalid second %ld", (long) sec);
-        return value;
-    }
-    if (! [s scanString: @"." intoString: NULL]) {
-        NSLog(@"Did not find second point in %@", coord);
-        return value;
-    }
-    if (! [s scanInteger: &cent]) {
-        NSLog(@"Did not find cent in %@", coord);
-        return value;
-    }
-    if (cent < 0 || cent > 99) {
-        NSLog(@"Invalid cent %ld", (long) cent);
-        return value;
-    }
+
+    NSString *cardinal = @"";
     if (! [s scanUpToString: @"FOOBAR" intoString: &cardinal]) {
-        NSLog(@"Did not find cardinal in %@", coord);
-        return value;
+        NSLog(@"Did not find cardinal in %@ (assuming positive)", coord);
     }
 
     double sign = 1.0;
     if (is_lat) {
-        if ([cardinal isEqualToString: @"N"]) {
-        } else if ([cardinal isEqualToString: @"S"]) {
+        if ([cardinal isEqualToString: @"N"] ||
+            [cardinal isEqualToString: @""] ||
+            [cardinal isEqualToString: @"+"]) {
+            // positive
+        } else if ([cardinal isEqualToString: @"S"] ||
+                   [cardinal isEqualToString: @"-"]) {
             sign = -1.0;
         } else {
             NSLog(@"Invalid cardinal for latitude: %@", cardinal);
             return value;
         }
     } else {
-        if ([cardinal isEqualToString: @"E"]) {
-        } else if ([cardinal isEqualToString: @"W"]) {
+        if ([cardinal isEqualToString: @"E"] ||
+            [cardinal isEqualToString: @""] ||
+            [cardinal isEqualToString: @"+"]) {
+        } else if ([cardinal isEqualToString: @"W"] ||
+                   [cardinal isEqualToString: @"-"]) {
             sign = -1.0;
         } else {
             NSLog(@"Invalid cardinal for longitude: %@", cardinal);
