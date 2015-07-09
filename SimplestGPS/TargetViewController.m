@@ -23,6 +23,10 @@
         [name setText: [[GPSModel model] target_name: index]];
         [latitude setText: [[GPSModel model] target_flatitude: index]];
         [longitude setText: [[GPSModel model] target_flongitude: index]];
+        [altitude setText: [[GPSModel model] target_faltitude_input: index]];
+        NSString *p = [NSString stringWithFormat: @"Altitude in %@ - optional",
+                                ([[GPSModel model] getMetric] ? @"m" : @"ft")];
+        altitude.placeholder = p;
     }
 }
 
@@ -35,9 +39,20 @@
 {
     NSString *err = [[GPSModel model] target_set: index name: name.text
                           latitude: latitude.text
-                         longitude: longitude.text];
+                         longitude: longitude.text
+                          altitude: altitude.text];
     if (err == nil) {
         // Done
+        [self quitEdit];
+        return;
+    }
+    
+    if (index < 0 &&
+            [latitude.text length] <= 0 &&
+            [longitude.text length] <= 0 &&
+            [altitude.text length] <= 0 &&
+            [name.text length] <= 0) {
+        // discard empty new record
         [self quitEdit];
         return;
     }
@@ -95,8 +110,10 @@
         [latitude becomeFirstResponder];
     } else if (textField == latitude) {
         [longitude becomeFirstResponder];
+    } else if (textField == longitude) {
+        [altitude becomeFirstResponder];
     }
-    return textField == longitude;
+    return textField == altitude;
 }
 
 @end

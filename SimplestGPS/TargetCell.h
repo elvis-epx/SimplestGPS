@@ -13,5 +13,6 @@
 @property (nonatomic, strong) IBOutlet UILabel* name;
 @property (nonatomic, strong) IBOutlet UILabel* distance;
 @property (nonatomic, strong) IBOutlet UILabel* heading;
+@property (nonatomic, strong) IBOutlet UILabel* altitude;
 
 @end

@@ -85,6 +85,7 @@
     
     cell.distance.text = [[GPSModel model] target_fdistance: indexPath.row];
     cell.heading.text = [[GPSModel model] target_fheading: indexPath.row];
+    cell.altitude.text = [[GPSModel model] target_faltitude: indexPath.row];
     cell.name.text = [[GPSModel model] target_name: indexPath.row];
     UIView *bgColorView = [[UIView alloc] init];
     bgColorView.backgroundColor = [UIColor darkGrayColor];

@@ -22,6 +22,7 @@
     NSMutableDictionary *names;
     NSMutableDictionary *lats;
     NSMutableDictionary *longs;
+    NSMutableDictionary *alts;
     NSArray *target_list;
     int next_target;
     
@@ -80,10 +81,20 @@
            nil], @"longs",
           nil]];
 
+        [prefs registerDefaults:
+         [NSDictionary dictionaryWithObjectsAndKeys:
+          [NSDictionary dictionaryWithObjectsAndKeys:
+           [NSNumber numberWithDouble: 50], @"2",
+           nil], @"alts",
+          nil]];
+
         names = [[prefs dictionaryForKey: @"names"] mutableCopy];
         lats = [[prefs dictionaryForKey: @"lats"] mutableCopy];
         longs = [[prefs dictionaryForKey: @"longs"] mutableCopy];
+        alts = [[prefs dictionaryForKey: @"alts"] mutableCopy];
+        
         [self updateTargetList];
+        [self upgradeAltitudes];
 
         metric = (int) [prefs integerForKey: @"metric"];
         next_target = (int) [prefs integerForKey: @"next_target"];
@@ -262,6 +273,13 @@ NSString *do_format_heading(double n)
     return do_format_heading(course);
 }
 
+- (NSString*) format_altitude_t: (double) alt
+{
+    if (alt != alt) {
+        return @"---";
+    }
+    return [NSString stringWithFormat: @"%.0f", alt];
+}
 
 - (NSString*) format_heading
 {
@@ -434,6 +452,42 @@ NSString *do_format_heading(double n)
     return [names valueForKey: [target_list objectAtIndex: index]];
 }
 
+- (NSString*) target_faltitude: (NSInteger) index
+{
+    if (index < 0 || index >= [target_list count]) {
+        NSLog(@"Index %ld out of range", (long) index);
+        return @"ERR";
+    }
+    double dn = [self calculate_altitude_t: index];
+    if (dn != dn) {
+        return @"";
+    }
+    if (! metric) {
+        dn *= 3.28084;
+    }
+    NSString *esign = dn >= 0 ? @"+": @"";
+    NSString *sn = [self format_altitude_t: dn];
+    NSString *unit = metric ? @"m" : @"ft";
+    return [NSString stringWithFormat: @"%@%@%@", esign, sn, unit];
+}
+
+- (NSString*) target_faltitude_input: (NSInteger) index
+{
+    if (index < 0 || index >= [target_list count]) {
+        NSLog(@"Index %ld out of range", (long) index);
+        return @"ERR";
+    }
+    NSNumber *n = [alts valueForKey: [target_list objectAtIndex: index]];
+    double dn = [n doubleValue];
+    if (dn != dn || dn == 0) {
+        return @"";
+    }
+    if (! metric) {
+        dn *= 3.28084;
+    }
+    return [self format_altitude_t: dn];
+}
+
 - (NSString*) target_flatitude: (NSInteger) index
 {
     if (index < 0 || index >= [target_list count]) {
@@ -521,6 +575,20 @@ double azimuth(double lat1, double lat2, double long1, double long2)
 
     return harvesine(lat1, [lat2 doubleValue], long1, [long2 doubleValue]);
 }
+
+- (double) calculate_altitude_t: (NSInteger) index
+{
+    if (! self.currentLocation || index < 0 || index >= [target_list count]) {
+        return 0.0/0.0;
+    }
+
+    NSNumber *alt = [alts valueForKey: [target_list objectAtIndex: index]];
+    if ([alt doubleValue] == 0) {
+        return 0.0/0.0;
+    }
+    return -(self.currentLocation.altitude - [alt doubleValue]);
+}
+
 
 - (double) calculate_heading_t: (NSInteger) index
 {
@@ -633,7 +701,7 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     return [self parse_coord: lo latitude: FALSE];
 }
 
-- (NSString*) target_set: (NSInteger) index name: (NSString*) name latitude: (NSString*) latitude longitude: (NSString*) longitude
+- (NSString*) target_set: (NSInteger) index name: (NSString*) name latitude: (NSString*) latitude longitude: (NSString*) longitude altitude: (NSString*) altitude
 {
     if ([name length] <= 0) {
         return @"Name must not be empty.";
@@ -649,6 +717,18 @@ double azimuth(double lat1, double lat2, double long1, double long2)
         return @"Longitude is invalid.";
     }
     
+    double daltitude = 0.0;
+    if ([altitude length] > 0) {
+        daltitude = [altitude doubleValue];
+        if (daltitude == 0.0) {
+            return @"Altitude is invalid.";
+        }
+    }
+    if (! metric) {
+        // altitude supplied in ft internally stored in m
+        daltitude /= 3.28084;
+    }
+    
     NSString *key;
     if (index < 0 || index >= [target_list count]) {
         index = ++next_target;
@@ -660,6 +740,7 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     [names setObject: name forKey: key];
     [lats setObject: [NSNumber numberWithDouble: dlatitude] forKey: key];
     [longs setObject: [NSNumber numberWithDouble: dlongitude] forKey: key];
+    [alts setObject: [NSNumber numberWithDouble: daltitude] forKey: key];
 
     [self saveTargets];
     [self update];
@@ -676,6 +757,7 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     [names removeObjectForKey: key];
     [lats removeObjectForKey: key];
     [longs removeObjectForKey: key];
+    [alts removeObjectForKey: key];
 
     [self saveTargets];
     [self update];
@@ -689,6 +771,7 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     [prefs setObject: names forKey: @"names"];
     [prefs setObject: lats forKey: @"lats"];
     [prefs setObject: longs forKey: @"longs"];
+    [prefs setObject: alts forKey: @"alts"];
     [prefs setInteger: next_target forKey: @"next_target"];
 }
 
@@ -707,6 +790,24 @@ double azimuth(double lat1, double lat2, double long1, double long2)
 - (void) target_setEdit: (NSInteger) index
 {
     editing = index;
+}
+
+- (void) upgradeAltitudes
+{
+    // takes care of upgrade from 1.2 to 1.3, where targets can have
+    // altitudes. Missing altitudes are added to the list
+    BOOL dirty = NO;
+    for (NSString *key in target_list) {
+        if ([alts objectForKey: key] == nil) {
+            dirty = YES;
+            [alts setObject: [NSNumber numberWithDouble: 0] forKey: key];
+            NSLog(@"Added key %@ in altitudes due to upgrade", key);
+        }
+    }
+    if (dirty) {
+        NSUserDefaults* prefs = [NSUserDefaults standardUserDefaults];
+        [prefs setObject: alts forKey: @"alts"];
+    }
 }
 
 @end

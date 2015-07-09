@@ -13,6 +13,7 @@
     IBOutlet UITextField *name;
     IBOutlet UITextField *latitude;
     IBOutlet UITextField *longitude;
+    IBOutlet UITextField *altitude;
     IBOutlet UIButton* delete_button;
     IBOutlet UIButton* back_button;
 }
