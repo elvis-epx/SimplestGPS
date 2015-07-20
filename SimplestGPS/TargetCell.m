@@ -13,6 +13,7 @@
 @synthesize name = _name;
 @synthesize distance = _distance;
 @synthesize heading = _heading;
+@synthesize heading_delta = _heading_delta;
 @synthesize altitude = _altitude;
 
 @end

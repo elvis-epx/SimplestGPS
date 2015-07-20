@@ -119,8 +119,8 @@
 {
     target_list = [[names allKeys] sortedArrayUsingComparator:
                     ^(id obj1, id obj2) {
-                        NSString* s1 = obj1;
-                        NSString* s2 = obj2;
+                        NSString* s1 = [names objectForKey: obj1];
+                        NSString* s2 = [names objectForKey: obj2];
                         return [s1 caseInsensitiveCompare: s2];
                     }];
     NSLog(@"Number of targets: %ld", (unsigned long)[target_list count]);
@@ -273,6 +273,15 @@ NSString *do_format_heading(double n)
     return do_format_heading(course);
 }
 
+- (NSString*) format_heading_delta_t: (double) course
+{
+    if (course != course) {
+        return @"";
+    }
+    NSString *plus = course > 0 ? @"+" : @"";
+    return [NSString stringWithFormat: @"%@%@", plus, do_format_heading(course)];
+}
+
 - (NSString*) format_altitude_t: (double) alt
 {
     if (alt != alt) {
@@ -358,9 +367,9 @@ NSString *do_format_heading(double n)
     return [NSString stringWithFormat:@"%.0f%@", alt, (metric ? @"m" : @"ft")];
 }
 
-- (NSString*) format_distance_t: (double) alt
+- (NSString*) format_distance_t: (double) dst
 {
-    if (alt != alt) {
+    if (dst != dst) {
         return @"---";
     }
     NSNumberFormatter *f = [[NSNumberFormatter alloc] init];
@@ -371,20 +380,20 @@ NSString *do_format_heading(double n)
     NSString *m = @"m";
     NSString *i = @"ft";
     if (metric) {
-        if (alt >= 5000) {
-            alt /= 1000;
+        if (dst >= 10000) {
+            dst /= 1000;
             m = @"km";
         }
     } else {
-        alt *= 3.28084;
-        if (alt >= (5280 * 5)) {
-            alt /= 5280;
+        dst *= 3.28084;
+        if (dst >= (5280 * 6)) {
+            dst /= 5280;
             i = @"mi";
         }
     }
     
     return [NSString stringWithFormat:@"%@%@",
-            [f stringFromNumber: [NSNumber numberWithDouble: alt]],
+            [f stringFromNumber: [NSNumber numberWithDouble: dst]],
             (metric ? m : i)];
 }
 
@@ -526,6 +535,15 @@ NSString *do_format_heading(double n)
     return [self format_heading_t: [self calculate_heading_t: index]];
 }
 
+- (NSString*) target_fheading_delta: (NSInteger) index
+{
+    if (index < 0 || index >= [target_list count]) {
+        NSLog(@"Index %ld out of range", (long) index);
+        return @"ERR";
+    }
+    return [self format_heading_delta_t: [self calculate_heading_delta_t: index]];
+}
+
 double harvesine(double lat1, double lat2, double long1, double long2)
 {
     // http://www.movable-type.co.uk/scripts/latlong.html
@@ -603,6 +621,22 @@ double azimuth(double lat1, double lat2, double long1, double long2)
     NSNumber *long2 = [longs objectForKey: key];
 
     return azimuth(lat1, [lat2 doubleValue], long1, [long2 doubleValue]);
+}
+
+- (double) calculate_heading_delta_t: (NSInteger) index
+{
+    double heading = [self calculate_heading_t: index];
+    if (heading != heading) {
+        return 0.0/0.0;
+    }
+    if (self.currentLocation.course < 0) {
+        return 0.0/0.0;
+    }
+    double delta = heading - self.currentLocation.course;
+    if (delta <= -180) {
+        delta += 360;
+    }
+    return delta;
 }
 
 - (double) parse_coord: (NSString *) coord latitude: (BOOL) is_lat

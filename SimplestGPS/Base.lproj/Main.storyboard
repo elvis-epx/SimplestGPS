@@ -48,13 +48,13 @@
                                 <rect key="frame" x="5" y="257" width="310" height="55"/>
                                 <color key="backgroundColor" red="0.18648357780612246" green="0.18648357780612246" blue="0.18648357780612246" alpha="1" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="50"/>
-                                <color key="textColor" red="1" green="0.94148301999999995" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="textColor" red="0.59177292690000005" green="1" blue="0.61720265439999999" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rZL-zA-5dH">
                                 <rect key="frame" x="5" y="308" width="315" height="40"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
-                                <color key="textColor" red="0.0" green="1" blue="0.78180178226088604" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QRI-tO-2U6">
@@ -152,7 +152,7 @@
                                     <segue destination="cgf-OK-JfV" kind="showDetail" identifier="openTarget" id="iU3-n9-ddI"/>
                                 </connections>
                             </button>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsVerticalScrollIndicator="NO" indicatorStyle="black" dataMode="prototypes" style="plain" rowHeight="139" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="9v4-Xt-iPm">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsVerticalScrollIndicator="NO" indicatorStyle="black" dataMode="prototypes" style="plain" rowHeight="186" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="9v4-Xt-iPm">
                                 <rect key="frame" x="0.0" y="28" width="600" height="499"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="separatorColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -160,43 +160,62 @@
                                 <color key="sectionIndexBackgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="sectionIndexTrackingBackgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="TargetCell" rowHeight="139" id="SPd-HC-R28" customClass="TargetCell">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="TargetCell" rowHeight="186" id="SPd-HC-R28" customClass="TargetCell">
                                         <rect key="frame" x="0.0" y="0.0" width="342" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="SPd-HC-R28" id="hRA-Cy-0GD">
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gYI-6G-IfP">
-                                                    <rect key="frame" x="19" y="0.0" width="471" height="40"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nameeeeeeeeeeeee" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gYI-6G-IfP">
+                                                    <rect key="frame" x="8" y="0.0" width="312" height="42"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="35"/>
                                                     <color key="textColor" red="1" green="0.97521016589999998" blue="0.47878038760000002" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Distance" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CDG-kr-TJx">
-                                                    <rect key="frame" x="19" y="96" width="471" height="40"/>
-                                                    <fontDescription key="fontDescription" name="Courier-Bold" family="Courier" pointSize="40"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="88.888ft" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CDG-kr-TJx">
+                                                    <rect key="frame" x="8" y="100" width="193" height="40"/>
+                                                    <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="40"/>
                                                     <color key="textColor" red="0.58571487860000004" green="1" blue="0.82091609060000004" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="333d" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jEC-qb-jv0">
-                                                    <rect key="frame" x="19" y="53" width="135" height="40"/>
-                                                    <fontDescription key="fontDescription" name="Courier-Bold" family="Courier" pointSize="40"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="333d" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jEC-qb-jv0">
+                                                    <rect key="frame" x="8" y="55" width="97" height="40"/>
+                                                    <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="40"/>
                                                     <color key="textColor" red="0.998816645" green="0.72787567519999996" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="-555ft" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aO8-ig-ZIM">
-                                                    <rect key="frame" x="177" y="53" width="247" height="40"/>
-                                                    <fontDescription key="fontDescription" name="Courier-Bold" family="Courier" pointSize="29"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="3+33d" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hyV-Rv-YW3">
+                                                    <rect key="frame" x="183" y="55" width="121" height="40"/>
+                                                    <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="40"/>
+                                                    <color key="textColor" red="0.998816645" green="0.72787567519999996" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-555.555ft" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aO8-ig-ZIM">
+                                                    <rect key="frame" x="8" y="145" width="199" height="33"/>
+                                                    <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="33"/>
                                                     <color key="textColor" red="0.59177292686675398" green="1" blue="0.61720265435434651" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
+                                            <constraints>
+                                                <constraint firstItem="gYI-6G-IfP" firstAttribute="leading" secondItem="hRA-Cy-0GD" secondAttribute="leadingMargin" id="DAo-89-Afc"/>
+                                                <constraint firstItem="jEC-qb-jv0" firstAttribute="top" secondItem="gYI-6G-IfP" secondAttribute="bottom" constant="13" id="Gax-K3-6Ix"/>
+                                                <constraint firstItem="CDG-kr-TJx" firstAttribute="leading" secondItem="hRA-Cy-0GD" secondAttribute="leadingMargin" id="GpU-jv-wkq"/>
+                                                <constraint firstItem="hyV-Rv-YW3" firstAttribute="leading" secondItem="jEC-qb-jv0" secondAttribute="trailing" constant="78" id="OQj-go-kWQ"/>
+                                                <constraint firstItem="CDG-kr-TJx" firstAttribute="top" secondItem="jEC-qb-jv0" secondAttribute="bottom" constant="5" id="Po8-MT-taH"/>
+                                                <constraint firstItem="aO8-ig-ZIM" firstAttribute="leading" secondItem="hRA-Cy-0GD" secondAttribute="leadingMargin" id="fAg-Lp-Zhh"/>
+                                                <constraint firstItem="aO8-ig-ZIM" firstAttribute="top" secondItem="CDG-kr-TJx" secondAttribute="bottom" constant="5" id="fBk-LP-Wo8"/>
+                                                <constraint firstItem="jEC-qb-jv0" firstAttribute="top" secondItem="hyV-Rv-YW3" secondAttribute="top" id="s6a-ww-KTC"/>
+                                                <constraint firstItem="jEC-qb-jv0" firstAttribute="leading" secondItem="hRA-Cy-0GD" secondAttribute="leadingMargin" id="sL4-rQ-Lqf"/>
+                                                <constraint firstItem="gYI-6G-IfP" firstAttribute="top" secondItem="hRA-Cy-0GD" secondAttribute="top" id="u8d-7p-Mjz"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <connections>
                                             <outlet property="altitude" destination="aO8-ig-ZIM" id="KMh-0g-Obt"/>
                                             <outlet property="distance" destination="CDG-kr-TJx" id="cDL-C6-ReC"/>
                                             <outlet property="heading" destination="jEC-qb-jv0" id="qSj-xg-Ow2"/>
+                                            <outlet property="heading_delta" destination="hyV-Rv-YW3" id="Yab-Sq-urI"/>
                                             <outlet property="name" destination="gYI-6G-IfP" id="OoU-Ev-8Cs"/>
                                         </connections>
                                     </tableViewCell>
