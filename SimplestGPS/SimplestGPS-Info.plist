@@ -45,6 +45,8 @@
 	<string>Please authorize GPS usage</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Please authorize GPS usage</string>
+	<key>UILaunchStoryboardName</key>
+	<string>Main</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
