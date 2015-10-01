@@ -23,20 +23,24 @@ import CoreLocation
     var longs = [NSObject: AnyObject]()
     var alts = [NSObject: AnyObject]()
     var target_list = [String]()
-    var next_target: Int
-    var current: CLLocation?
-    var lman: CLLocationManager
+    var next_target: Int = 0
+    var current: CLLocation? = nil
+    var lman: CLLocationManager? = nil
     var metric: Int = 1;
     var editing: Int = -1
     
     override init()
     {
+        super.init()
+        
         let prefs = NSUserDefaults.standardUserDefaults();
         
         prefs.registerDefaults(["metric": 1, "next_target": 3,
             "names": ["1": "Joinville, Brazil", "2": "Blumenau, Brazil"],
-            "lats": ["1": "26.18.19.50S", "2": "26.54.46.10S"],
-            "longs": ["1": "48.50.44.44W", "2": "49.04.04.47W"],
+            "lats": ["1": GPSModel2.parse_lat("26.18.19.50S"),
+                     "2": GPSModel2.parse_lat("26.54.46.10S")],
+            "longs": ["1": GPSModel2.parse_long("48.50.44.44W"),
+                      "2": GPSModel2.parse_long("49.04.04.47W")],
             "alts": ["2": 50.0],
             ])
         
@@ -45,21 +49,19 @@ import CoreLocation
         longs = prefs.dictionaryForKey("longs")!
         alts = prefs.dictionaryForKey("alts")!
         
-        // self.updateTargetList()
-        // self.upgradeAltitudes()
+        self.updateTargetList()
+        self.upgradeAltitudes()
         
         metric = prefs.integerForKey("metric")
         next_target = prefs.integerForKey("next_target")
         current = nil
-        lman = CLLocationManager()
         
-        super.init()
-
-        lman.delegate = self
-        lman.distanceFilter = kCLDistanceFilterNone
-        lman.desiredAccuracy = kCLLocationAccuracyBest
-        lman.requestAlwaysAuthorization()
-        lman.startUpdatingLocation()
+        lman = CLLocationManager()
+        lman!.delegate = self
+        lman!.distanceFilter = kCLDistanceFilterNone
+        lman!.desiredAccuracy = kCLLocationAccuracyBest
+        lman!.requestAlwaysAuthorization()
+        lman!.startUpdatingLocation()
     }
     
     static let singleton = GPSModel2();
@@ -118,11 +120,6 @@ import CoreLocation
     {
         return idx(haystack, needle: needle) >= 0;
     }
-
-    func remove(haystack: [ModelListener], needle: ModelListener)
-    {
-        
-    }
     
     func addObs(observer: ModelListener)
     {
@@ -137,7 +134,8 @@ import CoreLocation
     {
         while contains(observers, needle: observer) {
             NSLog("Removed observer %@", observer as! NSObject);
-            remove(observers, needle: observer);
+            let i = idx(observers, needle: observer);
+            observers.removeAtIndex(i);
         }
     }
     
@@ -152,18 +150,18 @@ import CoreLocation
             for observer in observers {
                 observer.permission();
             }
-            lman.stopUpdatingLocation();
+            lman!.stopUpdatingLocation();
         }
     }
     
     func locationManager(manager :CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus)
     {
-        lman.startUpdatingLocation()
+        lman!.startUpdatingLocation()
     }
 
     func do_format_heading(n: Double) -> String
     {
-        return String(format: "@%.0f", n);
+        return String(format: "%.0f°", n);
     }
 
     func format_deg(p: Double) -> String
@@ -351,7 +349,7 @@ import CoreLocation
             }
         }
    
-        return String(format: "%@%@", f.stringFromNumber(dst)!, (metric != 0 ? m : i));
+        return String(format: "%@%@", f.stringFromNumber(Int(dst))!, (metric != 0 ? m : i));
     }
     
     func format_speed() -> String
@@ -412,8 +410,7 @@ import CoreLocation
     func target_name(index: Int) -> String
     {
         if index < 0 || index >= target_list.count {
-            NSLog("Index %ld out of range", index);
-            return "ERR";
+            return "Here";
         }
         return names[target_list[index]] as! String;
     }
@@ -441,21 +438,24 @@ import CoreLocation
     
     func target_faltitude_input(index: Int) -> String
     {
+        var dn: Double;
+        
         if index < 0 || index >= target_list.count {
-            NSLog("Index %ld out of range", index);
-            return "ERR";
-        }
-        
-        if alts[target_list[index]] == nil {
+            if self.current != nil {
+                dn = self.current!.altitude;
+            } else {
+                return "";
+            }
+        } else if alts[target_list[index]] == nil {
             return "";
-        }
-        
-        var dn: Double = alts[target_list[index]] as! Double;
-        if dn != dn || dn == 0 {
-            return "";
-        }
-        if metric == 0 {
-            dn *= 3.28084;
+        } else {
+            dn = alts[target_list[index]] as! Double;
+            if dn != dn || dn == 0 {
+                return "";
+            }
+            if metric == 0 {
+                dn *= 3.28084;
+            }
         }
         return format_altitude_t(dn);
     }
@@ -463,21 +463,31 @@ import CoreLocation
    
     func target_flatitude(index: Int) -> String
     {
+        var n: Double;
         if index < 0 || index >= target_list.count {
-            NSLog("Index %ld out of range", index);
-            return "ERR";
+            if self.current != nil {
+                n = self.current!.coordinate.latitude;
+            } else {
+                return "";
+            }
+        } else {
+            n = lats[target_list[index]] as! Double;
         }
-        let n = lats[target_list[index]] as! Double;
         return format_latitude_t(n);
     }
     
     func target_flongitude(index: Int) -> String
     {
+        var n: Double;
         if index < 0 || index >= target_list.count {
-            NSLog("Index %ld out of range", index);
-            return "ERR";
+            if self.current != nil {
+                n = self.current!.coordinate.longitude;
+            } else {
+                return "";
+            }
+        } else {
+            n = longs[target_list[index]] as! Double;
         }
-        let n = longs[target_list[index]] as! Double;
         return format_longitude_t(n);
     }
     
@@ -605,12 +615,12 @@ import CoreLocation
         return delta;
     }
     
-    func parse_lat(lat: String) -> Double
+    class func parse_lat(lat: String) -> Double
     {
         return parse_coord(lat, latitude: true);
     }
  
-    func parse_long(lo: String) -> Double
+    class func parse_long(lo: String) -> Double
     {
         return parse_coord(lo, latitude: false);
     }
@@ -623,12 +633,12 @@ import CoreLocation
             return "Name must not be empty.";
         }
     
-        let dlatitude = parse_lat(latitude);
+        let dlatitude = GPSModel2.parse_lat(latitude);
         if dlatitude != dlatitude {
             return "Latitude is invalid.";
         }
     
-        let dlongitude = parse_long(longitude);
+        let dlongitude = GPSModel2.parse_long(longitude);
         if dlongitude != dlongitude {
             return "Longitude ixs invalid.";
         }
@@ -729,7 +739,7 @@ import CoreLocation
         }
     }
 
-    func parse_coord(c: String, latitude is_lat: Bool) -> Double
+    class func parse_coord(c: String, latitude is_lat: Bool) -> Double
     {
         var value: Double = 0.0 / 0.0;
         var deg: Int = 0

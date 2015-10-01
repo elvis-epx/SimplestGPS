@@ -17,15 +17,13 @@
 - (void)viewDidLoad
 {
     index = [[GPSModel2 model] target_getEdit];
-    if (index >= 0) {
-        [name setText: [[GPSModel2 model] target_name: index]];
-        [latitude setText: [[GPSModel2 model] target_flatitude: index]];
-        [longitude setText: [[GPSModel2 model] target_flongitude: index]];
-        [altitude setText: [[GPSModel2 model] target_faltitude_input: index]];
-        NSString *p = [NSString stringWithFormat: @"Altitude in %@ - optional",
+    [name setText: [[GPSModel2 model] target_name: index]];
+    [latitude setText: [[GPSModel2 model] target_flatitude: index]];
+    [longitude setText: [[GPSModel2 model] target_flongitude: index]];
+    [altitude setText: [[GPSModel2 model] target_faltitude_input: index]];
+    NSString *p = [NSString stringWithFormat: @"Altitude in %@ - optional",
                                 ([[GPSModel2 model] get_metric] ? @"m" : @"ft")];
-        altitude.placeholder = p;
-    }
+    altitude.placeholder = p;
 }
 
 - (void) quitEdit
