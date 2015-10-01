@@ -7,9 +7,7 @@
 //
 
 #import "TargetViewController.h"
-
-#import "GPSModel.h"
-
+#import "SimplestGPS-Swift.h"
 
 @implementation TargetViewController {
     int dialog;
@@ -18,14 +16,14 @@
 
 - (void)viewDidLoad
 {
-    index = [[GPSModel model] target_getEdit];
+    index = [[GPSModel2 model] target_getEdit];
     if (index >= 0) {
-        [name setText: [[GPSModel model] target_name: index]];
-        [latitude setText: [[GPSModel model] target_flatitude: index]];
-        [longitude setText: [[GPSModel model] target_flongitude: index]];
-        [altitude setText: [[GPSModel model] target_faltitude_input: index]];
+        [name setText: [[GPSModel2 model] target_name: index]];
+        [latitude setText: [[GPSModel2 model] target_flatitude: index]];
+        [longitude setText: [[GPSModel2 model] target_flongitude: index]];
+        [altitude setText: [[GPSModel2 model] target_faltitude_input: index]];
         NSString *p = [NSString stringWithFormat: @"Altitude in %@ - optional",
-                                ([[GPSModel model] getMetric] ? @"m" : @"ft")];
+                                ([[GPSModel2 model] get_metric] ? @"m" : @"ft")];
         altitude.placeholder = p;
     }
 }
@@ -37,7 +35,7 @@
 
 - (IBAction) back: (id) sender
 {
-    NSString *err = [[GPSModel model] target_set: index name: name.text
+    NSString *err = [[GPSModel2 model] target_set: index nam: name.text
                           latitude: latitude.text
                          longitude: longitude.text
                           altitude: altitude.text];
@@ -78,7 +76,7 @@
                 // Error dialog, user abandons changes
             } else if (dialog == 2) {
                 // Deletion dialog, user confirms deletion
-                [[GPSModel model] target_delete: index];
+                [[GPSModel2 model] target_delete: index];
             }
             [self quitEdit];
             break;

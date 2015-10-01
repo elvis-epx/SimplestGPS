@@ -8,6 +8,8 @@
 
 #import "TargetsViewController.h"
 #import "TargetCell.h"
+#import "SimplestGPS-Swift.h"
+
 
 @implementation TargetsViewController
 
@@ -25,13 +27,13 @@
 - (void) viewWillAppear:(BOOL)anim
 {
     [super viewWillAppear: anim];
-    [[GPSModel model] addObs: self];
+    [[GPSModel2 model] addObs: self];
 }
 
 - (void) viewWillDisappear:(BOOL)anim
 {
     [super viewWillDisappear: anim];
-    [[GPSModel model] delObs: self];
+    [[GPSModel2 model] delObs: self];
 }
 
 -(void)handleLongPress:(UILongPressGestureRecognizer *)gestureRecognizer
@@ -45,7 +47,7 @@
         NSLog(@"long press on table view at row %ld", (long)indexPath.row);
     } else if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
         NSLog(@"gestureRecognizer.state = %ld", (long) gestureRecognizer.state);
-        [[GPSModel model] target_setEdit: indexPath.row];
+        [[GPSModel2 model] target_setEdit: indexPath.row];
         [self performSegueWithIdentifier: @"openTarget" sender: self];
     }
 }
@@ -59,7 +61,7 @@
                  sender:(id)sender
 {
     if (sender == new_target) {
-        [[GPSModel model] target_setEdit: -1];
+        [[GPSModel2 model] target_setEdit: -1];
     }
 }
 
@@ -70,7 +72,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [[GPSModel model] target_count];
+    return [[GPSModel2 model] target_count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -83,11 +85,11 @@
         cell = [[TargetCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
     }
     
-    cell.distance.text = [[GPSModel model] target_fdistance: indexPath.row];
-    cell.heading.text = [[GPSModel model] target_fheading: indexPath.row];
-    cell.heading_delta.text = [[GPSModel model] target_fheading_delta: indexPath.row];
-    cell.altitude.text = [[GPSModel model] target_faltitude: indexPath.row];
-    cell.name.text = [[GPSModel model] target_name: indexPath.row];
+    cell.distance.text = [[GPSModel2 model] target_fdistance: indexPath.row];
+    cell.heading.text = [[GPSModel2 model] target_fheading: indexPath.row];
+    cell.heading_delta.text = [[GPSModel2 model] target_fheading_delta: indexPath.row];
+    cell.altitude.text = [[GPSModel2 model] target_faltitude: indexPath.row];
+    cell.name.text = [[GPSModel2 model] target_name: indexPath.row];
     UIView *bgColorView = [[UIView alloc] init];
     bgColorView.backgroundColor = [UIColor darkGrayColor];
     [cell setSelectedBackgroundView:bgColorView];

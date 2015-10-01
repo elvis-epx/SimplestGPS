@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "GPSModel.h"
+#import "SimplestGPS-Swift.h"
 
-@interface GPSViewController : UIViewController<ModelObserver> {
+@interface GPSViewController : UIViewController<ModelListener> {
 
     IBOutlet UILabel* latitude;
     IBOutlet UILabel* latitude2;

@@ -9,14 +9,14 @@
 #include <math.h>
 #import "GPSModel.h"
 
-@interface GPSModel () {
+@interface GPSModelX () {
 }
 
 @property (nonatomic, retain) CLLocation *currentLocation;
 
 @end
 
-@implementation GPSModel {
+@implementation GPSModelX {
     NSMutableArray *observers;
     
     NSMutableDictionary *names;
@@ -26,16 +26,14 @@
     NSArray *target_list;
     int next_target;
     
-    CLGeocoder *geocoder;
-    CLPlacemark *placemark;
     CLLocationManager *locationManager;
     int metric;
     
     NSInteger editing;
 }
 
-+ (GPSModel*) model {
-    static GPSModel *singleton = nil;
++ (GPSModelX*) model_x {
+    static GPSModelX *singleton = nil;
     if (! singleton) {
         singleton = [[self alloc] init];
     }

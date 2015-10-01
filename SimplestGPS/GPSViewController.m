@@ -7,6 +7,8 @@
 //
 
 #import "GPSViewController.h"
+#import "SimplestGPS-Swift.h"
+
 
 @interface GPSViewController () {
 }
@@ -34,13 +36,13 @@
      [NSDictionary dictionaryWithObjectsAndKeys:
       [NSNumber numberWithInt: 1], @"metric", nil]];
 
-    [[GPSModel model] addObs: self];
-    [metric_switch setOn: [[GPSModel model] getMetric]];
+    [[GPSModel2 model] addObs: self];
+    [metric_switch setOn: [[GPSModel2 model] get_metric]];
 }
 
 - (void) setMetric: (id) sender
 {
-    [[GPSModel model] setMetric: ([metric_switch isOn] ? 1 : 0)];
+    [[GPSModel2 model] setMetric: ([metric_switch isOn] ? 1 : 0)];
 }
 
 - (void) clearScreen
@@ -69,14 +71,14 @@
 
 - (void) update
 {
-    [latitude setText: [[GPSModel model] format_latitude]];
-    [latitude2 setText: [[GPSModel model] format_latitude2]];
-    [longitude setText: [[GPSModel model] format_longitude]];
-    [longitude2 setText: [[GPSModel model] format_longitude2]];
-    [altitude setText: [[GPSModel model] format_altitude]];
-    [heading setText: [[GPSModel model] format_heading]];
-    [speed setText: [[GPSModel model] format_speed]];
-    [accuracy setText: [[GPSModel model] format_accuracy]];
+    [latitude setText: [[GPSModel2 model] format_latitude]];
+    [latitude2 setText: [[GPSModel2 model] format_latitude2]];
+    [longitude setText: [[GPSModel2 model] format_longitude]];
+    [longitude2 setText: [[GPSModel2 model] format_longitude2]];
+    [altitude setText: [[GPSModel2 model] format_altitude]];
+    [heading setText: [[GPSModel2 model] format_heading]];
+    [speed setText: [[GPSModel2 model] format_speed]];
+    [accuracy setText: [[GPSModel2 model] format_accuracy]];
 }
 
 

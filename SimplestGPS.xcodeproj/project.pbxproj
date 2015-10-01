@@ -10,6 +10,7 @@
 		B90AAEEB184C1E59003A302E /* icon58.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEA184C1E59003A302E /* icon58.png */; };
 		B90AAEED184C1E5F003A302E /* icon80.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEC184C1E5F003A302E /* icon80.png */; };
 		B90AAEEF184C1E64003A302E /* icon120.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEE184C1E64003A302E /* icon120.png */; };
+		B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B912BBEC1B73394400C3C09C /* GPSModel2.swift */; };
 		B9692845184FB50A00998B77 /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692844184FB50A00998B77 /* icon114.png */; };
 		B9692847184FB51100998B77 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692846184FB51100998B77 /* icon29.png */; };
 		B9692849184FB51700998B77 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692848184FB51700998B77 /* icon57.png */; };
@@ -33,6 +34,8 @@
 		B90AAEEA184C1E59003A302E /* icon58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon58.png; sourceTree = "<group>"; };
 		B90AAEEC184C1E5F003A302E /* icon80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon80.png; sourceTree = "<group>"; };
 		B90AAEEE184C1E64003A302E /* icon120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon120.png; sourceTree = "<group>"; };
+		B912BBEB1B73394300C3C09C /* SimplestGPS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimplestGPS-Bridging-Header.h"; sourceTree = "<group>"; };
+		B912BBEC1B73394400C3C09C /* GPSModel2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSModel2.swift; sourceTree = "<group>"; };
 		B9692844184FB50A00998B77 /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
 		B9692846184FB51100998B77 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		B9692848184FB51700998B77 /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
@@ -116,17 +119,19 @@
 				B9BA425C1B46222D00429F3C /* GPSModel.h */,
 				B9BA425D1B46222D00429F3C /* GPSModel.m */,
 				B9AD65AB1849733200E9C380 /* GPSAppDelegate.h */,
-				B9AD65A31849733200E9C380 /* Supporting Files */,
 				B9AD65AC1849733200E9C380 /* GPSAppDelegate.m */,
 				B9AD65B11849733200E9C380 /* GPSViewController.h */,
 				B9AD65B21849733200E9C380 /* GPSViewController.m */,
 				B9AD65AE1849733200E9C380 /* Main.storyboard */,
+				B912BBEC1B73394400C3C09C /* GPSModel2.swift */,
 				B9C3FB111B471D66003D525C /* TargetCell.h */,
 				B9C3FB121B471D66003D525C /* TargetCell.m */,
 				B9C3FB0B1B47190F003D525C /* TargetsViewController.h */,
 				B9C3FB0C1B47190F003D525C /* TargetsViewController.m */,
 				B9C3FB0E1B471924003D525C /* TargetViewController.h */,
 				B9C3FB0F1B471924003D525C /* TargetViewController.m */,
+				B912BBEB1B73394300C3C09C /* SimplestGPS-Bridging-Header.h */,
+				B9AD65A31849733200E9C380 /* Supporting Files */,
 			);
 			path = SimplestGPS;
 			sourceTree = "<group>";
@@ -170,7 +175,8 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = GPS;
-				LastUpgradeCheck = 0640;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Elvis Pfutzenreuter";
 				TargetAttributes = {
 					B9AD65981849733200E9C380 = {
@@ -227,6 +233,7 @@
 				B9AD65AD1849733200E9C380 /* GPSAppDelegate.m in Sources */,
 				B9C3FB101B471924003D525C /* TargetViewController.m in Sources */,
 				B9C3FB131B471D66003D525C /* TargetCell.m in Sources */,
+				B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,6 +277,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -284,7 +292,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -316,7 +324,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -325,14 +333,19 @@
 		B9AD65CC1849733200E9C380 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
 				INFOPLIST_FILE = "SimplestGPS/SimplestGPS-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "br.com.epx.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "SimplestGPS/SimplestGPS-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -340,14 +353,18 @@
 		B9AD65CD1849733200E9C380 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
 				INFOPLIST_FILE = "SimplestGPS/SimplestGPS-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "br.com.epx.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "SimplestGPS/SimplestGPS-Bridging-Header.h";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

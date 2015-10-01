@@ -9,10 +9,10 @@
 #import <UIKit/UIKit.h>
 #include <CoreLocation/CoreLocation.h>
 
-@interface GPSModel: NSObject {
+@interface GPSModelX: NSObject {
 }
 
-+ (GPSModel*) model;
++ (GPSModelX*) model_x;
 
 - (int) getMetric;
 - (void) setMetric: (int) value;
