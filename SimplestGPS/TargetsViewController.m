@@ -7,7 +7,6 @@
 //
 
 #import "TargetsViewController.h"
-#import "TargetCell.h"
 #import "SimplestGPS-Swift.h"
 
 
@@ -77,12 +76,12 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *simpleTableIdentifier = @"TargetCell";
+    static NSString *simpleTableIdentifier = @"TargetCell2";
     
-    TargetCell *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
+    TargetCell2 *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
     
     if (cell == nil) {
-        cell = [[TargetCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
+        cell = [[TargetCell2 alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
     }
     
     cell.distance.text = [[GPSModel2 model] target_fdistance: indexPath.row];
