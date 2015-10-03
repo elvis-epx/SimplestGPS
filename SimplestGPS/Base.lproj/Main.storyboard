@@ -6,10 +6,10 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--View Controller2-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
-                <viewController id="vXZ-lx-hvc" customClass="GPSViewController" sceneMemberID="viewController">
+                <viewController id="vXZ-lx-hvc" customClass="GPSViewController2" customModule="SimplestGPS" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ofH-sa-vAp"/>
                         <viewControllerLayoutGuide type="bottom" id="9sr-ji-QdG"/>
@@ -218,10 +218,10 @@
             </objects>
             <point key="canvasLocation" x="952" y="318"/>
         </scene>
-        <!--Targets View Controller-->
+        <!--Targets View Controller2-->
         <scene sceneID="aOW-1h-Xvg">
             <objects>
-                <viewController id="nfc-wt-9rG" customClass="TargetsViewController" sceneMemberID="viewController">
+                <viewController id="nfc-wt-9rG" customClass="TargetsViewController2" customModule="SimplestGPS" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="qIk-NG-1VF"/>
                         <viewControllerLayoutGuide type="bottom" id="mjj-HO-i3M"/>
@@ -357,10 +357,10 @@
             </objects>
             <point key="canvasLocation" x="1723" y="332"/>
         </scene>
-        <!--Target View Controller-->
+        <!--Target View Controller2-->
         <scene sceneID="hR7-K3-BW4">
             <objects>
-                <viewController id="cgf-OK-JfV" customClass="TargetViewController" sceneMemberID="viewController">
+                <viewController id="cgf-OK-JfV" customClass="TargetViewController2" customModule="SimplestGPS" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="XQe-Mc-VPg"/>
                         <viewControllerLayoutGuide type="bottom" id="gRK-zR-HbO"/>

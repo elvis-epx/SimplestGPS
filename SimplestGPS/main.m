@@ -8,11 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
-#import "GPSAppDelegate.h"
+#import "SimplestGPS-Swift.h"
 
 int main(int argc, char * argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([GPSAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([GPSAppDelegate2 class]));
     }
 }

@@ -11,6 +11,9 @@
 		B90AAEED184C1E5F003A302E /* icon80.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEC184C1E5F003A302E /* icon80.png */; };
 		B90AAEEF184C1E64003A302E /* icon120.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEE184C1E64003A302E /* icon120.png */; };
 		B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B912BBEC1B73394400C3C09C /* GPSModel2.swift */; };
+		B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */; settings = {ASSET_TAGS = (); }; };
+		B93D610B1BBF59790092CD5C /* GPSViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D610A1BBF59790092CD5C /* GPSViewController2.swift */; settings = {ASSET_TAGS = (); }; };
+		B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D610C1BBF60DB0092CD5C /* TargetsViewController2.swift */; settings = {ASSET_TAGS = (); }; };
 		B9692845184FB50A00998B77 /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692844184FB50A00998B77 /* icon114.png */; };
 		B9692847184FB51100998B77 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692846184FB51100998B77 /* icon29.png */; };
 		B9692849184FB51700998B77 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692848184FB51700998B77 /* icon57.png */; };
@@ -19,13 +22,10 @@
 		B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65A01849733200E9C380 /* UIKit.framework */; };
 		B9AD65A71849733200E9C380 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65A51849733200E9C380 /* InfoPlist.strings */; };
 		B9AD65A91849733200E9C380 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD65A81849733200E9C380 /* main.m */; };
-		B9AD65AD1849733200E9C380 /* GPSAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD65AC1849733200E9C380 /* GPSAppDelegate.m */; };
 		B9AD65B01849733200E9C380 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65AE1849733200E9C380 /* Main.storyboard */; };
-		B9AD65B31849733200E9C380 /* GPSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD65B21849733200E9C380 /* GPSViewController.m */; };
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
-		B9C3FB0D1B47190F003D525C /* TargetsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9C3FB0C1B47190F003D525C /* TargetsViewController.m */; };
-		B9C3FB101B471924003D525C /* TargetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B9C3FB0F1B471924003D525C /* TargetViewController.m */; };
+		B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */; settings = {ASSET_TAGS = (); }; };
 		B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
@@ -35,6 +35,9 @@
 		B90AAEEE184C1E64003A302E /* icon120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon120.png; sourceTree = "<group>"; };
 		B912BBEB1B73394300C3C09C /* SimplestGPS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimplestGPS-Bridging-Header.h"; sourceTree = "<group>"; };
 		B912BBEC1B73394400C3C09C /* GPSModel2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSModel2.swift; sourceTree = "<group>"; };
+		B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSAppDelegate2.swift; sourceTree = "<group>"; };
+		B93D610A1BBF59790092CD5C /* GPSViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSViewController2.swift; sourceTree = "<group>"; };
+		B93D610C1BBF60DB0092CD5C /* TargetsViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetsViewController2.swift; sourceTree = "<group>"; };
 		B9692844184FB50A00998B77 /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
 		B9692846184FB51100998B77 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		B9692848184FB51700998B77 /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
@@ -46,17 +49,10 @@
 		B9AD65A61849733200E9C380 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B9AD65A81849733200E9C380 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		B9AD65AA1849733200E9C380 /* SimplestGPS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimplestGPS-Prefix.pch"; sourceTree = "<group>"; };
-		B9AD65AB1849733200E9C380 /* GPSAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPSAppDelegate.h; sourceTree = "<group>"; };
-		B9AD65AC1849733200E9C380 /* GPSAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPSAppDelegate.m; sourceTree = "<group>"; };
 		B9AD65AF1849733200E9C380 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		B9AD65B11849733200E9C380 /* GPSViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPSViewController.h; sourceTree = "<group>"; };
-		B9AD65B21849733200E9C380 /* GPSViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPSViewController.m; sourceTree = "<group>"; };
 		B9AD65B41849733200E9C380 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		B9AD65D118497AAB00E9C380 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		B9C3FB0B1B47190F003D525C /* TargetsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TargetsViewController.h; sourceTree = "<group>"; };
-		B9C3FB0C1B47190F003D525C /* TargetsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TargetsViewController.m; sourceTree = "<group>"; };
-		B9C3FB0E1B471924003D525C /* TargetViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TargetViewController.h; sourceTree = "<group>"; };
-		B9C3FB0F1B471924003D525C /* TargetViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TargetViewController.m; sourceTree = "<group>"; };
+		B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetViewController2.swift; sourceTree = "<group>"; };
 		B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetCell2.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -112,17 +108,13 @@
 		B9AD65A21849733200E9C380 /* SimplestGPS */ = {
 			isa = PBXGroup;
 			children = (
-				B9AD65AB1849733200E9C380 /* GPSAppDelegate.h */,
-				B9AD65AC1849733200E9C380 /* GPSAppDelegate.m */,
-				B9AD65B11849733200E9C380 /* GPSViewController.h */,
-				B9AD65B21849733200E9C380 /* GPSViewController.m */,
+				B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */,
+				B93D610A1BBF59790092CD5C /* GPSViewController2.swift */,
 				B9AD65AE1849733200E9C380 /* Main.storyboard */,
 				B912BBEC1B73394400C3C09C /* GPSModel2.swift */,
 				B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */,
-				B9C3FB0B1B47190F003D525C /* TargetsViewController.h */,
-				B9C3FB0C1B47190F003D525C /* TargetsViewController.m */,
-				B9C3FB0E1B471924003D525C /* TargetViewController.h */,
-				B9C3FB0F1B471924003D525C /* TargetViewController.m */,
+				B93D610C1BBF60DB0092CD5C /* TargetsViewController2.swift */,
+				B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */,
 				B912BBEB1B73394300C3C09C /* SimplestGPS-Bridging-Header.h */,
 				B9AD65A31849733200E9C380 /* Supporting Files */,
 			);
@@ -219,12 +211,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B9C3FB0D1B47190F003D525C /* TargetsViewController.m in Sources */,
-				B9AD65B31849733200E9C380 /* GPSViewController.m in Sources */,
+				B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */,
+				B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */,
 				B9AD65A91849733200E9C380 /* main.m in Sources */,
-				B9AD65AD1849733200E9C380 /* GPSAppDelegate.m in Sources */,
-				B9C3FB101B471924003D525C /* TargetViewController.m in Sources */,
+				B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */,
 				B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */,
+				B93D610B1BBF59790092CD5C /* GPSViewController2.swift in Sources */,
 				B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

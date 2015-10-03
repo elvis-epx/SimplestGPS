@@ -15,4 +15,12 @@ import UIKit
     @IBOutlet weak var heading: UILabel?
     @IBOutlet weak var heading_delta: UILabel?
     @IBOutlet weak var altitude: UILabel?
+    
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 }
