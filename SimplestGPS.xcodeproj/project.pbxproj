@@ -21,7 +21,6 @@
 		B9AD659F1849733200E9C380 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659E1849733200E9C380 /* CoreGraphics.framework */; };
 		B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65A01849733200E9C380 /* UIKit.framework */; };
 		B9AD65A71849733200E9C380 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65A51849733200E9C380 /* InfoPlist.strings */; };
-		B9AD65A91849733200E9C380 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B9AD65A81849733200E9C380 /* main.m */; };
 		B9AD65B01849733200E9C380 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65AE1849733200E9C380 /* Main.storyboard */; };
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
@@ -47,7 +46,6 @@
 		B9AD65A01849733200E9C380 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B9AD65A41849733200E9C380 /* SimplestGPS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SimplestGPS-Info.plist"; sourceTree = "<group>"; };
 		B9AD65A61849733200E9C380 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		B9AD65A81849733200E9C380 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		B9AD65AA1849733200E9C380 /* SimplestGPS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimplestGPS-Prefix.pch"; sourceTree = "<group>"; };
 		B9AD65AF1849733200E9C380 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B9AD65B41849733200E9C380 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -126,7 +124,6 @@
 			children = (
 				B9AD65A41849733200E9C380 /* SimplestGPS-Info.plist */,
 				B9AD65A51849733200E9C380 /* InfoPlist.strings */,
-				B9AD65A81849733200E9C380 /* main.m */,
 				B9AD65AA1849733200E9C380 /* SimplestGPS-Prefix.pch */,
 				B9AD65B41849733200E9C380 /* Images.xcassets */,
 			);
@@ -213,7 +210,6 @@
 			files = (
 				B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */,
 				B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */,
-				B9AD65A91849733200E9C380 /* main.m in Sources */,
 				B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */,
 				B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */,
 				B93D610B1BBF59790092CD5C /* GPSViewController2.swift in Sources */,

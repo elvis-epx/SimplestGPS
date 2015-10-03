@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 
+@UIApplicationMain
 @objc class GPSAppDelegate2: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
