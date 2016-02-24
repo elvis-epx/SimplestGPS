@@ -11,9 +11,9 @@
 		B90AAEED184C1E5F003A302E /* icon80.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEC184C1E5F003A302E /* icon80.png */; };
 		B90AAEEF184C1E64003A302E /* icon120.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEE184C1E64003A302E /* icon120.png */; };
 		B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B912BBEC1B73394400C3C09C /* GPSModel2.swift */; };
-		B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */; settings = {ASSET_TAGS = (); }; };
-		B93D610B1BBF59790092CD5C /* GPSViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D610A1BBF59790092CD5C /* GPSViewController2.swift */; settings = {ASSET_TAGS = (); }; };
-		B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D610C1BBF60DB0092CD5C /* TargetsViewController2.swift */; settings = {ASSET_TAGS = (); }; };
+		B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */; };
+		B93D610B1BBF59790092CD5C /* GPSViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D610A1BBF59790092CD5C /* GPSViewController2.swift */; };
+		B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D610C1BBF60DB0092CD5C /* TargetsViewController2.swift */; };
 		B9692845184FB50A00998B77 /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692844184FB50A00998B77 /* icon114.png */; };
 		B9692847184FB51100998B77 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692846184FB51100998B77 /* icon29.png */; };
 		B9692849184FB51700998B77 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692848184FB51700998B77 /* icon57.png */; };
@@ -24,8 +24,8 @@
 		B9AD65B01849733200E9C380 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65AE1849733200E9C380 /* Main.storyboard */; };
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
-		B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */; settings = {ASSET_TAGS = (); }; };
-		B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */; settings = {ASSET_TAGS = (); }; };
+		B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */; };
+		B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */

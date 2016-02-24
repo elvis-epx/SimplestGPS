@@ -611,6 +611,8 @@ import CoreLocation
         var delta = heading - self.current!.course;
         if delta <= -180 {
             delta += 360;
+        } else if delta >= 180 {
+            delta -= 360;
         }
         return delta;
     }
