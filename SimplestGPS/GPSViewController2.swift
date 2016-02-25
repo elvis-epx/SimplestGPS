@@ -28,7 +28,7 @@ import UIKit
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        metric_switch!.addTarget(self, action: "set_metric:", forControlEvents: .ValueChanged);
+        metric_switch!.addTarget(self, action: #selector(GPSViewController2.set_metric(_:)), forControlEvents: .ValueChanged);
         let prefs = NSUserDefaults.standardUserDefaults()
         prefs.registerDefaults(["metric": 1])
         GPSModel2.model().addObs(self)

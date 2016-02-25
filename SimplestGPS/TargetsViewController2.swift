@@ -16,7 +16,7 @@ import UIKit
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let lpgr = UILongPressGestureRecognizer.init(target: self, action: "handleLongPress:")
+        let lpgr = UILongPressGestureRecognizer.init(target: self, action: #selector(TargetsViewController2.handleLongPress(_:)))
         lpgr.minimumPressDuration = 0.5
         lpgr.delegate = self
         table!.addGestureRecognizer(lpgr)
