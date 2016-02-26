@@ -25,6 +25,7 @@
 		B9AD65B01849733200E9C380 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65AE1849733200E9C380 /* Main.storyboard */; };
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
+		B9D542991C80CBD70063DCD8 /* MapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */; };
 		B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */; };
 		B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */; };
 /* End PBXBuildFile section */
@@ -52,6 +53,7 @@
 		B9AD65AF1849733200E9C380 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B9AD65B41849733200E9C380 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		B9AD65D118497AAB00E9C380 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapCanvasView.swift; sourceTree = "<group>"; };
 		B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetViewController2.swift; sourceTree = "<group>"; };
 		B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetCell2.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -109,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				B91E5F9E1C7F83A2000CB068 /* MapViewController.swift */,
+				B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */,
 				B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */,
 				B93D610A1BBF59790092CD5C /* GPSViewController2.swift */,
 				B9AD65AE1849733200E9C380 /* Main.storyboard */,
@@ -214,6 +217,7 @@
 				B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */,
 				B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */,
 				B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */,
+				B9D542991C80CBD70063DCD8 /* MapCanvasView.swift in Sources */,
 				B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */,
 				B93D610B1BBF59790092CD5C /* GPSViewController2.swift in Sources */,
 				B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */,

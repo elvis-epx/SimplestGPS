@@ -242,24 +242,33 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ruK-YN-pqb" customClass="MapCanvasView">
-                                <rect key="frame" x="20" y="20" width="560" height="580"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ruK-YN-pqb" customClass="MapCanvasView" customModule="SimplestGPS">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="y7X-RE-ynn">
                                 <rect key="frame" x="260" y="20" width="81" height="30"/>
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="15"/>
                                 <state key="normal" title="Auto zoom"/>
+                                <connections>
+                                    <action selector="do_zoomauto:" destination="MWM-Gl-hMW" eventType="touchUpInside" id="8O2-rC-E7u"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KnH-L2-p62">
                                 <rect key="frame" x="20" y="550" width="79" height="30"/>
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="15"/>
                                 <state key="normal" title="Center me"/>
+                                <connections>
+                                    <action selector="do_centerme:" destination="MWM-Gl-hMW" eventType="touchUpInside" id="qkI-xC-ERD"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0bp-S4-Z3I">
                                 <rect key="frame" x="508" y="20" width="72" height="30"/>
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="15"/>
                                 <state key="normal" title="Zoom out"/>
+                                <connections>
+                                    <action selector="do_zoomout:" destination="MWM-Gl-hMW" eventType="touchUpInside" id="OY8-sN-lv9"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kAI-ob-o5A">
                                 <rect key="frame" x="542" y="550" width="38" height="30"/>
@@ -273,6 +282,9 @@
                                 <rect key="frame" x="20" y="20" width="60" height="30"/>
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="15"/>
                                 <state key="normal" title="Zoom in"/>
+                                <connections>
+                                    <action selector="do_zoomin:" destination="MWM-Gl-hMW" eventType="touchUpInside" id="Krn-lu-gBY"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -281,18 +293,25 @@
                             <constraint firstAttribute="trailingMargin" secondItem="kAI-ob-o5A" secondAttribute="trailing" id="4qz-BB-9xJ"/>
                             <constraint firstItem="vgv-h8-txb" firstAttribute="top" secondItem="NKJ-d3-AeC" secondAttribute="bottom" id="F6L-Ar-P33"/>
                             <constraint firstAttribute="leadingMargin" secondItem="vgv-h8-txb" secondAttribute="leading" id="Lmh-jF-Fs7"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="ruK-YN-pqb" secondAttribute="trailing" id="Mch-Re-g4p"/>
                             <constraint firstItem="gOi-eY-bkj" firstAttribute="top" secondItem="kAI-ob-o5A" secondAttribute="bottom" constant="20" id="NEJ-ht-2Rd"/>
                             <constraint firstItem="y7X-RE-ynn" firstAttribute="centerX" secondItem="gh1-lP-DJm" secondAttribute="centerX" id="Ob2-tX-gUI"/>
-                            <constraint firstItem="ruK-YN-pqb" firstAttribute="leading" secondItem="gh1-lP-DJm" secondAttribute="leadingMargin" id="S1p-sh-0pN"/>
-                            <constraint firstItem="ruK-YN-pqb" firstAttribute="top" secondItem="NKJ-d3-AeC" secondAttribute="bottom" id="cMT-Gc-oVw"/>
+                            <constraint firstItem="gOi-eY-bkj" firstAttribute="top" secondItem="ruK-YN-pqb" secondAttribute="bottom" id="dMZ-QX-J0Y"/>
                             <constraint firstItem="y7X-RE-ynn" firstAttribute="top" secondItem="NKJ-d3-AeC" secondAttribute="bottom" id="f6v-E1-wQ5"/>
+                            <constraint firstItem="ruK-YN-pqb" firstAttribute="leading" secondItem="gh1-lP-DJm" secondAttribute="leadingMargin" constant="-20" id="fLV-JO-hbh"/>
                             <constraint firstItem="gOi-eY-bkj" firstAttribute="top" secondItem="KnH-L2-p62" secondAttribute="bottom" constant="20" id="i0W-nt-HzX"/>
-                            <constraint firstItem="gOi-eY-bkj" firstAttribute="top" secondItem="ruK-YN-pqb" secondAttribute="bottom" id="mkJ-SV-e7I"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ruK-YN-pqb" secondAttribute="trailing" constant="-20" id="jQ0-8V-XFB"/>
                             <constraint firstAttribute="leadingMargin" secondItem="KnH-L2-p62" secondAttribute="leading" id="oKf-x0-xW6"/>
                             <constraint firstAttribute="trailingMargin" secondItem="0bp-S4-Z3I" secondAttribute="trailing" id="ren-z4-6ax"/>
+                            <constraint firstItem="ruK-YN-pqb" firstAttribute="top" secondItem="gh1-lP-DJm" secondAttribute="topMargin" id="yrW-UD-sF7"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="canvas" destination="ruK-YN-pqb" id="Ypl-9m-aJS"/>
+                        <outlet property="centerme" destination="KnH-L2-p62" id="9f2-VS-OSN"/>
+                        <outlet property="zoomauto" destination="y7X-RE-ynn" id="sLI-Ps-KTI"/>
+                        <outlet property="zoomin" destination="vgv-h8-txb" id="sdA-Ks-nO8"/>
+                        <outlet property="zoomout" destination="0bp-S4-Z3I" id="rJX-E8-lqI"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dPa-Io-I7X" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="NJ9-2M-3Ty" userLabel="Exit" sceneMemberID="exit"/>
