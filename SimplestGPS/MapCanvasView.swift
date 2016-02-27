@@ -34,15 +34,17 @@ class MapCanvasView: UIView {
     }
 
     override func drawRect(_: CGRect) {
-        for (img, x, y, w, h) in images {
-            let pos_rect = CGRect(x: x, y: y, width: w, height: h)
+        for (img, x0, y0, x1, y1) in images {
+            let pos_rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
             img.drawInRect(pos_rect)
         }
         
-        let pos_rect = CGRect(x: pos_x, y: pos_y, width: 15, height: 15)
-        let path = UIBezierPath(ovalInRect: pos_rect)
-        UIColor.redColor().setFill()
-        path.fill()
+        if pos_x >= 0 {
+            let pos_rect = CGRect(x: pos_x, y: pos_y, width: 15, height: 15)
+            let path = UIBezierPath(ovalInRect: pos_rect)
+            UIColor.redColor().setFill()
+            path.fill()
+        }
        
         for tgt in targets {
             let pos_rect = CGRect(x: tgt.0, y: tgt.1, width: 15, height: 15)

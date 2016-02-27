@@ -197,6 +197,17 @@ import CoreLocation
         return String(format: "%d.%02d.%02d.%02d", deg, minutes, seconds, cents);
     }
     
+    func latitude() -> Double
+    {
+        return self.current!.coordinate.latitude
+    }
+
+    func longitude() -> Double
+    {
+        return self.current!.coordinate.longitude
+    }
+    
+    
     func format_latitude() -> String
     {
         if self.current == nil {
@@ -460,6 +471,20 @@ import CoreLocation
         return format_altitude_t(dn);
     }
     
+    func target_latitude(index: Int) -> Double
+    {
+        var n: Double;
+        if index < 0 || index >= target_list.count {
+            if self.current != nil {
+                n = self.current!.coordinate.latitude;
+            } else {
+                return 0;
+            }
+        } else {
+            n = lats[target_list[index]] as! Double;
+        }
+        return n;
+    }
    
     func target_flatitude(index: Int) -> String
     {
@@ -475,7 +500,23 @@ import CoreLocation
         }
         return format_latitude_t(n);
     }
+
+    func target_longitude(index: Int) -> Double
+    {
+        var n: Double;
+        if index < 0 || index >= target_list.count {
+            if self.current != nil {
+                n = self.current!.coordinate.longitude;
+            } else {
+                return 0;
+            }
+        } else {
+            n = longs[target_list[index]] as! Double;
+        }
+        return n;
+    }
     
+
     func target_flongitude(index: Int) -> String
     {
         var n: Double;
@@ -536,6 +577,14 @@ import CoreLocation
         return d;
     }
     
+    /* Given a latitude, return the proportion of longitude distance
+       e.g. 1 deg long / 1 deg lat (tends to 1.0 in tropics, to 0.0 in poles 
+    */
+    func longitude_proportion(lat: Double) -> Double
+    {
+        return cos(abs(lat) * M_PI / 180.0)
+    }
+
     func azimuth(lat1: Double, lat2: Double, long1: Double, long2: Double) -> Double
     {
         let phi1 = lat1 * M_PI / 180.0;
