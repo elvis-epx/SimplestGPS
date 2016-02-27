@@ -18,6 +18,8 @@ import UIKit
     @IBOutlet weak var canvas: MapCanvasView!
 
     var maps: [(UIImage, Double, Double, Double, Double)] = [];
+    var scrw: CGFloat = 0;
+    var scrh: CGFloat = 0;
  
     @IBAction func do_zoomin(sender: AnyObject?)
     {
@@ -142,9 +144,6 @@ import UIKit
                 if let img = UIImage(data: NSData(contentsOfURL: url)!) {
                     NSLog("     Image loaded")
                     maps.append((img, coords.lat - coords.latheight, coords.lat, coords.long, coords.long + coords.longwidth))
-                    // FIXME
-                    canvas.send_img(img)
-                    canvas.setNeedsDisplay()
                 } else {
                     NSLog("     Image NOT loaded")
                 }
@@ -155,6 +154,20 @@ import UIKit
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         GPSModel2.model().addObs(self)
+    }
+    
+    override func viewWillLayoutSubviews() {
+        scrw = canvas.bounds.size.width
+        scrh = canvas.bounds.size.height
+        
+        canvas.send_pos(scrw / 2, y: scrh / 2)
+        canvas.send_targets([(CGFloat(10), CGFloat(10)), (CGFloat(scrw / 4), CGFloat(scrh / 4))])
+        
+        var plot: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat)] = []
+        for map in maps {
+            plot.append((map.0, 0, 0, scrw, scrh))
+        }
+        canvas.send_img(plot)
     }
     
     override func viewWillDisappear(animated: Bool) {

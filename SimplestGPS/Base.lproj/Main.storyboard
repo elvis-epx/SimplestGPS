@@ -290,19 +290,19 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="0bp-S4-Z3I" firstAttribute="top" secondItem="NKJ-d3-AeC" secondAttribute="bottom" id="1eo-4y-0TB"/>
+                            <constraint firstItem="ruK-YN-pqb" firstAttribute="leading" secondItem="gh1-lP-DJm" secondAttribute="leadingMargin" constant="-20" id="1s6-OV-11g"/>
                             <constraint firstAttribute="trailingMargin" secondItem="kAI-ob-o5A" secondAttribute="trailing" id="4qz-BB-9xJ"/>
                             <constraint firstItem="vgv-h8-txb" firstAttribute="top" secondItem="NKJ-d3-AeC" secondAttribute="bottom" id="F6L-Ar-P33"/>
                             <constraint firstAttribute="leadingMargin" secondItem="vgv-h8-txb" secondAttribute="leading" id="Lmh-jF-Fs7"/>
                             <constraint firstItem="gOi-eY-bkj" firstAttribute="top" secondItem="kAI-ob-o5A" secondAttribute="bottom" constant="20" id="NEJ-ht-2Rd"/>
                             <constraint firstItem="y7X-RE-ynn" firstAttribute="centerX" secondItem="gh1-lP-DJm" secondAttribute="centerX" id="Ob2-tX-gUI"/>
-                            <constraint firstItem="gOi-eY-bkj" firstAttribute="top" secondItem="ruK-YN-pqb" secondAttribute="bottom" id="dMZ-QX-J0Y"/>
                             <constraint firstItem="y7X-RE-ynn" firstAttribute="top" secondItem="NKJ-d3-AeC" secondAttribute="bottom" id="f6v-E1-wQ5"/>
-                            <constraint firstItem="ruK-YN-pqb" firstAttribute="leading" secondItem="gh1-lP-DJm" secondAttribute="leadingMargin" constant="-20" id="fLV-JO-hbh"/>
+                            <constraint firstItem="gOi-eY-bkj" firstAttribute="top" secondItem="ruK-YN-pqb" secondAttribute="bottom" id="gu6-gu-u54"/>
+                            <constraint firstItem="ruK-YN-pqb" firstAttribute="trailing" secondItem="gh1-lP-DJm" secondAttribute="trailingMargin" constant="20" id="h6T-ca-D2X"/>
                             <constraint firstItem="gOi-eY-bkj" firstAttribute="top" secondItem="KnH-L2-p62" secondAttribute="bottom" constant="20" id="i0W-nt-HzX"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="ruK-YN-pqb" secondAttribute="trailing" constant="-20" id="jQ0-8V-XFB"/>
+                            <constraint firstItem="ruK-YN-pqb" firstAttribute="top" secondItem="NKJ-d3-AeC" secondAttribute="bottom" constant="-20" id="iKy-Xp-BH3"/>
                             <constraint firstAttribute="leadingMargin" secondItem="KnH-L2-p62" secondAttribute="leading" id="oKf-x0-xW6"/>
                             <constraint firstAttribute="trailingMargin" secondItem="0bp-S4-Z3I" secondAttribute="trailing" id="ren-z4-6ax"/>
-                            <constraint firstItem="ruK-YN-pqb" firstAttribute="top" secondItem="gh1-lP-DJm" secondAttribute="topMargin" id="yrW-UD-sF7"/>
                         </constraints>
                     </view>
                     <connections>
@@ -356,7 +356,7 @@
                                         <rect key="frame" x="0.0" y="22" width="592" height="186"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="SPd-HC-R28" id="hRA-Cy-0GD">
-                                            <rect key="frame" x="0.0" y="0.0" width="592" height="185"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="592" height="185.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nameeeeeeeeeeeee" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gYI-6G-IfP">
