@@ -34,7 +34,7 @@ class MapCanvasView: UIView {
     }
 
     override func drawRect(_: CGRect) {
-        for (img, x0, y0, x1, y1) in images {
+        for (img, x0, x1, y0, y1) in images {
             let pos_rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
             img.drawInRect(pos_rect)
         }

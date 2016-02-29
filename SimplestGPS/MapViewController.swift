@@ -3,8 +3,16 @@
 //  SimplestGPS
 //
 //  Created by Elvis Pfutzenreuter on 10/2/15.
-//  Copyright © 2015 Elvis Pfutzenreuter. All rights reserved.
+//  Copyright © 2016 Elvis Pfutzenreuter. All rights reserved.
 //
+
+// FIXME drag view (changes center_lat and center_long)
+// FIXME cache loading of images (in main view?)
+// FIXME test multiple maps
+// FIXME test movement
+// FIXME blink points
+// FIXME background w/ grid?
+// FIXME show scale (longitude)
 
 import Foundation
 import UIKit
@@ -23,9 +31,10 @@ import UIKit
     var width_prop: Double = 1
     
     // in seconds of latitude degree across the screen height
-    var zoom: Double = 15
-    let zoom_min: Double = 1
+    var zoom_factor: Double = 900
+    let zoom_min: Double = 30
     let zoom_max: Double = 1800
+    let zoom_step: Double = 1.25
     
     // Screen position (0 = center locked in current position)
     var center_lat: Double = 0
@@ -43,16 +52,16 @@ import UIKit
     @IBAction func do_zoomin(sender: AnyObject?)
     {
         NSLog("zoom in")
-        zoom /= 1.4
-        zoom = max(zoom, zoom_min)
+        zoom_factor /= zoom_step
+        zoom_factor = max(zoom_factor, zoom_min)
         repaint()
     }
  
     @IBAction func do_zoomout(sender: AnyObject?)
     {
         NSLog("zoom out")
-        zoom *= 1.4
-        zoom = min(zoom, zoom_max)
+        zoom_factor *= zoom_step
+        zoom_factor = min(zoom_factor, zoom_max)
         repaint()
     }
 
@@ -61,8 +70,6 @@ import UIKit
         NSLog("zoom auto")
         calculate_zoom()
     }
-    
-    // FIXME drag view (changes center_lat and center_long)
     
     @IBAction func do_centerme(sender: AnyObject?)
     {
@@ -175,7 +182,7 @@ import UIKit
                 NSLog("   map coords %f %f %f %f", coords.lat, coords.long, coords.latheight, coords.longwidth)
                 if let img = UIImage(data: NSData(contentsOfURL: url)!) {
                     NSLog("     Image loaded")
-                    maps.append((img: img, lat0: coords.lat - coords.latheight, lat1: coords.lat,
+                    maps.append((img: img, lat0: coords.lat, lat1: coords.lat - coords.latheight,
                         long0: coords.long, long1: coords.long + coords.longwidth,
                         latheight: coords.latheight, longwidth: coords.longwidth))
                 } else {
@@ -212,9 +219,13 @@ import UIKit
         if scrw == 0 {
             return;
         }
+        let calc_zoom = gpslat == 0
         gpslat = GPSModel2.model().latitude()
         gpslong = GPSModel2.model().longitude()
         recenter()
+        if calc_zoom {
+            calculate_zoom()
+        }
         repaint()
     }
     
@@ -250,7 +261,11 @@ import UIKit
         let b0 = max(a, b)
         let c0 = min(c, d)
         let d0 = max(c, d)
-        return x0 <= b0 && x1 >= a0 && y0 <= d0 && y1 >= c0
+        let x0a = min(x0, x1)
+        let x1a = max(x0, x1)
+        let y0a = min(y0, y1)
+        let y1a = max(y0, y1)
+        return x0a <= b0 && x1a >= a0 && y0a <= d0 && y1a >= c0
     }
     
 
@@ -263,19 +278,34 @@ import UIKit
     {
         return CGFloat(scrw * (x - a) / (b - a))
     }
+    
+    // Convert zoom factor to degrees of latitude
+    func zoom_deg(x: Double) -> Double
+    {
+        return x / 3600.0
+    }
 
     func repaint()
     {
+        NSLog("Repaint");
+
         // calculate screen size in GPS
-        let slat0 = clat + zoom / 2
-        let slat1 = clat - zoom / 2
-        let slong0 = clong - (zoom * width_prop / long_prop) / 2
-        let slong1 = clong + (zoom * width_prop / long_prop) / 2
+        let dzoom = zoom_deg(zoom_factor)
+        let slat0 = clat + dzoom / 2.0
+        let slat1 = clat - dzoom / 2.0
+        let slong0 = clong - (dzoom * width_prop / long_prop) / 2.0
+        let slong1 = clong + (dzoom * width_prop / long_prop) / 2.0
+        NSLog("Coordinate space is lat %f to %f (for %f px), long %f to %f (for %f px)", slat0, slat1, scrh, slong0, slong1, scrw)
+        NSLog("Coordinate space is %f tall %f wide", slat1 - slat0, slong1 - slong0)
         
         if ins(clat, y: clong, a: slat0, b: slat1, c: slong0, d: slong1) {
-            canvas.send_pos(long_to(clong, a: slong0, b: slong1), y: lat_to(clat, a: slat0, b: slat1))
+            let x = long_to(clong, a: slong0, b: slong1)
+            let y = lat_to(clat, a: slat0, b: slat1)
+            canvas.send_pos(x, y: y)
+            NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
         } else {
             canvas.send_pos(0, y: 0)
+            NSLog("My position %f %f not in space", clat, clong)
         }
         
         var tgt = 0;
@@ -284,7 +314,12 @@ import UIKit
             let tlat = GPSModel2.model().target_latitude(tgt)
             let tlong = GPSModel2.model().target_longitude(tgt)
             if ins(tlat, y: tlong, a: slat0, b: slat1, c: slong0, d: slong1) {
-                targets.append((long_to(tlong, a: slong0, b: slong1), lat_to(tlat, a: slat0, b: slat1)))
+                let x = long_to(tlong, a: slong0, b: slong1)
+                let y = lat_to(tlat, a: slat0, b: slat1)
+                targets.append(x, y)
+                NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
+            } else {
+                NSLog("Target[%d] %f %f not in space", tgt, tlat, tlong)
             }
             tgt += 1
         }
@@ -298,15 +333,19 @@ import UIKit
                 let y0 = lat_to(map.lat0, a: slat0, b: slat1)
                 let y1 = lat_to(map.lat1, a: slat0, b: slat1)
                 plot.append((map.img, x0, x1, y0, y1))
+                NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
+            } else {
+                NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
             }
         }
         canvas.send_img(plot)
+        NSLog("------------------")
     }
     
     func calculate_zoom()
     {
-        if scrw == 0 || gpslat == 0 {
-            return;
+        if scrw == 0 || gpslat == 0 || GPSModel2.model().target_count() <= 0 {
+            return
         }
 
         // force current position in center
@@ -314,17 +353,18 @@ import UIKit
         center_long = 0
         recenter()
 
-        var new_zoom = zoom_min / 1.4
+        var new_zoom_factor = zoom_min / zoom_step
         var ok = false
         
-        while (!ok && new_zoom <= zoom_max) {
-            new_zoom *= 1.4
+        while (!ok && new_zoom_factor <= zoom_max) {
+            new_zoom_factor *= zoom_step
 
             // calculate screen size in GPS
-            let slat0 = clat + new_zoom / 2
-            let slat1 = clat - new_zoom / 2
-            let slong0 = clong - (new_zoom * width_prop / long_prop) / 2
-            let slong1 = clong + (new_zoom * width_prop / long_prop) / 2
+            let dzoom = zoom_deg(new_zoom_factor)
+            let slat0 = clat + dzoom / 2
+            let slat1 = clat - dzoom / 2
+            let slong0 = clong - (dzoom * width_prop / long_prop) / 2
+            let slong1 = clong + (dzoom * width_prop / long_prop) / 2
 
             // check whether at least one target fits in current zoom
             var tgt = 0;
@@ -340,7 +380,7 @@ import UIKit
         }
         
         if ok {
-            zoom = new_zoom
+            zoom_factor = new_zoom_factor
         }
         
         repaint()
