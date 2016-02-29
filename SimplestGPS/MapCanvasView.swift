@@ -10,12 +10,12 @@ import Foundation
 import UIKit
 
 class MapCanvasView: UIView {
-    var images: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat)] = []
+    var images: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
     var pos_x: CGFloat = -1
     var pos_y: CGFloat = -1
     var targets: [(CGFloat, CGFloat)] = []
 
-    func send_img(list: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat)]) {
+    func send_img(list: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
         self.images = list
         setNeedsDisplay()
     }
@@ -34,7 +34,7 @@ class MapCanvasView: UIView {
     }
 
     override func drawRect(_: CGRect) {
-        for (img, x0, x1, y0, y1) in images {
+        for (img, x0, x1, y0, y1, _) in images {
             let pos_rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
             img.drawInRect(pos_rect)
         }
