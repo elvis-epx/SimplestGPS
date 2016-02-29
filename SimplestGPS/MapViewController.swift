@@ -6,7 +6,6 @@
 //  Copyright © 2016 Elvis Pfutzenreuter. All rights reserved.
 //
 
-// FIXME drag view (changes center_lat and center_long)
 // FIXME cache loading of images (in main view?)
 // FIXME test movement
 // FIXME lazy eval
@@ -22,7 +21,8 @@ import UIKit
     @IBOutlet weak var centerme: UIButton!
     @IBOutlet weak var zoomin: UIButton!
     @IBOutlet weak var canvas: MapCanvasView!
-
+    @IBOutlet weak var scale: UILabel!
+    
     var maps: [(img: UIImage, lat0: Double, lat1: Double, long0: Double, long1: Double, latheight: Double, longwidth: Double)] = [];
     var scrw: Double = 0
     var scrh: Double = 0
@@ -34,9 +34,10 @@ import UIKit
     let zoom_max: Double = 3600
     let zoom_step: Double = 1.25
     
-    // Screen position (0 = center locked in current position)
+    // Screen position (0 = center follows GPS position)
     var center_lat: Double = 0
     var center_long: Double = 0
+    var touch_point: CGPoint? = nil
     
     // Screen position for painting purposes (either screen position or GPS position)
     var clat: Double = 0
@@ -192,6 +193,11 @@ import UIKit
                 }
             }
         }
+        
+        let pan = UIPanGestureRecognizer(target:self, action:"pan:")
+        pan.maximumNumberOfTouches = 1
+        pan.minimumNumberOfTouches = 1
+        canvas.addGestureRecognizer(pan)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -320,9 +326,31 @@ import UIKit
         NSLog("Coordinate space is lat %f to %f (for %f px), long %f to %f (for %f px)", slat0, slat1, scrh, slong0, slong1, scrw)
         NSLog("Coordinate space is %f tall %f wide", slat1 - slat0, slong1 - slong0)
         
-        if ins(clat, y: clong, a: slat0, b: slat1, c: slong0, d: slong1) {
-            let x = long_to(clong, a: slong0, b: slong1)
-            let y = lat_to(clat, a: slat0, b: slat1)
+        let scale_m = 1852.0 * 60 * long_prop * abs(slong1 - slong0)
+        let scale_ft = scale_m * 3.28084
+        var scale_text: NSString = ""
+        if GPSModel2.model().get_metric() > 0 {
+            if scale_m < 1000 {
+                scale_text = NSString(format: "<- %.0fm ->", scale_m)
+            } else if scale_m < 100000 {
+                scale_text = NSString(format: "<- %.1fkm ->", scale_m / 1000)
+            } else {
+                scale_text = NSString(format: "<- %.0fkm ->", scale_m / 1000)
+            }
+        } else {
+            if scale_m < 5280 {
+                scale_text = NSString(format: "<- %.0fft ->", scale_ft)
+            } else if scale_m < 5280*100 {
+                scale_text = NSString(format: "<- %.1fmi ->", scale_ft / 5280)
+            } else {
+                scale_text = NSString(format: "<- %.0fmi ->", scale_m / 5280)
+            }
+        }
+        scale.text = scale_text as String
+        
+        if ins(gpslat, y: gpslong, a: slat0, b: slat1, c: slong0, d: slong1) {
+            let x = long_to(gpslong, a: slong0, b: slong1)
+            let y = lat_to(gpslat, a: slat0, b: slat1)
             canvas.send_pos(x, y: y)
             NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
         } else {
@@ -411,5 +439,37 @@ import UIKit
         }
         
         repaint()
+    }
+    
+    func pan(rec:UIPanGestureRecognizer)
+    {
+        switch rec.state {
+            case .Began:
+                touch_point = rec.locationInView(canvas)
+                NSLog("Drag began at %f %f", touch_point!.x, touch_point!.y)
+        
+            case .Changed:
+                if scrw == 0 || gpslat == 0 {
+                    return
+                }
+                let new_point = rec.locationInView(canvas)
+                let dx = new_point.x - touch_point!.x
+                let dy = new_point.y - touch_point!.y
+                touch_point = new_point
+                NSLog("Drag moved by %f %f", dx, dy)
+                if center_lat == 0 {
+                    center_lat = gpslat
+                    center_long = gpslong
+                }
+                // zoom = measurement of latitude
+                let dzoom = zoom_deg(zoom_factor)
+                center_long += dzoom * width_prop / long_prop * (Double(-dx) / scrw)
+                center_lat += dzoom * (Double(dy) / scrh)
+                recenter()
+                repaint()
+            
+            default:
+                break
+        }
     }
 }
