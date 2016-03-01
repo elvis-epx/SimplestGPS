@@ -53,7 +53,7 @@ import UIKit
     
     @IBAction func do_zoomin(sender: AnyObject?)
     {
-        NSLog("zoom in")
+        // NSLog("zoom in")
         zoom_factor /= zoom_step
         zoom_factor = max(zoom_factor, zoom_min)
         repaint()
@@ -61,7 +61,7 @@ import UIKit
  
     @IBAction func do_zoomout(sender: AnyObject?)
     {
-        NSLog("zoom out")
+        // NSLog("zoom out")
         zoom_factor *= zoom_step
         zoom_factor = min(zoom_factor, zoom_max)
         repaint()
@@ -69,13 +69,13 @@ import UIKit
 
     @IBAction func do_zoomauto(sender: AnyObject?)
     {
-        NSLog("zoom auto")
+        // NSLog("zoom auto")
         calculate_zoom()
     }
     
     @IBAction func do_centerme(sender: AnyObject?)
     {
-        NSLog("center me")
+        // NSLog("center me")
         center_lat = 0
         center_long = 0
         recenter()
@@ -201,7 +201,7 @@ import UIKit
 
     func repaint()
     {
-        NSLog("Repaint");
+        // NSLog("Repaint");
 
         blink_phase += 1
         blink_phase = blink_phase % 2
@@ -213,8 +213,8 @@ import UIKit
         let slat1 = clat - dzoom / 2.0
         let slong0 = clong - (dzoom * width_prop / long_prop) / 2.0
         let slong1 = clong + (dzoom * width_prop / long_prop) / 2.0
-        NSLog("Coordinate space is lat %f to %f (for %f px), long %f to %f (for %f px)", slat0, slat1, scrh, slong0, slong1, scrw)
-        NSLog("Coordinate space is %f tall %f wide", slat1 - slat0, slong1 - slong0)
+        // NSLog("Coordinate space is lat %f to %f (for %f px), long %f to %f (for %f px)", slat0, slat1, scrh, slong0, slong1, scrw)
+        // NSLog("Coordinate space is %f tall %f wide", slat1 - slat0, slong1 - slong0)
         
         let scale_m = 1852.0 * 60 * long_prop * abs(slong1 - slong0)
         let scale_ft = scale_m * 3.28084
@@ -242,10 +242,10 @@ import UIKit
             let x = long_to(gpslong, a: slong0, b: slong1)
             let y = lat_to(gpslat, a: slat0, b: slat1)
             canvas.send_pos(x, y: y)
-            NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
+            // NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
         } else {
             canvas.send_pos(-1, y: -1)
-            NSLog("My position %f %f not in space", clat, clong)
+            // NSLog("My position %f %f not in space", clat, clong)
         }
         
         var targets: [(CGFloat, CGFloat)] = []
@@ -258,9 +258,9 @@ import UIKit
                     let x = long_to(tlong, a: slong0, b: slong1)
                     let y = lat_to(tlat, a: slat0, b: slat1)
                     targets.append(x, y)
-                    NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
+                    // NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
                 } else {
-                    NSLog("Target[%d] %f %f not in space", tgt, tlat, tlong)
+                    // NSLog("Target[%d] %f %f not in space", tgt, tlat, tlong)
                 }
                 tgt += 1
             }
@@ -274,17 +274,22 @@ import UIKit
                 let x1 = long_to(map.long1, a: slong0, b: slong1)
                 let y0 = lat_to(map.lat0, a: slat0, b: slat1)
                 let y1 = lat_to(map.lat1, a: slat0, b: slat1)
-                plot.append((map.img, x0, x1, y0, y1, abs(y1 - y0)))
-                NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
+                let img = GPSModel2.model().get_map_image(map.file)
+                if (img != nil) {
+                    plot.append((img!, x0, x1, y0, y1, abs(y1 - y0)))
+                    // NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
+                } else {
+                    // NSLog("Map not available")
+                }
             } else {
-                NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
+                // NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
             }
         }
         // smaller images should be blitted last since they are probably more detailed maps of the area
         plot.sortInPlace({ $0.5 > $1.5 } )
         canvas.send_img(plot)
         
-        NSLog("------------------")
+        NSLog("Painted with %d maps", plot.count)
     }
     
     func calculate_zoom()
@@ -336,7 +341,7 @@ import UIKit
         switch rec.state {
             case .Began:
                 touch_point = rec.locationInView(canvas)
-                NSLog("Drag began at %f %f", touch_point!.x, touch_point!.y)
+                // NSLog("Drag began at %f %f", touch_point!.x, touch_point!.y)
         
             case .Changed:
                 if scrw == 0 || gpslat == 0 {
@@ -346,7 +351,7 @@ import UIKit
                 let dx = new_point.x - touch_point!.x
                 let dy = new_point.y - touch_point!.y
                 touch_point = new_point
-                NSLog("Drag moved by %f %f", dx, dy)
+                // NSLog("Drag moved by %f %f", dx, dy)
                 if center_lat == 0 {
                     center_lat = gpslat
                     center_long = gpslong

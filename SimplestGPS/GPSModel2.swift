@@ -29,7 +29,8 @@ import CoreLocation
     var metric: Int = 1;
     var editing: Int = -1
     
-    var maps: [(img: UIImage, file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double, latheight: Double, longwidth: Double)] = [];
+    var maps: [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double, latheight: Double, longwidth: Double)] = [];
+    var mapimages: [String: UIImage] = [:]
     
     override init()
     {
@@ -79,19 +80,33 @@ import CoreLocation
                 if !coords.ok {
                     continue
                 }
-                NSLog("   map coords %f %f %f %f", coords.lat, coords.long, coords.latheight, coords.longwidth)
-                if let img = UIImage(data: NSData(contentsOfURL: url)!) {
-                    NSLog("     Image loaded")
-                    maps.append((img: img, file: url, lat0: coords.lat, lat1: coords.lat - coords.latheight,
+                NSLog("   %@ map coords %f %f %f %f", url.absoluteString, coords.lat, coords.long, coords.latheight, coords.longwidth)
+                maps.append((file: url, lat0: coords.lat, lat1: coords.lat - coords.latheight,
                         long0: coords.long, long1: coords.long + coords.longwidth,
                         latheight: coords.latheight, longwidth: coords.longwidth))
-                } else {
-                    NSLog("     Image NOT loaded")
-                }
             }
         }
     }
     
+    func get_map_image(url: NSURL) -> UIImage?
+    {
+        let name = url.absoluteString
+        if let img = mapimages[name] {
+            // NSLog("Image cached")
+            return img
+        }
+        if let img = UIImage(data: NSData(contentsOfURL: url)!) {
+            NSLog("Image %@ loaded", name)
+            mapimages[name] = img
+            return img
+        }
+        
+        NSLog("Image %@ NOT LOADED", name)
+        // remove map from list, so it is no longer requested
+        maps = maps.filter() {$0.file.absoluteString == name}
+        return nil
+    }
+
     func parseName(f: String) -> (ok: Bool, lat: Double, long: Double, latheight: Double, longwidth: Double)
     {
         NSLog("Parsing %@", f)
@@ -182,8 +197,8 @@ import CoreLocation
         return singleton
     }
     
-    func get_maps() -> [(img: UIImage, file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double, latheight: Double, longwidth: Double)] {
-        return maps
+    func get_maps() -> [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double, latheight: Double, longwidth: Double)] {
+        return [] + maps[0..<maps.count]
     }
     
     func sk(keys: Array<NSObject>) -> [String]
