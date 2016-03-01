@@ -6,11 +6,6 @@
 //  Copyright © 2016 Elvis Pfutzenreuter. All rights reserved.
 //
 
-// FIXME cache loading of images (in main view?)
-// FIXME test movement
-// FIXME lazy eval
-
-
 import Foundation
 import UIKit
 
