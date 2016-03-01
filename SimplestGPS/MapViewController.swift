@@ -25,8 +25,10 @@ import UIKit
     // in seconds of latitude degree across the screen height
     var zoom_factor: Double = 900
     let zoom_min: Double = 30
-    let zoom_max: Double = 3600
     let zoom_step: Double = 1.25
+    let zoom_max: Double = 3600
+    // we assume that maps have Mercator projection so we cannot go down to 90 degrees either
+    let max_latitude = 90.0 - 5.0 - 3600 / 3600.0
     
     // Screen position (0 = center follows GPS position)
     var center_lat: Double = 0
@@ -141,32 +143,87 @@ import UIKit
             clong = gpslong
         }
         
+        // Keep latitude within Mercator limits
+        clat = min(max_latitude, clat)
+        clat = max(-max_latitude, clat)
+        
         long_prop = GPSModel2.model().longitude_proportion(clat)
     }
     
-    func ins(x: Double, y: Double, a: Double, b: Double, c: Double, d: Double) -> Bool
+    func normalize_longitude(x: Double) -> Double
     {
-        let a0 = min(a, b)
-        let b0 = max(a, b)
-        let c0 = min(c, d)
-        let d0 = max(c, d)
-        return x >= a0 && x <= b0 && y >= c0 && y <= d0
-    }
-
-    func iins(x0: Double, x1: Double, y0: Double, y1: Double, a: Double, b: Double, c: Double, d: Double) -> Bool
-    {
-        let a0 = min(a, b)
-        let b0 = max(a, b)
-        let c0 = min(c, d)
-        let d0 = max(c, d)
-        let x0a = min(x0, x1)
-        let x1a = max(x0, x1)
-        let y0a = min(y0, y1)
-        let y1a = max(y0, y1)
-        return x0a <= b0 && x1a >= a0 && y0a <= d0 && y1a >= c0
+        if x < -180 {
+            // 181W -> 179E
+            return 360 - x
+        } else if center_long > 180 {
+            // 181E -> 179W
+            return x - 360
+        }
+        return x
     }
     
-
+    // test whether a longitude range is nearer to meridian 180 than meridian 0
+    func nearer_180(a: Double, b: Double) -> Bool
+    {
+        // note: this test assumes that range is < 180 degrees
+        return (abs(a) + abs(b)) >= 180
+    }
+    
+    // converts longitude, so values across +180/-180 line are directly comparable
+    // It actually moves the 180 "problem" to the meridian 0 (longitude line becomes 359..0..1)
+    // so this function should be used only when the range of interest does NOT cross 0
+    func offset_180(x: Double) -> Double
+    {
+        if x < 0 {
+            return x + 360
+        }
+        return x
+    }
+    
+    func ins(lat: Double, _long: Double, lata: Double, latb: Double, _longa: Double, _longb: Double) -> Bool
+    {
+        var long = normalize_longitude(_long)
+        var longa = normalize_longitude(_longa)
+        var longb = normalize_longitude(_longb)
+        
+        if nearer_180(longa, b: longb) {
+            long = offset_180(long)
+            longa = offset_180(longa)
+            longb = offset_180(longb)
+        }
+        
+        let lat0 = min(lata, latb)
+        let lat1 = max(lata, latb)
+        let long0 = min(longa, longb)
+        let long1 = max(longa, longb)
+        return lat >= lat0 && lat <= lat1 && long >= long0 && long <= long1
+    }
+    
+    func iins(maplata: Double, maplatb: Double, _maplonga: Double, _maplongb: Double, lata: Double, latb: Double, _longa: Double, _longb: Double) -> Bool
+    {
+        var maplonga = normalize_longitude(_maplonga)
+        var maplongb = normalize_longitude(_maplongb)
+        var longa = normalize_longitude(_longa)
+        var longb = normalize_longitude(_longb)
+        
+        if nearer_180(longa, b: longb) || nearer_180(maplonga, b: maplongb) {
+            longa = offset_180(longa)
+            longb = offset_180(longb)
+            maplonga = offset_180(maplonga)
+            maplongb = offset_180(maplongb)
+        }
+        
+        let maplat0 = min(maplata, maplatb)
+        let maplat1 = max(maplata, maplatb)
+        let maplong0 = min(maplonga, maplongb)
+        let maplong1 = max(maplonga, maplongb)
+        let lat0 = min(lata, latb)
+        let lat1 = max(lata, latb)
+        let long0 = min(longa, longb)
+        let long1 = max(longa, longb)
+        return maplat0 <= lat1 && maplat1 >= lat0 && maplong0 <= long1 && maplong1 >= long0
+    }
+    
     func lat_to(x: Double, a: Double, b: Double) -> CGFloat
     {
         return CGFloat(scrh * (x - a) / (b - a))
@@ -174,7 +231,17 @@ import UIKit
 
     func long_to(x: Double, a: Double, b: Double) -> CGFloat
     {
-        return CGFloat(scrw * (x - a) / (b - a))
+        var xx = normalize_longitude(x)
+        var aa = normalize_longitude(a)
+        var bb = normalize_longitude(b)
+        
+        if nearer_180(a, b: b) {
+            xx = offset_180(xx)
+            aa = offset_180(aa)
+            bb = offset_180(bb)
+        }
+        
+        return CGFloat(scrw * (xx - aa) / (bb - aa))
     }
     
     // Convert zoom factor to degrees of latitude
@@ -196,20 +263,27 @@ import UIKit
 
     func repaint()
     {
-        // NSLog("Repaint");
+        let debug = false
+        
+        if debug {
+            NSLog("Repaint");
+        }
 
         blink_phase += 1
         blink_phase = blink_phase % 2
         last_blink = NSDate()
 
         // calculate screen size in GPS
+        // NOTE: longitude coordinates may be denormalized (e.g. -181W or +181E)
         let dzoom = zoom_deg(zoom_factor)
         let slat0 = clat + dzoom / 2.0
         let slat1 = clat - dzoom / 2.0
         let slong0 = clong - (dzoom * width_prop / long_prop) / 2.0
         let slong1 = clong + (dzoom * width_prop / long_prop) / 2.0
-        // NSLog("Coordinate space is lat %f to %f (for %f px), long %f to %f (for %f px)", slat0, slat1, scrh, slong0, slong1, scrw)
-        // NSLog("Coordinate space is %f tall %f wide", slat1 - slat0, slong1 - slong0)
+        if debug {
+            NSLog("Coordinate space is lat %f to %f (for %f px), long %f to %f (for %f px)", slat0, slat1, scrh, slong0, slong1, scrw)
+            NSLog("Coordinate space is %f tall %f wide", slat1 - slat0, slong1 - slong0)
+        }
         
         let scale_m = 1852.0 * 60 * long_prop * abs(slong1 - slong0)
         let scale_ft = scale_m * 3.28084
@@ -233,14 +307,18 @@ import UIKit
         }
         scale.text = scale_text as String
         
-        if ins(gpslat, y: gpslong, a: slat0, b: slat1, c: slong0, d: slong1) {
+        if ins(gpslat, _long: gpslong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
             let x = long_to(gpslong, a: slong0, b: slong1)
             let y = lat_to(gpslat, a: slat0, b: slat1)
             canvas.send_pos(x, y: y)
-            // NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
+            if debug {
+                NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
+            }
         } else {
             canvas.send_pos(-1, y: -1)
-            // NSLog("My position %f %f not in space", clat, clong)
+            if debug {
+                NSLog("My position %f %f not in space", clat, clong)
+            }
         }
         
         var targets: [(CGFloat, CGFloat)] = []
@@ -249,13 +327,17 @@ import UIKit
             while tgt < GPSModel2.model().target_count() {
                 let tlat = GPSModel2.model().target_latitude(tgt)
                 let tlong = GPSModel2.model().target_longitude(tgt)
-                if ins(tlat, y: tlong, a: slat0, b: slat1, c: slong0, d: slong1) {
+                if ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
                     let x = long_to(tlong, a: slong0, b: slong1)
                     let y = lat_to(tlat, a: slat0, b: slat1)
                     targets.append(x, y)
-                    // NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
+                    if debug {
+                        NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
+                    }
                 } else {
-                    // NSLog("Target[%d] %f %f not in space", tgt, tlat, tlong)
+                    if debug {
+                        NSLog("Target[%d] %f %f not in space", tgt, tlat, tlong)
+                    }
                 }
                 tgt += 1
             }
@@ -264,7 +346,7 @@ import UIKit
         
         var plot: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
         for map in GPSModel2.model().get_maps() {
-            if iins(map.lat0, x1: map.lat1, y0: map.long0, y1: map.long1, a: slat0, b: slat1, c: slong0, d: slong1) {
+            if iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
                 let x0 = long_to(map.long0, a: slong0, b: slong1)
                 let x1 = long_to(map.long1, a: slong0, b: slong1)
                 let y0 = lat_to(map.lat0, a: slat0, b: slat1)
@@ -272,19 +354,46 @@ import UIKit
                 let img = GPSModel2.model().get_map_image(map.file)
                 if (img != nil) {
                     plot.append((img!, x0, x1, y0, y1, abs(y1 - y0)))
-                    // NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
+                    if debug {
+                        NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
+                    }
                 } else {
-                    // NSLog("Map not available")
+                    if debug {
+                        NSLog("Map not available")
+                    }
                 }
             } else {
-                // NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
+                if debug {
+                    NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
+                }
             }
         }
+        
         // smaller images should be blitted last since they are probably more detailed maps of the area
         plot.sortInPlace({ $0.5 > $1.5 } )
+        
+        // optimize the case when more than a map covers the whole screen
+        var i = plot.count - 1
+        while i > 0 {
+            let x0 = plot[i].1
+            let x1 = plot[i].2
+            let y0 = plot[i].3
+            let y1 = plot[i].4
+            if x0 <= 0 && x1 >= CGFloat(scrw) && y0 <= 0 && y1 >= CGFloat(scrh) {
+                // remove maps beneath the topmost that covers the whole screen
+                for _ in 1...i {
+                    plot.removeAtIndex(0)
+                }
+                break
+            }
+            i -= 1
+        }
+        
         canvas.send_img(plot)
         
-        // NSLog("Painted with %d maps", plot.count)
+        if debug {
+            NSLog("Painted with %d maps", plot.count)
+        }
     }
     
     func calculate_zoom()
@@ -305,6 +414,7 @@ import UIKit
             new_zoom_factor *= zoom_step
 
             // calculate screen size in GPS
+            // NOTE: longitude may be denormalized (e.g. -181W)
             let dzoom = zoom_deg(new_zoom_factor)
             let slat0 = clat + dzoom / 2
             let slat1 = clat - dzoom / 2
@@ -316,7 +426,7 @@ import UIKit
             while tgt < GPSModel2.model().target_count() {
                 let tlat = GPSModel2.model().target_latitude(tgt)
                 let tlong = GPSModel2.model().target_longitude(tgt)
-                if ins(tlat, y: tlong, a: slat0, b: slat1, c: slong0, d: slong1) {
+                if ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
                     ok = true
                     break
                 }
@@ -355,6 +465,14 @@ import UIKit
                 let dzoom = zoom_deg(zoom_factor)
                 center_long += dzoom * width_prop / long_prop * (Double(-dx) / scrw)
                 center_lat += dzoom * (Double(dy) / scrh)
+                
+                // do not allow latitude above the Mercator reasonable limit
+                center_lat = min(max_latitude, center_lat)
+                center_lat = max(-max_latitude, center_lat)
+                
+                // handle cross of 180W meridian, normalize longitude
+                center_long = normalize_longitude(center_long)
+
                 recenter()
                 repaint()
             
