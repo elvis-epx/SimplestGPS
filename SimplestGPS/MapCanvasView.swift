@@ -10,47 +10,96 @@ import Foundation
 import UIKit
 
 class MapCanvasView: UIView {
-    var images: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
-    var pos_x: CGFloat = -1
-    var pos_y: CGFloat = -1
-    var targets: [(CGFloat, CGFloat)] = []
+    var images: [(String,UIImageView)] = []
+    var targets: [UIView] = []
+    var location: UIView? = nil
 
-    func send_img(list: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
-        self.images = list
-        setNeedsDisplay()
+    func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
+        var rebuild = list.count != images.count
+        
+        if !rebuild {
+            // test if some image of the stack has changed
+            for i in 0..<list.count {
+                if images[i].0 != list[i].1 {
+                    rebuild = true
+                    break
+                }
+            }
+        }
+        
+        if rebuild {
+            // NSLog("Rebuilding image stack")
+
+            for (_, image) in images {
+                image.removeFromSuperview()
+            }
+            images = []
+            
+            for (img, name, _, _, _, _, _) in list {
+                let image = UIImageView(image: img)
+                images.append(name, image)
+                self.addSubview(image)
+            }
+            
+            // maps changed: bring points to front
+            if location != nil {
+                location!.removeFromSuperview()
+                self.addSubview(location!)
+            }
+            for target in targets {
+                target.removeFromSuperview()
+                self.addSubview(target)
+            }
+        }
+        
+        for i in 0..<list.count {
+            let (_, _, x0, x1, y0, y1, _) = list[i]
+            let rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
+            images[i].1.frame = rect
+        }
     }
     
-    func send_pos(x: CGFloat, y: CGFloat)
+    func send_pos(x: CGFloat, y: CGFloat, color: Int)
     {
-        pos_x = x
-        pos_y = y
-        setNeedsDisplay()
+        let f = CGRect(x: x - 8, y: y - 8, width: 16, height: 16)
+        
+        if location == nil {
+            location = UIView.init(frame: f)
+            location!.layer.cornerRadius = 8
+            location!.alpha = 1
+            self.addSubview(location!)
+        }
+
+        if color > 0 {
+            location!.backgroundColor = UIColor.redColor()
+        } else {
+            location!.backgroundColor = UIColor.yellowColor()
+        }
+        
+        location!.frame = f
+        location!.hidden = x == 0
     }
 
     func send_targets(list: [(CGFloat, CGFloat)])
     {
-        targets = list
-        setNeedsDisplay()
-    }
-
-    override func drawRect(_: CGRect) {
-        for (img, x0, x1, y0, y1, _) in images {
-            let pos_rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
-            img.drawInRect(pos_rect)
+        while targets.count < list.count {
+            let f = CGRect(x: 0, y: 0, width: 16, height: 16)
+            let target = UIView.init(frame: f)
+            target.backgroundColor = UIColor.blueColor()
+            target.layer.cornerRadius = 8
+            target.alpha = 1
+            self.addSubview(target)
+            targets.append(target)
         }
         
-        if pos_x >= 0 {
-            let pos_rect = CGRect(x: pos_x, y: pos_y, width: 15, height: 15)
-            let path = UIBezierPath(ovalInRect: pos_rect)
-            UIColor.redColor().setFill()
-            path.fill()
+        for i in 0..<targets.count {
+            if i < list.count {
+                let f = CGRect(x: list[i].0 - 8, y: list[i].1 - 8, width: 16, height: 16)
+                targets[i].frame = f
+                targets[i].hidden = false
+            } else {
+                targets[i].hidden = true
+            }
         }
-       
-        for tgt in targets {
-            let pos_rect = CGRect(x: tgt.0, y: tgt.1, width: 15, height: 15)
-            let path = UIBezierPath(ovalInRect: pos_rect)
-            UIColor.blueColor().setFill()
-            path.fill()
-        }
-   }
+    }
 }
