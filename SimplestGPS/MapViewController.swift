@@ -2,7 +2,7 @@
 //  TargetViewController.swift
 //  SimplestGPS
 //
-//  Created by Elvis Pfutzenreuter on 10/2/15. 
+//  Created by Elvis Pfutzenreuter on 10/2/15.
 //  Copyright © 2016 Elvis Pfutzenreuter. All rights reserved.
 //
 
