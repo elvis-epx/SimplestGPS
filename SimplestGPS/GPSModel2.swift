@@ -32,6 +32,8 @@ import CoreLocation
     var maps: [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double, latheight: Double, longwidth: Double)] = [];
     var mapimages: [String: UIImage] = [:]
     
+    var memoryWarningObserver : NSObjectProtocol!
+    
     override init()
     {
         super.init()
@@ -86,6 +88,25 @@ import CoreLocation
                         latheight: coords.latheight, longwidth: coords.longwidth))
             }
         }
+        
+        let notifications = NSNotificationCenter.defaultCenter()
+        memoryWarningObserver = notifications.addObserverForName(UIApplicationDidReceiveMemoryWarningNotification,
+                                                                 object: nil,
+                                                                 queue: NSOperationQueue.mainQueue(),
+                                                                 usingBlock: { [unowned self] (notification : NSNotification!) -> Void in
+                                                                    self.memory_low()
+            }
+        )
+    }
+    
+    deinit {
+        let notifications = NSNotificationCenter.defaultCenter()
+        notifications.removeObserver(memoryWarningObserver, name: UIApplicationDidReceiveMemoryWarningNotification, object: nil)
+    }
+    
+    func memory_low() {
+        NSLog("Memory low, purging images")
+        mapimages = [:]
     }
     
     func get_map_image(url: NSURL) -> UIImage?

@@ -98,7 +98,7 @@ import UIKit
     }
     
     override func viewWillLayoutSubviews() {
-        NSLog("     map layout")
+        // NSLog("     map layout")
         scrw = Double(canvas.bounds.size.width)
         scrh = Double(canvas.bounds.size.height)
         width_prop = scrw / scrh
@@ -289,7 +289,7 @@ import UIKit
         plot.sortInPlace({ $0.5 > $1.5 } )
         canvas.send_img(plot)
         
-        NSLog("Painted with %d maps", plot.count)
+        // NSLog("Painted with %d maps", plot.count)
     }
     
     func calculate_zoom()
