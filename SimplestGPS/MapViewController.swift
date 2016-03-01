@@ -45,7 +45,6 @@ import UIKit
     var gpslong: Double = 0
     
     var blink_phase = -1
-    var last_blink: NSDate? = nil
     var blink_timer: NSTimer? = nil
     
     @IBAction func do_zoomin(sender: AnyObject?)
@@ -91,7 +90,7 @@ import UIKit
         NSLog("     map will appear")
         super.viewWillAppear(animated)
         GPSModel2.model().addObs(self)
-        blink_timer = NSTimer.scheduledTimerWithTimeInterval(2.0, target: self, selector: #selector(MapViewController.blink), userInfo: nil, repeats: true)
+        blink_timer = NSTimer.scheduledTimerWithTimeInterval(0.33, target: self, selector: #selector(MapViewController.blink), userInfo: nil, repeats: true)
     }
     
     override func viewWillLayoutSubviews() {
@@ -252,13 +251,9 @@ import UIKit
     
     func blink()
     {
-        if last_blink == nil {
-            return
-        }
-        let now = NSDate()
-        if now.timeIntervalSinceDate(last_blink!) > 2.0 {
-            repaint()
-        }
+        blink_phase += 1
+        blink_phase %= 2
+        repaint()
     }
 
     func repaint()
@@ -268,10 +263,6 @@ import UIKit
         if debug {
             NSLog("Repaint");
         }
-
-        blink_phase += 1
-        blink_phase = blink_phase % 2
-        last_blink = NSDate()
 
         // calculate screen size in GPS
         // NOTE: longitude coordinates may be denormalized (e.g. -181W or +181E)
@@ -307,15 +298,62 @@ import UIKit
         }
         scale.text = scale_text as String
         
+        var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
+        for map in GPSModel2.model().get_maps() {
+            if iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
+                let x0 = long_to(map.long0, a: slong0, b: slong1)
+                let x1 = long_to(map.long1, a: slong0, b: slong1)
+                let y0 = lat_to(map.lat0, a: slat0, b: slat1)
+                let y1 = lat_to(map.lat1, a: slat0, b: slat1)
+                let img = GPSModel2.model().get_map_image(map.file)
+                if (img != nil) {
+                    plot.append((img!, map.file.absoluteString, x0, x1, y0, y1, abs(y1 - y0)))
+                    if debug {
+                        NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
+                    }
+                } else {
+                    if debug {
+                        NSLog("Map not available")
+                    }
+                }
+            } else {
+                if debug {
+                    NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
+                }
+            }
+        }
+        
+        // smaller images should be blitted last since they are probably more detailed maps of the area
+        plot.sortInPlace({ $0.5 > $1.5 } )
+        
+        // optimize the case when more than a map covers the whole screen
+        var i = plot.count - 1
+        while i > 0 {
+            let x0 = plot[i].2
+            let x1 = plot[i].3
+            let y0 = plot[i].4
+            let y1 = plot[i].5
+            if x0 <= 0 && x1 >= CGFloat(scrw) && y0 <= 0 && y1 >= CGFloat(scrh) {
+                // remove maps beneath the topmost that covers the whole screen
+                for _ in 1...i {
+                    plot.removeAtIndex(0)
+                }
+                break
+            }
+            i -= 1
+        }
+        
+        canvas.send_img(plot)
+        
         if ins(gpslat, _long: gpslong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
             let x = long_to(gpslong, a: slong0, b: slong1)
             let y = lat_to(gpslat, a: slat0, b: slat1)
-            canvas.send_pos(x, y: y)
+            canvas.send_pos(x, y: y, color: blink_phase)
             if debug {
                 NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
             }
         } else {
-            canvas.send_pos(-1, y: -1)
+            canvas.send_pos(-1, y: -1, color: 0)
             if debug {
                 NSLog("My position %f %f not in space", clat, clong)
             }
@@ -343,53 +381,6 @@ import UIKit
             }
         }
         canvas.send_targets(targets)
-        
-        var plot: [(UIImage, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
-        for map in GPSModel2.model().get_maps() {
-            if iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-                let x0 = long_to(map.long0, a: slong0, b: slong1)
-                let x1 = long_to(map.long1, a: slong0, b: slong1)
-                let y0 = lat_to(map.lat0, a: slat0, b: slat1)
-                let y1 = lat_to(map.lat1, a: slat0, b: slat1)
-                let img = GPSModel2.model().get_map_image(map.file)
-                if (img != nil) {
-                    plot.append((img!, x0, x1, y0, y1, abs(y1 - y0)))
-                    if debug {
-                        NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
-                    }
-                } else {
-                    if debug {
-                        NSLog("Map not available")
-                    }
-                }
-            } else {
-                if debug {
-                    NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
-                }
-            }
-        }
-        
-        // smaller images should be blitted last since they are probably more detailed maps of the area
-        plot.sortInPlace({ $0.5 > $1.5 } )
-        
-        // optimize the case when more than a map covers the whole screen
-        var i = plot.count - 1
-        while i > 0 {
-            let x0 = plot[i].1
-            let x1 = plot[i].2
-            let y0 = plot[i].3
-            let y1 = plot[i].4
-            if x0 <= 0 && x1 >= CGFloat(scrw) && y0 <= 0 && y1 >= CGFloat(scrh) {
-                // remove maps beneath the topmost that covers the whole screen
-                for _ in 1...i {
-                    plot.removeAtIndex(0)
-                }
-                break
-            }
-            i -= 1
-        }
-        
-        canvas.send_img(plot)
         
         if debug {
             NSLog("Painted with %d maps", plot.count)
