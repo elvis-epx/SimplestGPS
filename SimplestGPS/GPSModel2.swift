@@ -29,7 +29,8 @@ import CoreLocation
     var metric: Int = 1;
     var editing: Int = -1
     
-    var maps: [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double, latheight: Double, longwidth: Double)] = [];
+    var maps: [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double,
+                latheight: Double, longwidth: Double)] = [];
     var mapimages: [String: UIImage] = [:]
     
     var memoryWarningObserver : NSObjectProtocol!
@@ -82,10 +83,19 @@ import CoreLocation
                 if !coords.ok {
                     continue
                 }
-                NSLog("   %@ map coords %f %f %f %f", url.absoluteString, coords.lat, coords.long, coords.latheight, coords.longwidth)
-                maps.append((file: url, lat0: coords.lat, lat1: coords.lat - coords.latheight,
-                        long0: coords.long, long1: coords.long + coords.longwidth,
-                        latheight: coords.latheight, longwidth: coords.longwidth))
+                NSLog("   %@ map coords %f %f %f %f dx=%f dy=%f", url.absoluteString, coords.lat, coords.long,
+                      coords.latheight, coords.longwidth, coords.dx, coords.dy)
+                var lat = coords.lat
+                var long = coords.long
+                if coords.dx != 0 || coords.dy != 0 {
+                    // convert dx and dy from meters to degrees and add move map
+                    lat += coords.dy / (1852.0 * 60)
+                    long += coords.dx / ((1852.0 * 60) * longitude_proportion(lat))
+                    NSLog("   compensated to %f %f", lat, long)
+                }
+                maps.append((file: url, lat0: lat, lat1: lat - coords.latheight,
+                    long0: long, long1: long + coords.longwidth,
+                    latheight: coords.latheight, longwidth: coords.longwidth))
             }
         }
         
@@ -128,45 +138,47 @@ import CoreLocation
         return nil
     }
 
-    func parseName(f: String) -> (ok: Bool, lat: Double, long: Double, latheight: Double, longwidth: Double)
+    func parseName(f: String) -> (ok: Bool, lat: Double, long: Double, latheight: Double, longwidth: Double, dx: Double, dy: Double)
     {
         NSLog("Parsing %@", f)
         var lat = 1.0
         var long = 1.0
         var latheight = 0.0
         var longwidth = 0.0
+        var dx: Double? = 0.0
+        var dy: Double? = 0.0
         
         let e = f.lowercaseString
         let g = (e.characters.split(".").map{ String($0) }).first!
         var h = (g.characters.split("+").map{ String($0) })
         
-        if h.count != 4 {
-            NSLog("    did not find 4 tokens")
-            return (false, 0, 0, 0, 0)
+        if h.count != 4 && h.count != 6 {
+            NSLog("    did not find 4/6 tokens")
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         if h[0].characters.count < 4 || h[0].characters.count > 6 {
             NSLog("    latitude with <3 or >5 chars")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         
         if h[1].characters.count < 4 || h[1].characters.count > 6 {
             NSLog("    latitude with <3 or >5 chars")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         if h[2].characters.count < 2 || h[2].characters.count > 4 {
             NSLog("    latheight with <3 or >4 chars")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         if h[3].characters.count < 2 || h[3].characters.count > 4 {
             NSLog("    longwidth with <3 or >4 chars")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         
         let ns = h[0].characters.last
         
         if (ns != "n" && ns != "s") {
             NSLog("    latitude with no N or S suffix")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         if (ns == "s") {
             lat = -1;
@@ -176,7 +188,7 @@ import CoreLocation
         
         if (ew != "e" && ew != "w") {
             NSLog("    longitude with no W or E suffix")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         if (ew == "w") {
             long = -1;
@@ -186,29 +198,43 @@ import CoreLocation
         let ilat = Int(h[0])
         if (ilat == nil) {
             NSLog("    lat not parsable")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         let ilong = Int(h[1])
         if (ilong == nil) {
             NSLog("    long not parsable")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         let ilatheight = Int(h[2])
         if (ilatheight == nil) {
             NSLog("    latheight not parsable")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
         let ilongwidth = Int(h[3])
         if (ilongwidth == nil) {
             NSLog("    longwidth not parsable")
-            return (false, 0, 0, 0, 0)
+            return (false, 0, 0, 0, 0, 0, 0)
         }
+
+        if h.count == 6 {
+            dx = Double(h[4])
+            if (dx == nil) {
+                NSLog("    dx not parsable")
+                return (false, 0, 0, 0, 0, 0, 0)
+            }
+            dy = Double(h[5])
+            if (dy == nil) {
+                NSLog("    dy not parsable")
+                return (false, 0, 0, 0, 0, 0, 0)
+            }
+        }
+        
         lat *= Double(ilat! / 100) + (Double(ilat! % 100) / 60.0)
         long *= Double(ilong! / 100) + (Double(ilong! % 100) / 60.0)
         latheight = Double(ilatheight! / 100) + (Double(ilatheight! % 100) / 60.0)
         longwidth = Double(ilongwidth! / 100) + (Double(ilongwidth! % 100) / 60.0)
         
-        return (true, lat, long, latheight, longwidth)
+        return (true, lat, long, latheight, longwidth, dx!, dy!)
     }
     
     static let singleton = GPSModel2();
@@ -218,7 +244,8 @@ import CoreLocation
         return singleton
     }
     
-    func get_maps() -> [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double, latheight: Double, longwidth: Double)] {
+    func get_maps() -> [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double,
+                        latheight: Double, longwidth: Double)] {
         return [] + maps[0..<maps.count]
     }
     

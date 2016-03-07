@@ -47,6 +47,8 @@ import UIKit
     var blink_phase = -1
     var blink_timer: NSTimer? = nil
     
+    var debug = false
+
     @IBAction func do_zoomin(sender: AnyObject?)
     {
         // NSLog("zoom in")
@@ -258,8 +260,6 @@ import UIKit
 
     func repaint()
     {
-        let debug = false
-        
         if debug {
             NSLog("Repaint");
         }
