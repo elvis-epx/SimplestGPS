@@ -28,7 +28,7 @@ import UIKit
         latitude!.text = GPSModel2.model().target_flatitude(index)
         longitude!.text = GPSModel2.model().target_flongitude(index)
         altitude!.text = GPSModel2.model().target_faltitude_input(index)
-        let p = String(format: "Altitude in %@ - optional", (GPSModel2.model().get_metric() != 0) ? "m" : "ft")
+        let p = String(format: "Altitude in %@ - optional", GPSModel2.model().get_altitude_unit())
         altitude!.placeholder = p;
     }
     

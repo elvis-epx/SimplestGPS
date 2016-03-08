@@ -1060,5 +1060,8 @@ import CoreLocation
         return value;
     }
 
-    
+    func get_altitude_unit() -> String
+    {
+        return (get_metric() != 0) ? "m" : "ft"
+    }
 }
