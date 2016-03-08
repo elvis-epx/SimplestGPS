@@ -1064,4 +1064,102 @@ import CoreLocation
     {
         return (get_metric() != 0) ? "m" : "ft"
     }
-}
+    
+    // make sure that longitude is in range -180 <= x < +180
+    class func normalize_longitude(x: Double) -> Double
+    {
+        if x < -180 {
+            // 181W -> 179E
+            return 360 - x
+        } else if x >= 180 {
+            // 181E -> 179W
+            return x - 360
+        }
+        return x
+    }
+    
+    // test whether a longitude range is nearer to meridian 180 than meridian 0
+    class func nearer_180(a: Double, b: Double) -> Bool
+    {
+        // note: this test assumes that range is < 180 degrees
+        return (abs(a) + abs(b)) >= 180
+    }
+    
+    // converts longitude, so values across +180/-180 line are directly comparable
+    // It actually moves the 180 "problem" to the meridian 0 (longitude line becomes 359..0..1)
+    // so this function should be used only when the range of interest does NOT cross 0
+    class func offset_180(x: Double) -> Double
+    {
+        if x < 0 {
+            return x + 360
+        }
+        return x
+    }
+    
+    // returns whether a point is inside a lat/long "square"
+    class func ins(lat: Double, _long: Double, lata: Double, latb: Double, _longa: Double, _longb: Double) -> Bool
+    {
+        var long = normalize_longitude(_long)
+        var longa = normalize_longitude(_longa)
+        var longb = normalize_longitude(_longb)
+        
+        if nearer_180(longa, b: longb) {
+            long = offset_180(long)
+            longa = offset_180(longa)
+            longb = offset_180(longb)
+        }
+        
+        let lat0 = min(lata, latb)
+        let lat1 = max(lata, latb)
+        let long0 = min(longa, longb)
+        let long1 = max(longa, longb)
+        return lat >= lat0 && lat <= lat1 && long >= long0 && long <= long1
+    }
+    
+    class func iins(maplata: Double, maplatb: Double, _maplonga: Double, _maplongb: Double, lata: Double, latb: Double, _longa: Double, _longb: Double) -> Bool
+    {
+        var maplonga = normalize_longitude(_maplonga)
+        var maplongb = normalize_longitude(_maplongb)
+        var longa = normalize_longitude(_longa)
+        var longb = normalize_longitude(_longb)
+        
+        if nearer_180(longa, b: longb) || nearer_180(maplonga, b: maplongb) {
+            longa = offset_180(longa)
+            longb = offset_180(longb)
+            maplonga = offset_180(maplonga)
+            maplongb = offset_180(maplongb)
+        }
+        
+        let maplat0 = min(maplata, maplatb)
+        let maplat1 = max(maplata, maplatb)
+        let maplong0 = min(maplonga, maplongb)
+        let maplong1 = max(maplonga, maplongb)
+        let lat0 = min(lata, latb)
+        let lat1 = max(lata, latb)
+        let long0 = min(longa, longb)
+        let long1 = max(longa, longb)
+        return maplat0 <= lat1 && maplat1 >= lat0 && maplong0 <= long1 && maplong1 >= long0
+    }
+    
+    /* Convert latitude to screen coordinate */
+    class func lat_to(x: Double, a: Double, b: Double, scrh: Double) -> CGFloat
+    {
+        return CGFloat(scrh * (x - a) / (b - a))
+    }
+
+    /* Convert longitude to screen coordinate */
+    class func long_to(x: Double, a: Double, b: Double, scrw: Double) -> CGFloat
+    {
+        var xx = normalize_longitude(x)
+        var aa = normalize_longitude(a)
+        var bb = normalize_longitude(b)
+        
+        if nearer_180(a, b: b) {
+            xx = offset_180(xx)
+            aa = offset_180(aa)
+            bb = offset_180(bb)
+        }
+        
+        return CGFloat(scrw * (xx - aa) / (bb - aa))
+    }
+ }

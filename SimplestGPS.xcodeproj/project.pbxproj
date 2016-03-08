@@ -39,6 +39,7 @@
 		B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSAppDelegate2.swift; sourceTree = "<group>"; };
 		B93D610A1BBF59790092CD5C /* GPSViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSViewController2.swift; sourceTree = "<group>"; };
 		B93D610C1BBF60DB0092CD5C /* TargetsViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetsViewController2.swift; sourceTree = "<group>"; };
+		B95B5D3D1C8F6099002EAEA6 /* SimplestGPS-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SimplestGPS-Bridging-Header.h"; sourceTree = "<group>"; };
 		B9692844184FB50A00998B77 /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
 		B9692846184FB51100998B77 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		B9692848184FB51700998B77 /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
@@ -109,6 +110,7 @@
 		B9AD65A21849733200E9C380 /* SimplestGPS */ = {
 			isa = PBXGroup;
 			children = (
+				B95B5D3D1C8F6099002EAEA6 /* SimplestGPS-Bridging-Header.h */,
 				B91E5F9E1C7F83A2000CB068 /* MapViewController.swift */,
 				B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */,
 				B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */,

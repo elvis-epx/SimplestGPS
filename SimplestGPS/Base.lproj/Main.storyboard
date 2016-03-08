@@ -306,8 +306,8 @@
                                     <action selector="do_zoomin:" destination="MWM-Gl-hMW" eventType="touchUpInside" id="Krn-lu-gBY"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="&lt;- scale -&gt;" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ehl-KC-tZl">
-                                <rect key="frame" x="238" y="531" width="126" height="29"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="&lt;- scale -&gt;" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ehl-KC-tZl">
+                                <rect key="frame" x="237" y="531" width="126" height="29"/>
                                 <color key="backgroundColor" red="0.99363735021277477" green="0.95948688852681219" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
                                 <color key="textColor" red="0.77461796675494921" green="0.10086730243726738" blue="1" alpha="1" colorSpace="calibratedRGB"/>

@@ -18,9 +18,9 @@ import UIKit
     @IBOutlet weak var canvas: MapCanvasView!
     @IBOutlet weak var scale: UILabel!
     
-    var scrw: Double = 0
-    var scrh: Double = 0
-    var width_prop: Double = 1
+    var scrw: Double = Double.NaN
+    var scrh: Double = Double.NaN
+    var width_prop: Double = Double.NaN
     
     // in seconds of latitude degree across the screen height
     var zoom_factor: Double = 900
@@ -30,19 +30,19 @@ import UIKit
     // we assume that maps have Mercator projection so we cannot go down to 90 degrees either
     let max_latitude = 90.0 - 5.0 - 3600 / 3600.0
     
-    // Screen position (0 = center follows GPS position)
-    var center_lat: Double = 0
-    var center_long: Double = 0
+    // Screen position (NaN = center follows GPS position)
+    var center_lat: Double = Double.NaN
+    var center_long: Double = Double.NaN
     var touch_point: CGPoint? = nil
     
     // Screen position for painting purposes (either screen position or GPS position)
-    var clat: Double = 0
-    var clong: Double = 0
+    var clat: Double = Double.NaN
+    var clong: Double = Double.NaN
     var long_prop: Double = 1
  
     // Most current GPS position
-    var gpslat: Double = 0
-    var gpslong: Double = 0
+    var gpslat: Double = Double.NaN
+    var gpslong: Double = Double.NaN
     
     var blink_phase = -1
     var blink_timer: NSTimer? = nil
@@ -74,8 +74,8 @@ import UIKit
     @IBAction func do_centerme(sender: AnyObject?)
     {
         // NSLog("center me")
-        center_lat = 0
-        center_long = 0
+        center_lat = Double.NaN
+        center_long = Double.NaN
         recenter()
         repaint()
     }
@@ -117,10 +117,10 @@ import UIKit
     }
     
     func update() {
-        if scrw == 0 {
+        if scrw.isNaN {
             return;
         }
-        let calc_zoom = gpslat == 0
+        let calc_zoom = gpslat.isNaN
         gpslat = GPSModel2.model().latitude()
         gpslong = GPSModel2.model().longitude()
         recenter()
@@ -137,10 +137,8 @@ import UIKit
         clong = center_long
         
         // if center is locked in current position:
-        if clat == 0 {
+        if clat.isNaN {
             clat = gpslat
-        }
-        if clong == 0 {
             clong = gpslong
         }
         
@@ -149,100 +147,6 @@ import UIKit
         clat = max(-max_latitude, clat)
         
         long_prop = GPSModel2.model().longitude_proportion(clat)
-    }
-    
-    func normalize_longitude(x: Double) -> Double
-    {
-        if x < -180 {
-            // 181W -> 179E
-            return 360 - x
-        } else if x > 180 {
-            // 181E -> 179W
-            return x - 360
-        }
-        return x
-    }
-    
-    // test whether a longitude range is nearer to meridian 180 than meridian 0
-    func nearer_180(a: Double, b: Double) -> Bool
-    {
-        // note: this test assumes that range is < 180 degrees
-        return (abs(a) + abs(b)) >= 180
-    }
-    
-    // converts longitude, so values across +180/-180 line are directly comparable
-    // It actually moves the 180 "problem" to the meridian 0 (longitude line becomes 359..0..1)
-    // so this function should be used only when the range of interest does NOT cross 0
-    func offset_180(x: Double) -> Double
-    {
-        if x < 0 {
-            return x + 360
-        }
-        return x
-    }
-    
-    func ins(lat: Double, _long: Double, lata: Double, latb: Double, _longa: Double, _longb: Double) -> Bool
-    {
-        var long = normalize_longitude(_long)
-        var longa = normalize_longitude(_longa)
-        var longb = normalize_longitude(_longb)
-        
-        if nearer_180(longa, b: longb) {
-            long = offset_180(long)
-            longa = offset_180(longa)
-            longb = offset_180(longb)
-        }
-        
-        let lat0 = min(lata, latb)
-        let lat1 = max(lata, latb)
-        let long0 = min(longa, longb)
-        let long1 = max(longa, longb)
-        return lat >= lat0 && lat <= lat1 && long >= long0 && long <= long1
-    }
-    
-    func iins(maplata: Double, maplatb: Double, _maplonga: Double, _maplongb: Double, lata: Double, latb: Double, _longa: Double, _longb: Double) -> Bool
-    {
-        var maplonga = normalize_longitude(_maplonga)
-        var maplongb = normalize_longitude(_maplongb)
-        var longa = normalize_longitude(_longa)
-        var longb = normalize_longitude(_longb)
-        
-        if nearer_180(longa, b: longb) || nearer_180(maplonga, b: maplongb) {
-            longa = offset_180(longa)
-            longb = offset_180(longb)
-            maplonga = offset_180(maplonga)
-            maplongb = offset_180(maplongb)
-        }
-        
-        let maplat0 = min(maplata, maplatb)
-        let maplat1 = max(maplata, maplatb)
-        let maplong0 = min(maplonga, maplongb)
-        let maplong1 = max(maplonga, maplongb)
-        let lat0 = min(lata, latb)
-        let lat1 = max(lata, latb)
-        let long0 = min(longa, longb)
-        let long1 = max(longa, longb)
-        return maplat0 <= lat1 && maplat1 >= lat0 && maplong0 <= long1 && maplong1 >= long0
-    }
-    
-    func lat_to(x: Double, a: Double, b: Double) -> CGFloat
-    {
-        return CGFloat(scrh * (x - a) / (b - a))
-    }
-
-    func long_to(x: Double, a: Double, b: Double) -> CGFloat
-    {
-        var xx = normalize_longitude(x)
-        var aa = normalize_longitude(a)
-        var bb = normalize_longitude(b)
-        
-        if nearer_180(a, b: b) {
-            xx = offset_180(xx)
-            aa = offset_180(aa)
-            bb = offset_180(bb)
-        }
-        
-        return CGFloat(scrw * (xx - aa) / (bb - aa))
     }
     
     // Convert zoom factor to degrees of latitude
@@ -300,11 +204,12 @@ import UIKit
         
         var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
         for map in GPSModel2.model().get_maps() {
-            if iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-                let x0 = long_to(map.long0, a: slong0, b: slong1)
-                let x1 = long_to(map.long1, a: slong0, b: slong1)
-                let y0 = lat_to(map.lat0, a: slat0, b: slat1)
-                let y1 = lat_to(map.lat1, a: slat0, b: slat1)
+            if GPSModel2.iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1,
+                              lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
+                let x0 = GPSModel2.long_to(map.long0, a: slong0, b: slong1, scrw: scrw)
+                let x1 = GPSModel2.long_to(map.long1, a: slong0, b: slong1, scrw: scrw)
+                let y0 = GPSModel2.lat_to(map.lat0, a: slat0, b: slat1, scrh: scrh)
+                let y1 = GPSModel2.lat_to(map.lat1, a: slat0, b: slat1, scrh: scrh)
                 let img = GPSModel2.model().get_map_image(map.file)
                 if (img != nil) {
                     plot.append((img!, map.file.absoluteString, x0, x1, y0, y1, abs(y1 - y0)))
@@ -345,9 +250,9 @@ import UIKit
         
         canvas.send_img(plot)
         
-        if ins(gpslat, _long: gpslong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-            let x = long_to(gpslong, a: slong0, b: slong1)
-            let y = lat_to(gpslat, a: slat0, b: slat1)
+        if GPSModel2.ins(gpslat, _long: gpslong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
+            let x = GPSModel2.long_to(gpslong, a: slong0, b: slong1, scrw: scrw)
+            let y = GPSModel2.lat_to(gpslat, a: slat0, b: slat1, scrh: scrh)
             canvas.send_pos(x, y: y, color: blink_phase)
             if debug {
                 NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
@@ -365,9 +270,9 @@ import UIKit
             while tgt < GPSModel2.model().target_count() {
                 let tlat = GPSModel2.model().target_latitude(tgt)
                 let tlong = GPSModel2.model().target_longitude(tgt)
-                if ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-                    let x = long_to(tlong, a: slong0, b: slong1)
-                    let y = lat_to(tlat, a: slat0, b: slat1)
+                if GPSModel2.ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
+                    let x = GPSModel2.long_to(tlong, a: slong0, b: slong1, scrw: scrw)
+                    let y = GPSModel2.lat_to(tlat, a: slat0, b: slat1, scrh: scrh)
                     targets.append(x, y)
                     if debug {
                         NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
@@ -389,13 +294,13 @@ import UIKit
     
     func calculate_zoom()
     {
-        if scrw == 0 || gpslat == 0 || GPSModel2.model().target_count() <= 0 {
+        if scrw.isNaN || gpslat.isNaN || GPSModel2.model().target_count() <= 0 {
             return
         }
 
         // force current position in center
-        center_lat = 0
-        center_long = 0
+        center_lat = Double.NaN
+        center_long = Double.NaN
         recenter()
 
         var new_zoom_factor = zoom_min / zoom_step
@@ -417,7 +322,7 @@ import UIKit
             while tgt < GPSModel2.model().target_count() {
                 let tlat = GPSModel2.model().target_latitude(tgt)
                 let tlong = GPSModel2.model().target_longitude(tgt)
-                if ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
+                if GPSModel2.ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
                     ok = true
                     break
                 }
@@ -440,7 +345,7 @@ import UIKit
                 // NSLog("Drag began at %f %f", touch_point!.x, touch_point!.y)
         
             case .Changed:
-                if scrw == 0 || gpslat == 0 {
+                if scrw.isNaN || gpslat.isNaN {
                     return
                 }
                 let new_point = rec.locationInView(canvas)
@@ -448,7 +353,7 @@ import UIKit
                 let dy = new_point.y - touch_point!.y
                 touch_point = new_point
                 // NSLog("Drag moved by %f %f", dx, dy)
-                if center_lat == 0 {
+                if center_lat.isNaN {
                     center_lat = gpslat
                     center_long = gpslong
                 }
@@ -462,7 +367,7 @@ import UIKit
                 center_lat = max(-max_latitude, center_lat)
                 
                 // handle cross of 180W meridian, normalize longitude
-                center_long = normalize_longitude(center_long)
+                center_long = GPSModel2.normalize_longitude(center_long)
 
                 recenter()
                 repaint()
