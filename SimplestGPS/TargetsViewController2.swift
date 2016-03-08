@@ -87,10 +87,10 @@ import UIKit
             cell = TargetCell2(style: .Default, reuseIdentifier: "TargetCell2")
         }
 
-        cell!.distance!.text = GPSModel2.model().target_fdistance(i.row)
-        cell!.heading!.text = GPSModel2.model().target_fheading(i.row)
-        cell!.heading_delta!.text = GPSModel2.model().target_fheading_delta(i.row)
-        cell!.altitude!.text = GPSModel2.model().target_faltitude(i.row)
+        cell!.distance!.text = GPSModel2.model().target_distance_formatted(i.row)
+        cell!.heading!.text = GPSModel2.model().target_heading_formatted(i.row)
+        cell!.heading_delta!.text = GPSModel2.model().target_heading_delta_formatted(i.row)
+        cell!.altitude!.text = GPSModel2.model().target_altitude_formatted(i.row)
         cell!.name!.text = GPSModel2.model().target_name(i.row)
         let bgcv = UIView.init()
         bgcv.backgroundColor = UIColor.darkGrayColor()

@@ -60,13 +60,13 @@ import UIKit
     }
     
     func update() {
-        latitude!.text = GPSModel2.model().format_latitude()
-        latitude2!.text = GPSModel2.model().format_latitude2()
-        longitude!.text = GPSModel2.model().format_longitude()
-        longitude2!.text = GPSModel2.model().format_longitude2()
-        altitude!.text = GPSModel2.model().format_altitude()
-        heading!.text = GPSModel2.model().format_heading()
-        speed!.text = GPSModel2.model().format_speed()
-        accuracy!.text = GPSModel2.model().format_accuracy()
+        latitude!.text = GPSModel2.model().latitude_formatted_part1()
+        latitude2!.text = GPSModel2.model().latitude_formatted_part2()
+        longitude!.text = GPSModel2.model().longitude_formatted_part1()
+        longitude2!.text = GPSModel2.model().longitude_formatted_part2()
+        altitude!.text = GPSModel2.model().altitude_formatted()
+        heading!.text = GPSModel2.model().heading_formatted()
+        speed!.text = GPSModel2.model().speed_formatted()
+        accuracy!.text = GPSModel2.model().accuracy_formatted()
     }    
 }

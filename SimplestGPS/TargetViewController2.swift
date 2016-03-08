@@ -25,9 +25,9 @@ import UIKit
     {
         index = GPSModel2.model().target_getEdit()
         name!.text = GPSModel2.model().target_name(index)
-        latitude!.text = GPSModel2.model().target_flatitude(index)
-        longitude!.text = GPSModel2.model().target_flongitude(index)
-        altitude!.text = GPSModel2.model().target_faltitude_input(index)
+        latitude!.text = GPSModel2.model().target_latitude_formatted(index)
+        longitude!.text = GPSModel2.model().target_longitude_formatted(index)
+        altitude!.text = GPSModel2.model().target_altitude_input_formatted(index)
         let p = String(format: "Altitude in %@ - optional", GPSModel2.model().get_altitude_unit())
         altitude!.placeholder = p;
     }

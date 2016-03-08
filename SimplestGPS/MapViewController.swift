@@ -146,7 +146,7 @@ import UIKit
         clat = min(max_latitude, clat)
         clat = max(-max_latitude, clat)
         
-        long_prop = GPSModel2.model().longitude_proportion(clat)
+        long_prop = GPSModel2.longitude_proportion(clat)
     }
     
     // Convert zoom factor to degrees of latitude
