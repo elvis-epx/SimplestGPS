@@ -156,7 +156,7 @@ import UIKit
         if x < -180 {
             // 181W -> 179E
             return 360 - x
-        } else if center_long > 180 {
+        } else if x > 180 {
             // 181E -> 179W
             return x - 360
         }
