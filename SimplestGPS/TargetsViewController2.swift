@@ -9,7 +9,8 @@
 import Foundation
 import UIKit
 
-@objc class TargetsViewController2: UIViewController, ModelListener, UITableViewDelegate,       UITableViewDataSource, UIGestureRecognizerDelegate
+@objc class TargetsViewController2: UIViewController, ModelListener, UITableViewDelegate,
+                                    UITableViewDataSource, UIGestureRecognizerDelegate
 {
     @IBOutlet weak var table: UITableView?
     @IBOutlet weak var new_target: UIButton?
