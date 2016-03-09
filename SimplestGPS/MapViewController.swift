@@ -189,7 +189,7 @@ import UIKit
         while tgt < GPSModel2.model().target_count() {
             targets_compass.append((heading: GPSModel2.model().target_heading(tgt),
                 name: GPSModel2.model().target_name(tgt),
-                distance: GPSModel2().target_distance_formatted(tgt)))
+                distance: GPSModel2.model().target_distance_formatted(tgt)))
             tgt += 1
         }
         canvas.send_compass(mode, heading: GPSModel2.model().heading(),

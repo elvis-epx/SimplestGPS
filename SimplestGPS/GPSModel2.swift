@@ -511,18 +511,18 @@ import CoreLocation
     }
     
     
-    class func parse_lat(lat: String) -> Double
+    class func parse_latz(lat: String) -> Double
     {
-        return parse_coord(lat, latitude: true);
+        return parse_coordz(lat, latitude: true);
     }
     
-    class func parse_long(lo: String) -> Double
+    class func parse_longz(lo: String) -> Double
     {
-        return parse_coord(lo, latitude: false);
+        return parse_coordz(lo, latitude: false);
     }
     
     
-    class func parse_coord(c: String, latitude is_lat: Bool) -> Double
+    class func parse_coordz(c: String, latitude is_lat: Bool) -> Double
     {
         var value: Double = 0.0 / 0.0;
         var deg: Int = 0
@@ -890,18 +890,20 @@ import CoreLocation
     
     func target_set(pindex: Int, nam: String, latitude: String, longitude: String, altitude: String) -> String?
     {
+        NSLog("Target_set %d", pindex)
+        
         var index = pindex;
         
         if nam.isEmpty {
             return "Name must not be empty.";
         }
     
-        let dlatitude = GPSModel2.parse_lat(latitude);
+        let dlatitude = GPSModel2.parse_latz(latitude);
         if dlatitude != dlatitude {
             return "Latitude is invalid.";
         }
     
-        let dlongitude = GPSModel2.parse_long(longitude);
+        let dlongitude = GPSModel2.parse_longz(longitude);
         if dlongitude != dlongitude {
             return "Longitude ixs invalid.";
         }
@@ -1015,10 +1017,10 @@ import CoreLocation
         
         prefs.registerDefaults(["metric": 1, "next_target": 3,
             "names": ["1": "Joinville, Brazil", "2": "Blumenau, Brazil"],
-            "lats": ["1": GPSModel2.parse_lat("26.18.19.50S"),
-                "2": GPSModel2.parse_lat("26.54.46.10S")],
-            "longs": ["1": GPSModel2.parse_long("48.50.44.44W"),
-                "2": GPSModel2.parse_long("49.04.04.47W")],
+            "lats": ["1": GPSModel2.parse_latz("26.18.19.50S"),
+                "2": GPSModel2.parse_latz("26.54.46.10S")],
+            "longs": ["1": GPSModel2.parse_longz("48.50.44.44W"),
+                "2": GPSModel2.parse_longz("49.04.04.47W")],
             "alts": ["2": 50.0],
             ])
         
