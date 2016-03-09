@@ -13,8 +13,6 @@ import UIKit
 {
     @IBOutlet weak var canvas: MapCanvasView!
     @IBOutlet weak var scale: UILabel!
-    @IBOutlet weak var coordinates: UILabel!
-    @IBOutlet weak var extra: UILabel!
     
     var scrw: Double = Double.NaN
     var scrh: Double = Double.NaN
@@ -188,9 +186,9 @@ import UIKit
         }
         
         let scale_m = 1852.0 * 60 * long_prop * abs(slong1 - slong0)
-        scale.text = "w = " + GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
-        coordinates.text = GPSModel2.model().latitude_formatted() + "   " + GPSModel2.model().altitude_formatted()
-        extra.text = GPSModel2.model().longitude_formatted() + "   " + GPSModel2.model().speed_formatted()
+        scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
+        // coordinates.text = GPSModel2.model().latitude_formatted()
+        // extra.text = GPSModel2.model().longitude_formatted()
 
         let accuracy = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
         // let accuracy = scrw * 1000 / scale_m
