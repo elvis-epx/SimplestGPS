@@ -11,10 +11,6 @@ import UIKit
 
 @objc class MapViewController: UIViewController, ModelListener
 {
-    @IBOutlet weak var zoomout: UIButton!
-    @IBOutlet weak var zoomauto: UIButton!
-    @IBOutlet weak var centerme: UIButton!
-    @IBOutlet weak var zoomin: UIButton!
     @IBOutlet weak var canvas: MapCanvasView!
     @IBOutlet weak var scale: UILabel!
     
@@ -49,29 +45,13 @@ import UIKit
     
     var debug = false
 
-    @IBAction func do_zoomin(sender: AnyObject?)
-    {
-        // NSLog("zoom in")
-        zoom_factor /= zoom_step
-        zoom_factor = max(zoom_factor, zoom_min)
-        repaint()
-    }
- 
-    @IBAction func do_zoomout(sender: AnyObject?)
-    {
-        // NSLog("zoom out")
-        zoom_factor *= zoom_step
-        zoom_factor = min(zoom_factor, zoom_max)
-        repaint()
-    }
-
-    @IBAction func do_zoomauto(sender: AnyObject?)
+    func do_zoomauto(all_targets: Bool)
     {
         // NSLog("zoom auto")
-        calculate_zoom()
+        calculate_zoom(all_targets)
     }
     
-    @IBAction func do_centerme(sender: AnyObject?)
+    func do_centerme()
     {
         // NSLog("center me")
         center_lat = Double.NaN
@@ -86,6 +66,24 @@ import UIKit
         pan.maximumNumberOfTouches = 1
         pan.minimumNumberOfTouches = 1
         canvas.addGestureRecognizer(pan)
+        
+        let pinch = UIPinchGestureRecognizer(target: self, action:#selector(MapViewController.pinch(_:)))
+        canvas.addGestureRecognizer(pinch)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(MapViewController.onefinger(_:)))
+        tap.numberOfTapsRequired = 3
+        tap.numberOfTouchesRequired = 1
+        canvas.addGestureRecognizer(tap)
+
+        let tap2 = UITapGestureRecognizer(target: self, action: #selector(MapViewController.twofingers(_:)))
+        tap2.numberOfTapsRequired = 3
+        tap2.numberOfTouchesRequired = 2
+        canvas.addGestureRecognizer(tap2)
+        
+        let tap3 = UITapGestureRecognizer(target: self, action: #selector(MapViewController.threefingers(_:)))
+        tap3.numberOfTapsRequired = 3
+        tap3.numberOfTouchesRequired = 3
+        canvas.addGestureRecognizer(tap3)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -125,7 +123,7 @@ import UIKit
         gpslong = GPSModel2.model().longitude()
         recenter()
         if calc_zoom {
-            calculate_zoom()
+            calculate_zoom(false)
         }
         repaint()
     }
@@ -147,6 +145,9 @@ import UIKit
         clat = max(-max_latitude, clat)
         
         long_prop = GPSModel2.longitude_proportion(clat)
+        if long_prop.isNaN {
+            long_prop = 1
+        }
     }
     
     // Convert zoom factor to degrees of latitude
@@ -167,6 +168,10 @@ import UIKit
         if debug {
             NSLog("Repaint");
         }
+        
+        if (clat.isNaN) {
+            return
+        }
 
         // calculate screen size in GPS
         // NOTE: longitude coordinates may be denormalized (e.g. -181W or +181E)
@@ -181,26 +186,7 @@ import UIKit
         }
         
         let scale_m = 1852.0 * 60 * long_prop * abs(slong1 - slong0)
-        let scale_ft = scale_m * 3.28084
-        var scale_text: NSString = ""
-        if GPSModel2.model().get_metric() > 0 {
-            if scale_m < 1000 {
-                scale_text = NSString(format: "<- %.0fm ->", scale_m)
-            } else if scale_m < 100000 {
-                scale_text = NSString(format: "<- %.1fkm ->", scale_m / 1000)
-            } else {
-                scale_text = NSString(format: "<- %.0fkm ->", scale_m / 1000)
-            }
-        } else {
-            if scale_m < 5280 {
-                scale_text = NSString(format: "<- %.0fft ->", scale_ft)
-            } else if scale_m < 5280*100 {
-                scale_text = NSString(format: "<- %.1fmi ->", scale_ft / 5280)
-            } else {
-                scale_text = NSString(format: "<- %.0fmi ->", scale_m / 5280)
-            }
-        }
-        scale.text = scale_text as String
+        scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
         
         var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
         for map in GPSModel2.model().get_maps() {
@@ -292,7 +278,7 @@ import UIKit
         }
     }
     
-    func calculate_zoom()
+    func calculate_zoom(all_targets: Bool)
     {
         if scrw.isNaN || gpslat.isNaN || GPSModel2.model().target_count() <= 0 {
             return
@@ -317,22 +303,30 @@ import UIKit
             let slong0 = clong - (dzoom * width_prop / long_prop) / 2
             let slong1 = clong + (dzoom * width_prop / long_prop) / 2
 
-            // check whether at least one target fits in current zoom
+            // check whether at least one target, or all targets, fit in current zoom
+            ok = all_targets
             var tgt = 0;
             while tgt < GPSModel2.model().target_count() {
                 let tlat = GPSModel2.model().target_latitude(tgt)
                 let tlong = GPSModel2.model().target_longitude(tgt)
                 if GPSModel2.ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-                    ok = true
-                    break
+                    if !all_targets {
+                        ok = true
+                        break
+                    }
+                } else {
+                    if all_targets {
+                        ok = false
+                        break
+                    }
                 }
                 tgt += 1
             }
         }
         
-        if ok {
-            zoom_factor = new_zoom_factor
-        }
+        zoom_factor = new_zoom_factor
+        zoom_factor = max(zoom_factor, zoom_min)
+        zoom_factor = min(zoom_factor, zoom_max)
         
         repaint()
     }
@@ -374,6 +368,48 @@ import UIKit
             
             default:
                 break
+        }
+    }
+
+    func pinch(rec:UIPinchGestureRecognizer)
+    {
+        zoom_factor /= Double(rec.scale)
+        zoom_factor = max(zoom_factor, zoom_min)
+        zoom_factor = min(zoom_factor, zoom_max)
+        rec.scale = 1.0
+        repaint()
+    }
+
+    func onefinger(rec:UITapGestureRecognizer)
+    {
+        NSLog("One finger")
+        switch rec.state {
+        case .Ended:
+            do_centerme()
+        default:
+            break
+        }
+    }
+
+    func twofingers(rec:UITapGestureRecognizer)
+    {
+        NSLog("Two fingers")
+        switch rec.state {
+        case .Ended:
+            do_zoomauto(false)
+        default:
+            break
+        }
+    }
+    
+    func threefingers(rec:UITapGestureRecognizer)
+    {
+        NSLog("Three fingers")
+        switch rec.state {
+        case .Ended:
+            do_zoomauto(true)
+        default:
+            break
         }
     }
 }
