@@ -13,6 +13,7 @@ class MapCanvasView: UIView {
     var images: [(String,UIImageView)] = []
     var targets: [UIView] = []
     var location: UIView? = nil
+    var accuracy_area: UIView? = nil
 
     func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
         var rebuild = list.count != images.count
@@ -42,6 +43,10 @@ class MapCanvasView: UIView {
             }
             
             // maps changed: bring points to front
+            if accuracy_area != nil {
+                accuracy_area!.removeFromSuperview()
+                self.addSubview(accuracy_area!)
+            }
             if location != nil {
                 location!.removeFromSuperview()
                 self.addSubview(location!)
@@ -59,9 +64,17 @@ class MapCanvasView: UIView {
         }
     }
     
-    func send_pos(x: CGFloat, y: CGFloat, color: Int)
+    func send_pos(x: CGFloat, y: CGFloat, color: Int, accuracy: CGFloat)
     {
         let f = CGRect(x: x - 8, y: y - 8, width: 16, height: 16)
+        let facc = CGRect(x: x - accuracy, y: y - accuracy, width: accuracy * 2, height: accuracy * 2)
+        
+        if accuracy_area == nil {
+            accuracy_area = UIView.init(frame: facc)
+            accuracy_area!.alpha = 0.2
+            accuracy_area!.backgroundColor = UIColor.yellowColor()
+            self.addSubview(accuracy_area!)
+        }
         
         if location == nil {
             location = UIView.init(frame: f)
@@ -75,6 +88,10 @@ class MapCanvasView: UIView {
         } else {
             location!.backgroundColor = UIColor.yellowColor()
         }
+
+        accuracy_area!.frame = facc
+        accuracy_area!.layer.cornerRadius = accuracy
+        accuracy_area!.hidden = x == 0
         
         location!.frame = f
         location!.hidden = x == 0

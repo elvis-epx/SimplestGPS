@@ -13,6 +13,8 @@ import UIKit
 {
     @IBOutlet weak var canvas: MapCanvasView!
     @IBOutlet weak var scale: UILabel!
+    @IBOutlet weak var coordinates: UILabel!
+    @IBOutlet weak var extra: UILabel!
     
     var scrw: Double = Double.NaN
     var scrh: Double = Double.NaN
@@ -186,7 +188,12 @@ import UIKit
         }
         
         let scale_m = 1852.0 * 60 * long_prop * abs(slong1 - slong0)
-        scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
+        scale.text = "w = " + GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
+        coordinates.text = GPSModel2.model().latitude_formatted() + "   " + GPSModel2.model().altitude_formatted()
+        extra.text = GPSModel2.model().longitude_formatted() + "   " + GPSModel2.model().speed_formatted()
+
+        let accuracy = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
+        // let accuracy = scrw * 1000 / scale_m
         
         var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
         for map in GPSModel2.model().get_maps() {
@@ -239,12 +246,12 @@ import UIKit
         if GPSModel2.ins(gpslat, _long: gpslong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
             let x = GPSModel2.long_to(gpslong, a: slong0, b: slong1, scrw: scrw)
             let y = GPSModel2.lat_to(gpslat, a: slat0, b: slat1, scrh: scrh)
-            canvas.send_pos(x, y: y, color: blink_phase)
+            canvas.send_pos(x, y: y, color: blink_phase, accuracy: CGFloat(accuracy))
             if debug {
                 NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
             }
         } else {
-            canvas.send_pos(-1, y: -1, color: 0)
+            canvas.send_pos(-1, y: -1, color: 0, accuracy: 0)
             if debug {
                 NSLog("My position %f %f not in space", clat, clong)
             }

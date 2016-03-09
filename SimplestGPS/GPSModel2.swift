@@ -348,6 +348,15 @@ import CoreLocation
         return String(format: "%@%@", format_deg(fabs(lat)), suffix);
     }
 
+    class func do_format_latitude_full(lat: Double) -> String
+    {
+        if lat != lat {
+            return "---";
+        }
+        let suffix = lat < 0 ? "S" : "N";
+        return String(format: "%@%@%@", format_deg(fabs(lat)), format_deg2(fabs(lat)), suffix);
+    }
+
     class func do_format_latitude2(lat: Double) -> String
     {
         if lat != lat {
@@ -364,7 +373,17 @@ import CoreLocation
         let suffix = lon < 0 ? "W" : "E";
         return String(format: "%@%@", format_deg(fabs(lon)), suffix);
     }
+
+    class func do_format_longitude_full(lon: Double) -> String
+    {
+        if lon != lon {
+            return "---";
+        }
+        let suffix = lon < 0 ? "W" : "E";
+        return String(format: "%@%@%@", format_deg(fabs(lon)), format_deg2(fabs(lon)), suffix);
+    }
     
+
     class func do_format_longitude2(lon: Double) -> String
     {
         if lon != lon {
@@ -638,7 +657,12 @@ import CoreLocation
         self.curloc = newLocation;
         self.update();
     }
-    
+
+    func latitude_formatted() -> String
+    {
+        return GPSModel2.do_format_latitude_full(latitude());
+    }
+
     func latitude_formatted_part1() -> String
     {
         return GPSModel2.do_format_latitude(latitude());
@@ -652,6 +676,11 @@ import CoreLocation
     func heading_formatted() -> String
     {
         return GPSModel2.do_format_heading(self.heading())
+    }
+    
+    func longitude_formatted() -> String
+    {
+        return GPSModel2.do_format_longitude_full(self.longitude())
     }
     
     func longitude_formatted_part1() -> String
