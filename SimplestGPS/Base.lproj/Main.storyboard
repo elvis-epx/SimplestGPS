@@ -288,6 +288,9 @@
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
                                 <state key="normal" title="PIN"/>
+                                <connections>
+                                    <segue destination="cgf-OK-JfV" kind="showDetail" identifier="pinTarget" id="ZAy-mh-r9c"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mrM-pp-NuZ">
                                 <rect key="frame" x="520" y="0.0" width="80" height="80"/>
@@ -321,13 +324,14 @@
                     </view>
                     <connections>
                         <outlet property="canvas" destination="ruK-YN-pqb" id="Ypl-9m-aJS"/>
+                        <outlet property="new_target" destination="ZJU-aR-bMo" id="KZY-Qd-PCj"/>
                         <outlet property="scale" destination="Ehl-KC-tZl" id="vnq-ME-ZQL"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dPa-Io-I7X" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="NJ9-2M-3Ty" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1211" y="1085"/>
+            <point key="canvasLocation" x="2031" y="360"/>
         </scene>
         <!--Targets View Controller2-->
         <scene sceneID="aOW-1h-Xvg">
@@ -367,7 +371,7 @@
                                         <rect key="frame" x="0.0" y="22" width="592" height="186"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="SPd-HC-R28" id="hRA-Cy-0GD">
-                                            <rect key="frame" x="0.0" y="0.0" width="592" height="185"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="592" height="185.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nameeeeeeeeeeeee" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gYI-6G-IfP">
@@ -630,8 +634,11 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="WLd-0I-8Fl" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="ok7-U1-Ocp" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2601" y="345"/>
+            <point key="canvasLocation" x="2803" y="312"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="ZAy-mh-r9c"/>
+    </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
 </document>

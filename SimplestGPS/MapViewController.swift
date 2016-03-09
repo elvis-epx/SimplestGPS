@@ -13,6 +13,7 @@ import UIKit
 {
     @IBOutlet weak var canvas: MapCanvasView!
     @IBOutlet weak var scale: UILabel!
+    @IBOutlet weak var new_target: UIButton!
     
     var scrw: Double = Double.NaN
     var scrh: Double = Double.NaN
@@ -416,5 +417,16 @@ import UIKit
         default:
             break
         }
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if sender === new_target {
+            GPSModel2.model().target_setEdit(-1)
+        }
+    }
+    
+    @IBAction func backToTable(sender: UIStoryboardSegue)
+    {
+        // UIViewController *sourceViewController = sender.sourceViewController;
     }
 }
