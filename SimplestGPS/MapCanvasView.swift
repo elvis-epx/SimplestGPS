@@ -14,6 +14,13 @@ class MapCanvasView: UIView {
     var targets: [UIView] = []
     var location: UIView? = nil
     var accuracy_area: UIView? = nil
+    
+    let MODE_MAPONLY = 0
+    let MODE_MAPCOMPASS = 1
+    let MODE_MAPHEADING = 2
+    let MODE_COMPASS = 3
+    let MODE_HEADING = 4
+    let MODE_COUNT = 5
 
     func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
         var rebuild = list.count != images.count
@@ -118,5 +125,11 @@ class MapCanvasView: UIView {
                 targets[i].hidden = true
             }
         }
+    }
+    
+    func send_compass(mode: Int, heading: Double, speed: String,
+                      current_target: Int,
+                      targets: [(heading: Double, name: String, distance: String)])
+    {
     }
 }

@@ -19,6 +19,13 @@ import UIKit
     var scrh: Double = Double.NaN
     var width_prop: Double = Double.NaN
     
+    let MODE_MAPONLY = 0
+    let MODE_MAPCOMPASS = 1
+    let MODE_MAPHEADING = 2
+    let MODE_COMPASS = 3
+    let MODE_HEADING = 4
+    let MODE_COUNT = 5
+    
     // in seconds of latitude degree across the screen height
     var zoom_factor: Double = 900
     let zoom_min: Double = 30
@@ -43,6 +50,8 @@ import UIKit
     
     var blink_phase = -1
     var blink_timer: NSTimer? = nil
+    var mode = 0
+    var current_target = -1
     
     var debug = false
 
@@ -173,6 +182,19 @@ import UIKit
         if (clat.isNaN) {
             return
         }
+        
+        // send compass data
+        var targets_compass: [(heading: Double, name: String, distance: String)] = []
+        var tgt = 0;
+        while tgt < GPSModel2.model().target_count() {
+            targets_compass.append((heading: GPSModel2.model().target_heading(tgt),
+                name: GPSModel2.model().target_name(tgt),
+                distance: GPSModel2().target_distance_formatted(tgt)))
+            tgt += 1
+        }
+        canvas.send_compass(mode, heading: GPSModel2.model().heading(),
+                            speed: GPSModel2.model().speed_formatted(),
+                            current_target: current_target, targets: targets_compass)
 
         // calculate screen size in GPS
         // NOTE: longitude coordinates may be denormalized (e.g. -181W or +181E)
@@ -428,5 +450,21 @@ import UIKit
     @IBAction func backToTable(sender: UIStoryboardSegue)
     {
         // UIViewController *sourceViewController = sender.sourceViewController;
+    }
+    
+    @IBAction func mod_button(sender: AnyObject)
+    {
+        mode += 1
+        mode %= MODE_COUNT
+        repaint()
+    }
+    
+    @IBAction func tgt_button(sender: AnyObject)
+    {
+        current_target += 1
+        if current_target >= GPSModel2.model().target_count() {
+            current_target = -1
+        }
+        repaint()
     }
 }
