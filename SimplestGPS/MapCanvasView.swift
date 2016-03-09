@@ -9,11 +9,13 @@
 import Foundation
 import UIKit
 
-class MapCanvasView: UIView {
+class MapCanvasView: UIView
+{
     var images: [(String,UIImageView)] = []
     var targets: [UIView] = []
     var location: UIView? = nil
     var accuracy_area: UIView? = nil
+    var compass: CompassView? = nil
     
     let MODE_MAPONLY = 0
     let MODE_MAPCOMPASS = 1
@@ -21,6 +23,17 @@ class MapCanvasView: UIView {
     let MODE_COMPASS = 3
     let MODE_HEADING = 4
     let MODE_COUNT = 5
+    var current_mode = -1
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        self.backgroundColor = UIColor.blackColor()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        self.backgroundColor = UIColor.blackColor()
+    }
 
     func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
         var rebuild = list.count != images.count
@@ -62,6 +75,10 @@ class MapCanvasView: UIView {
                 target.removeFromSuperview()
                 self.addSubview(target)
             }
+            if compass != nil {
+                compass!.removeFromSuperview()
+                self.addSubview(compass!)
+            }
         }
         
         for i in 0..<list.count {
@@ -95,6 +112,13 @@ class MapCanvasView: UIView {
         } else {
             location!.backgroundColor = UIColor.yellowColor()
         }
+        
+        if compass == nil {
+            let slack = self.frame.height - self.frame.width
+            let compass_frame = CGRect(x: 0, y: slack / 2, width: self.frame.width, height: self.frame.width)
+            compass = CompassView.init(frame: compass_frame)
+            self.addSubview(compass!)
+        }
 
         accuracy_area!.frame = facc
         accuracy_area!.layer.cornerRadius = accuracy
@@ -106,6 +130,8 @@ class MapCanvasView: UIView {
 
     func send_targets(list: [(CGFloat, CGFloat)])
     {
+        let updated_targets = targets.count < list.count
+        
         while targets.count < list.count {
             let f = CGRect(x: 0, y: 0, width: 16, height: 16)
             let target = UIView.init(frame: f)
@@ -114,6 +140,12 @@ class MapCanvasView: UIView {
             target.alpha = 1
             self.addSubview(target)
             targets.append(target)
+        }
+        
+        if updated_targets && compass != nil {
+            // new target subviews are on top of the compass, move compass back to the top
+            compass!.removeFromSuperview()
+            self.addSubview(compass!)
         }
         
         for i in 0..<targets.count {
@@ -131,5 +163,24 @@ class MapCanvasView: UIView {
                       current_target: Int,
                       targets: [(heading: Double, name: String, distance: String)])
     {
+        if compass == nil {
+            return;
+        }
+        if mode == MODE_MAPONLY && current_mode != MODE_MAPONLY {
+            compass!.hidden = true
+        } else if current_mode == MODE_MAPONLY && mode != MODE_MAPONLY {
+            compass!.hidden = false
+        }
+        current_mode = mode
+        if mode == MODE_MAPONLY {
+            // nothing to do with compass
+            return
+        }
+        
+        compass!.send_data(mode == MODE_COMPASS || mode == MODE_MAPCOMPASS,
+                           transparent: mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING,
+                           heading: heading, speed: speed,
+                           current_target: current_target,
+                           targets: targets)
     }
 }

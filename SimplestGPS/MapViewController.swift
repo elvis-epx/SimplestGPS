@@ -217,49 +217,52 @@ import UIKit
         // let accuracy = scrw * 1000 / scale_m
         
         var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
-        for map in GPSModel2.model().get_maps() {
-            if GPSModel2.iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1,
-                              lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-                let x0 = GPSModel2.long_to(map.long0, a: slong0, b: slong1, scrw: scrw)
-                let x1 = GPSModel2.long_to(map.long1, a: slong0, b: slong1, scrw: scrw)
-                let y0 = GPSModel2.lat_to(map.lat0, a: slat0, b: slat1, scrh: scrh)
-                let y1 = GPSModel2.lat_to(map.lat1, a: slat0, b: slat1, scrh: scrh)
-                let img = GPSModel2.model().get_map_image(map.file)
-                if (img != nil) {
-                    plot.append((img!, map.file.absoluteString, x0, x1, y0, y1, abs(y1 - y0)))
-                    if debug {
-                        NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
+        
+        if mode == MODE_MAPONLY || mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING {
+            for map in GPSModel2.model().get_maps() {
+                if GPSModel2.iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1,
+                                  lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
+                    let x0 = GPSModel2.long_to(map.long0, a: slong0, b: slong1, scrw: scrw)
+                    let x1 = GPSModel2.long_to(map.long1, a: slong0, b: slong1, scrw: scrw)
+                    let y0 = GPSModel2.lat_to(map.lat0, a: slat0, b: slat1, scrh: scrh)
+                    let y1 = GPSModel2.lat_to(map.lat1, a: slat0, b: slat1, scrh: scrh)
+                    let img = GPSModel2.model().get_map_image(map.file)
+                    if (img != nil) {
+                        plot.append((img!, map.file.absoluteString, x0, x1, y0, y1, abs(y1 - y0)))
+                        if debug {
+                            NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
+                        }
+                    } else {
+                        if debug {
+                            NSLog("Map not available")
+                        }
                     }
                 } else {
                     if debug {
-                        NSLog("Map not available")
+                        NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
                     }
                 }
-            } else {
-                if debug {
-                    NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
-                }
             }
-        }
         
-        // smaller images should be blitted last since they are probably more detailed maps of the area
-        plot.sortInPlace({ $0.5 > $1.5 } )
+            // smaller images should be blitted last since they are probably more detailed maps of the area
+            plot.sortInPlace({ $0.5 > $1.5 } )
         
-        // optimize the case when more than a map covers the whole screen
-        var i = plot.count - 1
-        while i > 0 {
-            let x0 = plot[i].2
-            let x1 = plot[i].3
-            let y0 = plot[i].4
-            let y1 = plot[i].5
-            if x0 <= 0 && x1 >= CGFloat(scrw) && y0 <= 0 && y1 >= CGFloat(scrh) {
-                // remove maps beneath the topmost that covers the whole screen
-                for _ in 1...i {
-                    plot.removeAtIndex(0)
+            // optimize the case when more than a map covers the whole screen
+            var i = plot.count - 1
+            while i > 0 {
+                let x0 = plot[i].2
+                let x1 = plot[i].3
+                let y0 = plot[i].4
+                let y1 = plot[i].5
+                if x0 <= 0 && x1 >= CGFloat(scrw) && y0 <= 0 && y1 >= CGFloat(scrh) {
+                    // remove maps beneath the topmost that covers the whole screen
+                    for _ in 1...i {
+                        plot.removeAtIndex(0)
+                    }
+                    break
                 }
-                break
+                i -= 1
             }
-            i -= 1
         }
         
         canvas.send_img(plot)

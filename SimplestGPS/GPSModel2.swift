@@ -624,13 +624,13 @@ import CoreLocation
         return self.curloc != nil ? (self.curloc!.coordinate.latitude) : Double.NaN
     }
 
-    func longitude() -> Double
+    func longitude() -> Double  
     {
         return self.curloc != nil ? (self.curloc!.coordinate.longitude) : Double.NaN
     }
     
     func speed() -> Double {
-        return self.curloc != nil ? (self.curloc!.speed) : Double.NaN
+        return self.curloc != nil ? (self.curloc!.speed < 0 ? Double.NaN : self.curloc!.speed) : Double.NaN
     }
     
     func horizontal_accuracy() -> Double
