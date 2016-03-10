@@ -123,9 +123,5 @@ class CompassView: UIView {
                 tgtminis[i].transform = tgtheading_t
             }
         }
-        
-        // FIXME target name
-        // FIXME target distance
-        // FIXME animation
     }
 }
