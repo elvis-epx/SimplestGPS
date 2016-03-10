@@ -199,6 +199,7 @@ import UIKit
             tgt += 1
         }
         canvas.send_compass(mode, heading: GPSModel2.model().heading(),
+                            altitude: GPSModel2.model().altitude_formatted(),
                             speed: GPSModel2.model().speed_formatted(),
                             current_target: current_target, targets: targets_compass)
 

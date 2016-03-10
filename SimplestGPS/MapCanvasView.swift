@@ -161,7 +161,7 @@ class MapCanvasView: UIView
         }
     }
     
-    func send_compass(mode: Int, heading: Double, speed: String,
+    func send_compass(mode: Int, heading: Double, altitude: String, speed: String,
                       current_target: Int,
                       targets: [(heading: Double, name: String, distance: String)])
     {
@@ -178,9 +178,10 @@ class MapCanvasView: UIView
             return
         }
         
-        compass!.send_data(mode == MODE_COMPASS || mode == MODE_MAPCOMPASS,
+        compass!.send_data(mode == MODE_COMPASS || mode == MODE_HEADING,
+                            absolute: mode == MODE_COMPASS || mode == MODE_MAPCOMPASS,
                            transparent: mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING,
-                           heading: heading, speed: speed,
+                           heading: heading, altitude: altitude, speed: speed,
                            current_target: current_target,
                            targets: targets)
     }

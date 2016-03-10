@@ -49,16 +49,13 @@ class CompassView: UIView {
         self.addSubview(tgtneedle)
         self.addSubview(back)
         
-        tgtdistance.textColor = UIColor.cyanColor()
         tgtdistance.backgroundColor = UIColor.clearColor()
         tgtdistance.font = UIFont.systemFontOfSize(frame.width / 15)
         tgtdistance.textAlignment = .Center
         self.addSubview(tgtdistance)
-        
-        tgtname.textColor = UIColor.cyanColor()
+   
         tgtname.backgroundColor = UIColor.clearColor()
         tgtname.font = UIFont.systemFontOfSize(frame.width / 20)
-        tgtname.backgroundColor = UIColor.clearColor()
         tgtname.textAlignment = .Center
         self.addSubview(tgtname)
     }
@@ -67,7 +64,9 @@ class CompassView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func send_data(absolute: Bool, transparent: Bool, heading: Double, speed: String,
+    func send_data(compassonly: Bool,
+                   absolute: Bool, transparent: Bool, heading: Double,
+                   altitude: String, speed: String,
                       current_target: Int,
                       targets: [(heading: Double, name: String, distance: String)])
     {
@@ -79,10 +78,18 @@ class CompassView: UIView {
             back_anim.set(0.0)
         }
         if current_target < 0 {
+            tgtname.hidden = !compassonly
+            tgtdistance.hidden = !compassonly
+            if compassonly {
+                tgtdistance.textColor = UIColor.redColor()
+                tgtname.textColor = UIColor.redColor()
+                tgtdistance.text = speed
+                tgtname.text = altitude
+            }
             tgtneedle.hidden = true
-            tgtname.hidden = true
-            tgtdistance.hidden = true
         } else {
+            tgtdistance.textColor = UIColor.cyanColor()
+            tgtname.textColor = UIColor.cyanColor()
             tgtname.hidden = false
             tgtdistance.hidden = false
             tgtname.text = targets[current_target].name
