@@ -16,6 +16,8 @@ import CoreLocation
     func update()
 }
 
+// FIXME metric in Settings, listen changes
+
 @objc class GPSModel2: NSObject, CLLocationManagerDelegate {
     var observers = [ModelListener]()
     var names = [NSObject: AnyObject]()
