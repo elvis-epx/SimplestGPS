@@ -15,18 +15,20 @@ class CompassView: UIView {
     var back: BareCompassView? = nil
     var needle: NeedleView? = nil
     var tgtneedle: NeedleView? = nil
-    var rot = CGFloat(0)
+    var tgtminis: [TargetMiniNeedleView] = []
+    var child_frame: CGRect
     
     override init(frame: CGRect) {
+        child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
         super.init(frame: frame)
         self.backgroundColor = UIColor.clearColor()
-        bg = CompassBGView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
+        bg = CompassBGView(frame: child_frame)
         self.addSubview(bg!)
-        needle = NeedleView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.height), color: UIColor.redColor())
+        needle = NeedleView(frame: child_frame, color: UIColor.redColor())
         self.addSubview(needle!)
-        tgtneedle = NeedleView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.height), color: UIColor.greenColor())
+        tgtneedle = NeedleView(frame: child_frame, color: UIColor.greenColor())
         self.addSubview(tgtneedle!)
-        back = BareCompassView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
+        back = BareCompassView(frame: child_frame)
         self.addSubview(back!)
     }
     
@@ -64,12 +66,43 @@ class CompassView: UIView {
             tgtneedle!.transform = tgtheading_t
         }
         
-        // FIXME targets rectangles
+        var dirty = false
+        while tgtminis.count < targets.count {
+            let mini = TargetMiniNeedleView(frame: child_frame)
+            tgtminis.append(mini)
+            self.addSubview(mini)
+            mini.hidden = true
+            dirty = true
+        }
+        
+        if dirty {
+            return
+        }
+        
+        for i in 0..<tgtminis.count {
+            if i >= targets.count || i == current_target {
+                tgtminis[i].hidden = true
+            } else {
+                var tgtheading = targets[i].heading
+                if !absolute {
+                    tgtheading -= heading
+                    while tgtheading < 0 {
+                        tgtheading += 360
+                    }
+                    while tgtheading >= 360 {
+                        tgtheading -= 360
+                    }
+                }
+                let tgtheading_t = CGAffineTransformMakeRotation(CGFloat(tgtheading * M_PI / 180.0))
+                tgtminis[i].hidden = false
+                tgtminis[i].transform = tgtheading_t
+            }
+        }
+        
         // FIXME target name
         // FIXME target distance
         // FIXME targets names?
         // FIXME targets distances?
-        // FIXME speed
         // FIXME animation
     }
 }

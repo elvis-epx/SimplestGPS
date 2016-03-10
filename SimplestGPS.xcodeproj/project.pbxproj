@@ -19,6 +19,7 @@
 		B95B688E1C90B6AF008E6CD3 /* BareCompassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95B688D1C90B6AF008E6CD3 /* BareCompassView.swift */; };
 		B95B68901C90BC92008E6CD3 /* CompassBGView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95B688F1C90BC92008E6CD3 /* CompassBGView.swift */; };
 		B95B68921C90BF30008E6CD3 /* NeedleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95B68911C90BF30008E6CD3 /* NeedleView.swift */; };
+		B95B68961C90D18D008E6CD3 /* TargetMiniNeedleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95B68951C90D18D008E6CD3 /* TargetMiniNeedleView.swift */; };
 		B9692845184FB50A00998B77 /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692844184FB50A00998B77 /* icon114.png */; };
 		B9692847184FB51100998B77 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692846184FB51100998B77 /* icon29.png */; };
 		B9692849184FB51700998B77 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692848184FB51700998B77 /* icon57.png */; };
@@ -48,6 +49,7 @@
 		B95B688D1C90B6AF008E6CD3 /* BareCompassView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BareCompassView.swift; sourceTree = "<group>"; };
 		B95B688F1C90BC92008E6CD3 /* CompassBGView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompassBGView.swift; sourceTree = "<group>"; };
 		B95B68911C90BF30008E6CD3 /* NeedleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeedleView.swift; sourceTree = "<group>"; };
+		B95B68951C90D18D008E6CD3 /* TargetMiniNeedleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetMiniNeedleView.swift; sourceTree = "<group>"; };
 		B9692844184FB50A00998B77 /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
 		B9692846184FB51100998B77 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		B9692848184FB51700998B77 /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */,
 				B95B688B1C908DEF008E6CD3 /* CompassView.swift */,
 				B95B688D1C90B6AF008E6CD3 /* BareCompassView.swift */,
+				B95B68951C90D18D008E6CD3 /* TargetMiniNeedleView.swift */,
 				B95B68911C90BF30008E6CD3 /* NeedleView.swift */,
 				B95B688F1C90BC92008E6CD3 /* CompassBGView.swift */,
 				B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */,
@@ -235,6 +238,7 @@
 				B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */,
 				B93D610B1BBF59790092CD5C /* GPSViewController2.swift in Sources */,
 				B95B688C1C908DF0008E6CD3 /* CompassView.swift in Sources */,
+				B95B68961C90D18D008E6CD3 /* TargetMiniNeedleView.swift in Sources */,
 				B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */,
 				B91E5F9F1C7F83A2000CB068 /* MapViewController.swift in Sources */,
 				B95B688E1C90B6AF008E6CD3 /* BareCompassView.swift in Sources */,
