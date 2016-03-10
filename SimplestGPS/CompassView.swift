@@ -11,25 +11,43 @@ import Foundation
 import UIKit
 
 class CompassView: UIView {
-    var bg: CompassBGView? = nil
-    var back: BareCompassView? = nil
-    var needle: NeedleView? = nil
-    var tgtneedle: NeedleView? = nil
+    var bg: CompassBGView
+    var back: BareCompassView
+    var needle: NeedleView
+    var tgtneedle: NeedleView
     var tgtminis: [TargetMiniNeedleView] = []
+    var tgtdistance: UITextView
+    var tgtname: UITextView
     var child_frame: CGRect
     
     override init(frame: CGRect) {
         child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
+        bg = CompassBGView(frame: child_frame)
+        needle = NeedleView(frame: child_frame, color: UIColor.redColor())
+        tgtneedle = NeedleView(frame: child_frame, color: UIColor.greenColor())
+        back = BareCompassView(frame: child_frame)
+        tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.53, width: frame.width, height: frame.height * 0.1))
+        tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.63, width: frame.width, height: frame.height * 0.1))
+
         super.init(frame: frame)
         self.backgroundColor = UIColor.clearColor()
-        bg = CompassBGView(frame: child_frame)
-        self.addSubview(bg!)
-        needle = NeedleView(frame: child_frame, color: UIColor.redColor())
-        self.addSubview(needle!)
-        tgtneedle = NeedleView(frame: child_frame, color: UIColor.greenColor())
-        self.addSubview(tgtneedle!)
-        back = BareCompassView(frame: child_frame)
-        self.addSubview(back!)
+        self.addSubview(bg)
+        self.addSubview(needle)
+        self.addSubview(tgtneedle)
+        self.addSubview(back)
+        
+        tgtdistance.textColor = UIColor.cyanColor()
+        tgtdistance.backgroundColor = UIColor.clearColor()
+        tgtdistance.font = UIFont.systemFontOfSize(frame.width / 15)
+        tgtdistance.textAlignment = .Center
+        self.addSubview(tgtdistance)
+        
+        tgtname.textColor = UIColor.cyanColor()
+        tgtname.backgroundColor = UIColor.clearColor()
+        tgtname.font = UIFont.systemFontOfSize(frame.width / 20)
+        tgtname.backgroundColor = UIColor.clearColor()
+        tgtname.textAlignment = .Center
+        self.addSubview(tgtname)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -42,16 +60,23 @@ class CompassView: UIView {
     {
         let heading_t = CGAffineTransformMakeRotation(CGFloat(heading * M_PI / 180.0))
         if !absolute {
-            back!.transform = heading_t
-            needle!.transform = CGAffineTransformIdentity
+            back.transform = heading_t
+            needle.transform = CGAffineTransformIdentity
         } else {
-            needle!.transform = heading_t
-            back!.transform = CGAffineTransformIdentity
+            needle.transform = heading_t
+            back.transform = CGAffineTransformIdentity
         }
         if current_target < 0 {
-            tgtneedle!.hidden = true
+            tgtneedle.hidden = true
+            tgtname.hidden = true
+            tgtdistance.hidden = true
         } else {
-            tgtneedle!.hidden = false
+            tgtname.hidden = false
+            tgtdistance.hidden = false
+            tgtname.text = targets[current_target].name
+            tgtdistance.text = targets[current_target].distance
+            
+            tgtneedle.hidden = false
             var tgtheading = targets[current_target].heading
             if !absolute {
                 tgtheading -= heading
@@ -63,7 +88,7 @@ class CompassView: UIView {
                 }
             }
             let tgtheading_t = CGAffineTransformMakeRotation(CGFloat(tgtheading * M_PI / 180.0))
-            tgtneedle!.transform = tgtheading_t
+            tgtneedle.transform = tgtheading_t
         }
         
         var dirty = false
@@ -101,8 +126,6 @@ class CompassView: UIView {
         
         // FIXME target name
         // FIXME target distance
-        // FIXME targets names?
-        // FIXME targets distances?
         // FIXME animation
     }
 }
