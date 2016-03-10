@@ -82,9 +82,9 @@ class CompassView: UIView {
             tgtdistance.hidden = !compassonly
             if compassonly {
                 tgtdistance.textColor = UIColor.redColor()
-                tgtname.textColor = UIColor.redColor()
+                // tgtname.textColor = UIColor.redColor()
                 tgtdistance.text = speed
-                tgtname.text = altitude
+                tgtname.text = ""
             }
             tgtneedle.hidden = true
         } else {

@@ -15,6 +15,7 @@ import UIKit
     @IBOutlet weak var scale: UILabel!
     @IBOutlet weak var new_target: UIButton!
     
+    @IBOutlet weak var altitude: UILabel!
     @IBOutlet weak var accuracy: UILabel!
     @IBOutlet weak var longitude: UILabel!
     @IBOutlet weak var latitude: UILabel!
@@ -225,6 +226,7 @@ import UIKit
         scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
         latitude.text = GPSModel2.model().latitude_formatted()
         longitude.text = GPSModel2.model().longitude_formatted()
+        altitude.text = GPSModel2.model().altitude_formatted()
         accuracy.text = GPSModel2.model().accuracy_formatted()
 
         let accuracy_px = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
