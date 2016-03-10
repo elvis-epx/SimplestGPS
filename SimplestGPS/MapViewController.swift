@@ -25,7 +25,9 @@ import UIKit
     let MODE_COMPASS = 3
     let MODE_HEADING = 4
     let MODE_COUNT = 5
-    
+
+    var mode = 1
+
     // in seconds of latitude degree across the screen height
     var zoom_factor: Double = 900
     let zoom_min: Double = 30
@@ -51,7 +53,6 @@ import UIKit
     var blink_phase = -1
     var blink_timer: NSTimer? = nil
     var compass_timer: NSTimer? = nil
-    var mode = 0
     var current_target = -1
     
     var debug = false
@@ -186,9 +187,11 @@ import UIKit
             return
         }
         
+        scale.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+        
         // send compass data
         var targets_compass: [(heading: Double, name: String, distance: String)] = []
-        var tgt = 0;
+        var tgt = 0
         while tgt < GPSModel2.model().target_count() {
             targets_compass.append((heading: GPSModel2.model().target_heading(tgt),
                 name: GPSModel2.model().target_name(tgt),
@@ -221,7 +224,6 @@ import UIKit
         
         var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
         
-        if mode == MODE_MAPONLY || mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING {
             for map in GPSModel2.model().get_maps() {
                 if GPSModel2.iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1,
                                   lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
@@ -266,7 +268,6 @@ import UIKit
                 }
                 i -= 1
             }
-        }
         
         canvas.send_img(plot)
         

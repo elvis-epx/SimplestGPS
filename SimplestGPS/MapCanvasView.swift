@@ -24,6 +24,8 @@ class MapCanvasView: UIView
     let MODE_HEADING = 4
     let MODE_COUNT = 5
     
+    var mode = 0
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = UIColor.blackColor()
@@ -84,6 +86,7 @@ class MapCanvasView: UIView
             let (_, _, x0, x1, y0, y1, _) = list[i]
             let rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
             images[i].1.frame = rect
+            images[i].1.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
         }
     }
     
@@ -121,10 +124,10 @@ class MapCanvasView: UIView
 
         accuracy_area!.frame = facc
         accuracy_area!.layer.cornerRadius = accuracy
-        accuracy_area!.hidden = x == 0
+        accuracy_area!.hidden = (x == 0 || mode == MODE_COMPASS || mode == MODE_HEADING)
         
         location!.frame = f
-        location!.hidden = x == 0
+        location!.hidden = (x == 0 || mode == MODE_COMPASS || mode == MODE_HEADING)
     }
 
     func send_targets(list: [(CGFloat, CGFloat)])
@@ -151,7 +154,7 @@ class MapCanvasView: UIView
             if i < list.count {
                 let f = CGRect(x: list[i].0 - 8, y: list[i].1 - 8, width: 16, height: 16)
                 targets[i].frame = f
-                targets[i].hidden = false
+                targets[i].hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
             } else {
                 targets[i].hidden = true
             }
@@ -162,6 +165,8 @@ class MapCanvasView: UIView
                       current_target: Int,
                       targets: [(heading: Double, name: String, distance: String)])
     {
+        self.mode = mode
+        
         if compass == nil {
             return;
         }
