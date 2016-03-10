@@ -25,6 +25,8 @@ import CoreLocation
     var target_list = [String]()
     var next_target: Int = 0
     var curloc: CLLocation? = nil
+    var curloc_new: CLLocation? = nil
+    var held: Bool = false
     var lman: CLLocationManager? = nil
     var metric: Int = 1;
     var editing: Int = -1
@@ -34,6 +36,23 @@ import CoreLocation
     var mapimages: [String: UIImage] = [:]
     
     var memoryWarningObserver : NSObjectProtocol!
+    
+    func hold() -> Bool
+    {
+        if curloc == nil {
+            return false
+        }
+        held = true
+        curloc_new = curloc
+        return true
+    }
+    
+    func releas()
+    {
+        curloc = curloc_new
+        // TODO call update() when curloc changed and is not nil?
+        held = false
+    }
     
     class func parse_map_name(f: String) -> (ok: Bool, lat: Double, long: Double,
         latheight: Double, longwidth: Double, dx: Double, dy: Double)
@@ -654,8 +673,12 @@ import CoreLocation
 
     func locationManager(manager: CLLocationManager, didUpdateToLocation newLocation: CLLocation, fromLocation oldLocation: CLLocation)
     {
-        self.curloc = newLocation;
-        self.update();
+        if held {
+            self.curloc_new = newLocation
+        } else {
+            self.curloc = newLocation
+            self.update()
+        }
     }
 
     func latitude_formatted() -> String
@@ -1179,6 +1202,12 @@ import CoreLocation
     // Failed to get current location
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError)
     {
+        if held {
+            self.curloc_new = nil
+        } else {
+            self.curloc = nil
+        }
+        
         for observer in observers {
             observer.fail();
         }

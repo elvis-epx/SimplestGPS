@@ -125,11 +125,14 @@ import UIKit
         compass_timer?.invalidate()
     }
     
-    
     func fail() {
+        latitude.text = ""
+        longitude.text = "Wait"
     }
     
     func permission() {
+        latitude.text = ""
+        longitude.text = "Permission denied"
     }
     
     func update() {
@@ -159,8 +162,10 @@ import UIKit
         }
         
         // Keep latitude within Mercator limits
-        clat = min(max_latitude, clat)
-        clat = max(-max_latitude, clat)
+        if clat == clat {
+            clat = min(max_latitude, clat)
+            clat = max(-max_latitude, clat)
+        }
         
         long_prop = GPSModel2.longitude_proportion(clat)
         if long_prop.isNaN {
@@ -183,11 +188,11 @@ import UIKit
 
     func repaint()
     {
-        if debug {
-            NSLog("Repaint");
+        if clat.isNaN {
+            return
         }
         
-        if (clat.isNaN) {
+        if !GPSModel2.model().hold() {
             return
         }
         
@@ -204,6 +209,9 @@ import UIKit
                 name: GPSModel2.model().target_name(tgt),
                 distance: GPSModel2.model().target_distance_formatted(tgt)))
             tgt += 1
+        }
+        if current_target >= targets_compass.count {
+            current_target = -1
         }
         canvas.send_compass(mode, heading: GPSModel2.model().heading(),
                             altitude: GPSModel2.model().altitude_formatted(),
@@ -316,6 +324,8 @@ import UIKit
             }
         }
         canvas.send_targets(targets)
+        
+        GPSModel2.model().releas()
         
         if debug {
             NSLog("Painted with %d maps", plot.count)
@@ -457,17 +467,6 @@ import UIKit
         }
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if sender === new_target {
-            GPSModel2.model().target_setEdit(-1)
-        }
-    }
-    
-    @IBAction func backToTable(sender: UIStoryboardSegue)
-    {
-        // UIViewController *sourceViewController = sender.sourceViewController;
-    }
-    
     @IBAction func mod_button(sender: AnyObject)
     {
         mode += 1
@@ -487,5 +486,9 @@ import UIKit
     func compass_anim()
     {
         canvas.compass_anim()
+    }
+    
+    @IBAction func backToMain(sender: UIStoryboardSegue)
+    {
     }
 }
