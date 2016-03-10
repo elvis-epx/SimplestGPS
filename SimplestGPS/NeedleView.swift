@@ -33,7 +33,7 @@ class NeedleView: UIView {
         if ctx == nil {
             return
         }
-        let radius = CGFloat((CGFloat(self.frame.size.width) * 0.77) / 2)
+        let radius = CGFloat((CGFloat(self.frame.size.width) * 0.75) / 2)
         let off = radius * 0.055
         let center = CGPointMake(self.frame.size.width / 2, self.frame.size.height / 2)
 

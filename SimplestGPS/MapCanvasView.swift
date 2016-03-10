@@ -23,7 +23,6 @@ class MapCanvasView: UIView
     let MODE_COMPASS = 3
     let MODE_HEADING = 4
     let MODE_COUNT = 5
-    var current_mode = -1
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -166,12 +165,9 @@ class MapCanvasView: UIView
         if compass == nil {
             return;
         }
-        if mode == MODE_MAPONLY && current_mode != MODE_MAPONLY {
-            compass!.hidden = true
-        } else if current_mode == MODE_MAPONLY && mode != MODE_MAPONLY {
-            compass!.hidden = false
-        }
-        current_mode = mode
+        
+        compass!.hidden = (mode == MODE_MAPONLY)
+
         if mode == MODE_MAPONLY {
             // nothing to do with compass
             return
@@ -182,5 +178,12 @@ class MapCanvasView: UIView
                            heading: heading, speed: speed,
                            current_target: current_target,
                            targets: targets)
+    }
+    
+    func compass_anim()
+    {
+        if (compass != nil) {
+            compass!.anim()
+        }
     }
 }

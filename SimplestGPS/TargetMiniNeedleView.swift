@@ -27,32 +27,29 @@ class TargetMiniNeedleView: UIView {
             return
         }
         
-        let radius = CGFloat((CGFloat(self.frame.size.width) * 0.92) / 2)
-        let off = radius * 0.07
+        let radius = CGFloat((CGFloat(self.frame.size.width) * 0.80) / 2)
+        let off = radius * 0.08
         let x = CGFloat(self.frame.size.width / 2)
         let y = CGFloat(self.frame.size.height / 2)
 
         let x0 = x - off
         let y0 = y - radius - off
         let x1 = x + off
-        let y1 = y - radius + off
+        let y1 = y - radius
+        let xm = x
 
         CGContextSetStrokeColorWithColor(ctx, UIColor.greenColor().CGColor)
         CGContextSetLineWidth(ctx, 2.0)
 
         CGContextMoveToPoint(ctx, x0, y0) 
-        CGContextAddLineToPoint(ctx, x0, y1) 
-        CGContextStrokePath(ctx)
-        
-        CGContextMoveToPoint(ctx, x0, y1)
-        CGContextAddLineToPoint(ctx, x1, y1)
-        CGContextStrokePath(ctx)
-        
-        CGContextMoveToPoint(ctx, x1, y1)
         CGContextAddLineToPoint(ctx, x1, y0)
         CGContextStrokePath(ctx)
         
         CGContextMoveToPoint(ctx, x1, y0)
+        CGContextAddLineToPoint(ctx, xm, y1)
+        CGContextStrokePath(ctx)
+        
+        CGContextMoveToPoint(ctx, xm, y1)
         CGContextAddLineToPoint(ctx, x0, y0)
         CGContextStrokePath(ctx)
     }

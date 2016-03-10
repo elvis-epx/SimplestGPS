@@ -12,10 +12,19 @@ import UIKit
 
 class CompassView: UIView {
     var bg: CompassBGView
+
     var back: BareCompassView
+    var back_anim: CompassAnim
+
     var needle: NeedleView
+    var needle_anim: CompassAnim
+    
     var tgtneedle: NeedleView
+    var tgtneedle_anim: CompassAnim
+
     var tgtminis: [TargetMiniNeedleView] = []
+    var tgtminis_anim: [CompassAnim] = []
+    
     var tgtdistance: UITextView
     var tgtname: UITextView
     var child_frame: CGRect
@@ -28,6 +37,10 @@ class CompassView: UIView {
         back = BareCompassView(frame: child_frame)
         tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.53, width: frame.width, height: frame.height * 0.1))
         tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.63, width: frame.width, height: frame.height * 0.1))
+        
+        back_anim = CompassAnim(mass: 0.2, drag: 4.0)
+        needle_anim = CompassAnim(mass: 0.25, drag: 4.0)
+        tgtneedle_anim = CompassAnim(mass: 0.3, drag: 4.0)
 
         super.init(frame: frame)
         self.backgroundColor = UIColor.clearColor()
@@ -58,13 +71,12 @@ class CompassView: UIView {
                       current_target: Int,
                       targets: [(heading: Double, name: String, distance: String)])
     {
-        let heading_t = CGAffineTransformMakeRotation(CGFloat(heading * M_PI / 180.0))
         if !absolute {
-            back.transform = heading_t
-            needle.transform = CGAffineTransformIdentity
+            back_anim.set(-heading)
+            needle_anim.set(0)
         } else {
-            needle.transform = heading_t
-            back.transform = CGAffineTransformIdentity
+            needle_anim.set(heading)
+            back_anim.set(0.0)
         }
         if current_target < 0 {
             tgtneedle.hidden = true
@@ -80,21 +92,16 @@ class CompassView: UIView {
             var tgtheading = targets[current_target].heading
             if !absolute {
                 tgtheading -= heading
-                while tgtheading < 0 {
-                    tgtheading += 360
-                }
-                while tgtheading >= 360 {
-                    tgtheading -= 360
-                }
             }
-            let tgtheading_t = CGAffineTransformMakeRotation(CGFloat(tgtheading * M_PI / 180.0))
-            tgtneedle.transform = tgtheading_t
+            tgtneedle_anim.set(tgtheading)
         }
         
         var dirty = false
         while tgtminis.count < targets.count {
             let mini = TargetMiniNeedleView(frame: child_frame)
+            let mini_anim = CompassAnim(mass: 0.36, drag: 4.0)
             tgtminis.append(mini)
+            tgtminis_anim.append(mini_anim)
             self.addSubview(mini)
             mini.hidden = true
             dirty = true
@@ -105,7 +112,7 @@ class CompassView: UIView {
         }
         
         for i in 0..<tgtminis.count {
-            if i >= targets.count || i == current_target {
+            if i >= targets.count {
                 tgtminis[i].hidden = true
             } else {
                 var tgtheading = targets[i].heading
@@ -118,10 +125,29 @@ class CompassView: UIView {
                         tgtheading -= 360
                     }
                 }
-                let tgtheading_t = CGAffineTransformMakeRotation(CGFloat(tgtheading * M_PI / 180.0))
-                tgtminis[i].hidden = false
-                tgtminis[i].transform = tgtheading_t
+                tgtminis[i].hidden = i == current_target
+                tgtminis_anim[i].set(tgtheading)
             }
+        }
+    }
+    
+    func anim()
+    {
+        var h: Double
+        
+        h = back_anim.get()
+        back.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        
+        h = needle_anim.get()
+        needle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        
+        h = tgtneedle_anim.get()
+        tgtneedle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        
+        for i in 0..<tgtminis_anim.count {
+            h = tgtminis_anim[i].get()
+            tgtminis[i].transform =
+                CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
         }
     }
 }
