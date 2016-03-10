@@ -40,9 +40,9 @@ class CompassView: UIView {
         tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.53, width: frame.width, height: frame.height * 0.1))
         tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.63, width: frame.width, height: frame.height * 0.1))
         
-        back_anim = CompassAnim(mass: 0.2, drag: 4.0)
-        needle_anim = CompassAnim(mass: 0.25, drag: 4.0)
-        tgtneedle_anim = CompassAnim(mass: 0.3, drag: 4.0)
+        back_anim = CompassAnim(name: "compass", mass: 0.2, drag: 4.0)
+        needle_anim = CompassAnim(name: "needle", mass: 0.25, drag: 4.0)
+        tgtneedle_anim = CompassAnim(name: "tgtneedle", mass: 0.3, drag: 4.0)
 
         super.init(frame: frame)
         self.backgroundColor = UIColor.clearColor()
@@ -73,6 +73,8 @@ class CompassView: UIView {
                       targets: [(heading: Double, name: String, distance: String)],
                       tgt_dist: Bool)
     {
+        // heading_opt can be NaN, in this case the animation will keep rotating endlessly
+        
         if !absolute {
             back_anim.set(-heading)
             needle_anim.set(0)
@@ -102,6 +104,7 @@ class CompassView: UIView {
             var tgtheading = targets[current_target].heading
             if !absolute {
                 tgtheading -= heading
+                // NSLog("New relative heading for %d: %f", current_target, tgtheading)
             }
             tgtneedle_anim.set(tgtheading)
         }
@@ -110,7 +113,7 @@ class CompassView: UIView {
         while tgtminis.count < targets.count {
             let mini = TargetMiniNeedleView(frame: child_frame)
             let mini2 = TargetMiniInfoView(frame: child_frame)
-            let mini_anim = CompassAnim(mass: 0.36, drag: 4.0)
+            let mini_anim = CompassAnim(name: "minitgtneedle", mass: 0.36, drag: 4.0)
             tgtminis.append(mini)
             tgtminis2.append(mini2)
             tgtminis_anim.append(mini_anim)
@@ -133,12 +136,6 @@ class CompassView: UIView {
                 var tgtheading = targets[i].heading
                 if !absolute {
                     tgtheading -= heading
-                    while tgtheading < 0 {
-                        tgtheading += 360
-                    }
-                    while tgtheading >= 360 {
-                        tgtheading -= 360
-                    }
                 }
                 tgtminis[i].hidden = i == current_target || tgt_dist
                 tgtminis2[i].hidden = i == current_target || !tgt_dist
@@ -152,21 +149,29 @@ class CompassView: UIView {
     {
         var h: Double
         
-        h = back_anim.get()
-        back.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        h = back_anim.getv()
+        if h == h {
+            back.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        }
         
-        h = needle_anim.get()
-        needle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        h = needle_anim.getv()
+        if h == h {
+            needle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        }
         
-        h = tgtneedle_anim.get()
-        tgtneedle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        h = tgtneedle_anim.getv()
+        if h == h {
+            tgtneedle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        }
         
         for i in 0..<tgtminis_anim.count {
-            h = tgtminis_anim[i].get()
-            tgtminis[i].transform =
-                CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
-            tgtminis2[i].transform =
-                CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+            h = tgtminis_anim[i].getv()
+            if h == h {
+                tgtminis[i].transform =
+                    CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+                tgtminis2[i].transform =
+                    CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+            }
         }
     }
 }
