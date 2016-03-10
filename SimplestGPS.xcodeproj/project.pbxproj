@@ -24,6 +24,7 @@
 		B9692847184FB51100998B77 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692846184FB51100998B77 /* icon29.png */; };
 		B9692849184FB51700998B77 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692848184FB51700998B77 /* icon57.png */; };
 		B97E8DF41C91A4FA00B3291C /* TargetMiniInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97E8DF31C91A4FA00B3291C /* TargetMiniInfoView.swift */; };
+		B9AAA5DC1C9236190050F390 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B9AAA5DB1C9236190050F390 /* Settings.bundle */; };
 		B9AD659D1849733200E9C380 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659C1849733200E9C380 /* Foundation.framework */; };
 		B9AD659F1849733200E9C380 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659E1849733200E9C380 /* CoreGraphics.framework */; };
 		B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65A01849733200E9C380 /* UIKit.framework */; };
@@ -55,6 +56,7 @@
 		B9692846184FB51100998B77 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		B9692848184FB51700998B77 /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
 		B97E8DF31C91A4FA00B3291C /* TargetMiniInfoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetMiniInfoView.swift; sourceTree = "<group>"; };
+		B9AAA5DB1C9236190050F390 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		B9AD65991849733200E9C380 /* SimplestGPS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimplestGPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9AD659C1849733200E9C380 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B9AD659E1849733200E9C380 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -122,6 +124,7 @@
 		B9AD65A21849733200E9C380 /* SimplestGPS */ = {
 			isa = PBXGroup;
 			children = (
+				B9AAA5DB1C9236190050F390 /* Settings.bundle */,
 				B95B5D3D1C8F6099002EAEA6 /* SimplestGPS-Bridging-Header.h */,
 				B91E5F9E1C7F83A2000CB068 /* MapViewController.swift */,
 				B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */,
@@ -215,6 +218,7 @@
 			files = (
 				B9AD65B51849733200E9C380 /* Images.xcassets in Resources */,
 				B9692845184FB50A00998B77 /* icon114.png in Resources */,
+				B9AAA5DC1C9236190050F390 /* Settings.bundle in Resources */,
 				B9692849184FB51700998B77 /* icon57.png in Resources */,
 				B9AD65A71849733200E9C380 /* InfoPlist.strings in Resources */,
 				B90AAEEF184C1E64003A302E /* icon120.png in Resources */,

@@ -38,6 +38,7 @@ import CoreLocation
     var mapimages: [String: UIImage] = [:]
     
     var memoryWarningObserver : NSObjectProtocol!
+    var prefsObserver : NSObjectProtocol!
     
     func hold() -> Bool
     {
@@ -1100,17 +1101,31 @@ import CoreLocation
         
         let notifications = NSNotificationCenter.defaultCenter()
         memoryWarningObserver = notifications.addObserverForName(UIApplicationDidReceiveMemoryWarningNotification,
-                                                                 object: nil,
-                                                                 queue: NSOperationQueue.mainQueue(),
-                                                                 usingBlock: { [unowned self] (notification : NSNotification!) -> Void in
-                                                                    self.memory_low()
-            }
+                                object: nil,
+                                queue: NSOperationQueue.mainQueue(),
+                                usingBlock: { [unowned self] (notification : NSNotification!) -> Void in
+                                        self.memory_low()
+                                }
+        )
+        prefsObserver = notifications.addObserverForName(NSUserDefaultsDidChangeNotification,
+                                object: nil,
+                                queue: NSOperationQueue.mainQueue(),
+                                usingBlock: { [unowned self] (notification : NSNotification!) -> Void in
+                                    self.prefs_changed()
+                                }
         )
     }
     
     deinit {
         let notifications = NSNotificationCenter.defaultCenter()
         notifications.removeObserver(memoryWarningObserver, name: UIApplicationDidReceiveMemoryWarningNotification, object: nil)
+        notifications.removeObserver(prefsObserver, name: NSUserDefaultsDidChangeNotification, object: nil)
+    }
+    
+    func prefs_changed()
+    {
+        let prefs = NSUserDefaults.standardUserDefaults();
+        metric = prefs.integerForKey("metric")
     }
     
     func memory_low() {
