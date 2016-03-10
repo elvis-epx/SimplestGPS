@@ -23,6 +23,7 @@
 		B9692845184FB50A00998B77 /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692844184FB50A00998B77 /* icon114.png */; };
 		B9692847184FB51100998B77 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692846184FB51100998B77 /* icon29.png */; };
 		B9692849184FB51700998B77 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692848184FB51700998B77 /* icon57.png */; };
+		B97E8DF41C91A4FA00B3291C /* TargetMiniInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97E8DF31C91A4FA00B3291C /* TargetMiniInfoView.swift */; };
 		B9AD659D1849733200E9C380 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659C1849733200E9C380 /* Foundation.framework */; };
 		B9AD659F1849733200E9C380 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659E1849733200E9C380 /* CoreGraphics.framework */; };
 		B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65A01849733200E9C380 /* UIKit.framework */; };
@@ -53,6 +54,7 @@
 		B9692844184FB50A00998B77 /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
 		B9692846184FB51100998B77 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		B9692848184FB51700998B77 /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
+		B97E8DF31C91A4FA00B3291C /* TargetMiniInfoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetMiniInfoView.swift; sourceTree = "<group>"; };
 		B9AD65991849733200E9C380 /* SimplestGPS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimplestGPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9AD659C1849733200E9C380 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B9AD659E1849733200E9C380 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -127,6 +129,7 @@
 				B95B68971C911A39008E6CD3 /* CompassAnim.swift */,
 				B95B688D1C90B6AF008E6CD3 /* BareCompassView.swift */,
 				B95B68951C90D18D008E6CD3 /* TargetMiniNeedleView.swift */,
+				B97E8DF31C91A4FA00B3291C /* TargetMiniInfoView.swift */,
 				B95B68911C90BF30008E6CD3 /* NeedleView.swift */,
 				B95B688F1C90BC92008E6CD3 /* CompassBGView.swift */,
 				B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */,
@@ -229,6 +232,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B97E8DF41C91A4FA00B3291C /* TargetMiniInfoView.swift in Sources */,
 				B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */,
 				B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */,
 				B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */,

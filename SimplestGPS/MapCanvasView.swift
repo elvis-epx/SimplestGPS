@@ -163,7 +163,8 @@ class MapCanvasView: UIView
     
     func send_compass(mode: Int, heading: Double, altitude: String, speed: String,
                       current_target: Int,
-                      targets: [(heading: Double, name: String, distance: String)])
+                      targets: [(heading: Double, name: String, distance: String)],
+                      tgt_dist: Bool)
     {
         self.mode = mode
         
@@ -183,7 +184,7 @@ class MapCanvasView: UIView
                            transparent: mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING,
                            heading: heading, altitude: altitude, speed: speed,
                            current_target: current_target,
-                           targets: targets)
+                           targets: targets, tgt_dist: tgt_dist)
     }
     
     func compass_anim()

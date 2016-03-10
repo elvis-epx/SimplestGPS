@@ -31,6 +31,7 @@ import UIKit
     let MODE_COUNT = 5
 
     var mode = 1
+    var tgt_dist = true
 
     // in seconds of latitude degree across the screen height
     var zoom_factor: Double = 900
@@ -216,7 +217,8 @@ import UIKit
         canvas.send_compass(mode, heading: GPSModel2.model().heading(),
                             altitude: GPSModel2.model().altitude_formatted(),
                             speed: GPSModel2.model().speed_formatted(),
-                            current_target: current_target, targets: targets_compass)
+                            current_target: current_target, targets: targets_compass,
+                            tgt_dist: tgt_dist)
 
         // calculate screen size in GPS
         // NOTE: longitude coordinates may be denormalized (e.g. -181W or +181E)
@@ -465,6 +467,13 @@ import UIKit
         default:
             break
         }
+    }
+    
+    @IBAction func tgd_button(sender: AnyObject)
+    {
+        NSLog("tgd")
+        tgt_dist = !tgt_dist
+        repaint()
     }
     
     @IBAction func mod_button(sender: AnyObject)

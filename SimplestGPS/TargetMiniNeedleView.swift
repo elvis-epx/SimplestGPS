@@ -9,7 +9,8 @@
 import Foundation
 import UIKit
 
-class TargetMiniNeedleView: UIView {
+class TargetMiniNeedleView: UIView
+{
     override init(frame: CGRect)
     {
         super.init(frame: frame)

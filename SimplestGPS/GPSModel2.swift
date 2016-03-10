@@ -1041,7 +1041,7 @@ import CoreLocation
         let prefs = NSUserDefaults.standardUserDefaults();
         
         prefs.registerDefaults(["metric": 1, "next_target": 3,
-            "names": ["1": "Joinville, Brazil", "2": "Blumenau, Brazil"],
+            "names": ["1": "Joinville", "2": "Blumenau"],
             "lats": ["1": GPSModel2.parse_latz("26.18.19.50S"),
                 "2": GPSModel2.parse_latz("26.54.46.10S")],
             "longs": ["1": GPSModel2.parse_longz("48.50.44.44W"),

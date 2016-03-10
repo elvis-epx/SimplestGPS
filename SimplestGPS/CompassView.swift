@@ -23,8 +23,10 @@ class CompassView: UIView {
     var tgtneedle_anim: CompassAnim
 
     var tgtminis: [TargetMiniNeedleView] = []
+    var tgtminis2: [TargetMiniInfoView] = []
     var tgtminis_anim: [CompassAnim] = []
-    
+
+
     var tgtdistance: UITextView
     var tgtname: UITextView
     var child_frame: CGRect
@@ -68,7 +70,8 @@ class CompassView: UIView {
                    absolute: Bool, transparent: Bool, heading: Double,
                    altitude: String, speed: String,
                       current_target: Int,
-                      targets: [(heading: Double, name: String, distance: String)])
+                      targets: [(heading: Double, name: String, distance: String)],
+                      tgt_dist: Bool)
     {
         if !absolute {
             back_anim.set(-heading)
@@ -106,11 +109,15 @@ class CompassView: UIView {
         var dirty = false
         while tgtminis.count < targets.count {
             let mini = TargetMiniNeedleView(frame: child_frame)
+            let mini2 = TargetMiniInfoView(frame: child_frame)
             let mini_anim = CompassAnim(mass: 0.36, drag: 4.0)
             tgtminis.append(mini)
+            tgtminis2.append(mini2)
             tgtminis_anim.append(mini_anim)
             self.addSubview(mini)
+            self.addSubview(mini2)
             mini.hidden = true
+            mini2.hidden = true
             dirty = true
         }
         
@@ -121,6 +128,7 @@ class CompassView: UIView {
         for i in 0..<tgtminis.count {
             if i >= targets.count {
                 tgtminis[i].hidden = true
+                tgtminis2[i].hidden = true
             } else {
                 var tgtheading = targets[i].heading
                 if !absolute {
@@ -132,7 +140,9 @@ class CompassView: UIView {
                         tgtheading -= 360
                     }
                 }
-                tgtminis[i].hidden = i == current_target
+                tgtminis[i].hidden = i == current_target || tgt_dist
+                tgtminis2[i].hidden = i == current_target || !tgt_dist
+                tgtminis2[i].labels(targets[i].name, distance: targets[i].distance)
                 tgtminis_anim[i].set(tgtheading)
             }
         }
@@ -154,6 +164,8 @@ class CompassView: UIView {
         for i in 0..<tgtminis_anim.count {
             h = tgtminis_anim[i].get()
             tgtminis[i].transform =
+                CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+            tgtminis2[i].transform =
                 CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
         }
     }
