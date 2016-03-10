@@ -15,6 +15,9 @@ import UIKit
     @IBOutlet weak var scale: UILabel!
     @IBOutlet weak var new_target: UIButton!
     
+    @IBOutlet weak var accuracy: UILabel!
+    @IBOutlet weak var longitude: UILabel!
+    @IBOutlet weak var latitude: UILabel!
     var scrw: Double = Double.NaN
     var scrh: Double = Double.NaN
     var width_prop: Double = Double.NaN
@@ -188,6 +191,9 @@ import UIKit
         }
         
         scale.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+        // latitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
+        // longitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
+        // accuracy.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
         
         // send compass data
         var targets_compass: [(heading: Double, name: String, distance: String)] = []
@@ -217,11 +223,11 @@ import UIKit
         
         let scale_m = 1852.0 * 60 * long_prop * abs(slong1 - slong0)
         scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
-        // coordinates.text = GPSModel2.model().latitude_formatted()
-        // extra.text = GPSModel2.model().longitude_formatted()
+        latitude.text = GPSModel2.model().latitude_formatted()
+        longitude.text = GPSModel2.model().longitude_formatted()
+        accuracy.text = GPSModel2.model().accuracy_formatted()
 
-        let accuracy = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
-        // let accuracy = scrw * 1000 / scale_m
+        let accuracy_px = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
         
         var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
         
@@ -275,7 +281,7 @@ import UIKit
         if GPSModel2.ins(gpslat, _long: gpslong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
             let x = GPSModel2.long_to(gpslong, a: slong0, b: slong1, scrw: scrw)
             let y = GPSModel2.lat_to(gpslat, a: slat0, b: slat1, scrh: scrh)
-            canvas.send_pos(x, y: y, color: blink_phase, accuracy: CGFloat(accuracy))
+            canvas.send_pos(x, y: y, color: blink_phase, accuracy: CGFloat(accuracy_px))
             if debug {
                 NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
             }
