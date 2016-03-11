@@ -62,7 +62,7 @@ class CompassAnim
             return Double.NaN
         }
         
-        if (abs(target - current) < 0.1) {
+        if (abs(target - current) < 0.1 && abs(speed) <= MIN_SPEED) {
             current = target
             return current
         }
