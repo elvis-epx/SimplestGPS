@@ -75,7 +75,11 @@ class CompassAnim
         }
         
         let now = NSDate()
-        let dx = now.timeIntervalSinceDate(self.last!)
+        var dx = now.timeIntervalSinceDate(self.last!)
+        if dx > 1.0 {
+            // we were probably at background
+            dx = 0.0
+        }
         self.last = now
         
         if lost {
@@ -98,8 +102,8 @@ class CompassAnim
         
         current += speed * dx
         current %= 360.0 // for the "lost" case
-        // NSLog("%@: Force %f pforce %f accel %f spd %f cur %f -> %f",
-            // name, force, force2, acceleration, speed, current, target)
+        // NSLog("%@: dx %f Force %f pforce %f accel %f spd %f cur %f -> %f",
+        //      name, dx, force, force2, acceleration, speed, current, target)
         
         return current
     }
