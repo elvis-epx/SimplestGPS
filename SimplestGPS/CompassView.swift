@@ -113,7 +113,7 @@ class CompassView: UIView {
         while tgtminis.count < targets.count {
             let mini = TargetMiniNeedleView(frame: child_frame)
             let mini2 = TargetMiniInfoView(frame: child_frame)
-            let mini_anim = CompassAnim(name: "minitgtneedle", mass: 0.36, drag: 4.0)
+            let mini_anim = CompassAnim(name: "minitgtneedle", mass: 0.36, drag: 3.5 + drand48() * 2)
             tgtminis.append(mini)
             tgtminis2.append(mini2)
             tgtminis_anim.append(mini_anim)
