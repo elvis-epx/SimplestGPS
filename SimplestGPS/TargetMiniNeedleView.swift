@@ -28,10 +28,10 @@ class TargetMiniNeedleView: UIView
             return
         }
         
-        let radius = CGFloat((CGFloat(self.frame.size.width) * 0.80) / 2)
+        let radius = CGFloat((CGFloat(self.bounds.size.width) * 0.80) / 2)
         let off = radius * 0.08
-        let x = CGFloat(self.frame.size.width / 2)
-        let y = CGFloat(self.frame.size.height / 2)
+        let x = CGFloat(self.bounds.size.width / 2)
+        let y = CGFloat(self.bounds.size.height / 2)
 
         let x0 = x - off
         let y0 = y - radius - off

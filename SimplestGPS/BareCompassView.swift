@@ -23,9 +23,9 @@ class BareCompassView: UIView {
     {
         var startAngle: Float = Float(2 * M_PI)
         var endAngle: Float = 0.0
-        let radius = CGFloat((CGFloat(self.frame.size.width)) / 2)
+        let radius = CGFloat((CGFloat(self.bounds.size.width)) / 2)
         
-        let center = CGPointMake(self.frame.size.width / 2, self.frame.size.height / 2)
+        let center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2)
         
         CGContextSetStrokeColorWithColor(ctx, UIColor.redColor().CGColor)
         CGContextSetLineWidth(ctx, CGFloat(0))
@@ -130,9 +130,9 @@ class BareCompassView: UIView {
             return
         }
         // outer_circle(context!)
-        let radius = CGFloat((CGFloat(self.frame.size.width) - 12) / 2)
-        let center = CGPointMake(self.frame.size.width / 2, self.frame.size.height / 2)
+        let radius = CGFloat((CGFloat(self.bounds.size.width) - 12) / 2)
+        let center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2)
         markers(context!, x: center.x, y: center.y, radius: radius, sides: 60, color: UIColor.whiteColor())
-        cardinals(self.frame, ctx: context!, x: center.x, y: center.y, radius: radius, sides: 12, color: UIColor.whiteColor())
+        cardinals(self.bounds, ctx: context!, x: center.x, y: center.y, radius: radius, sides: 12, color: UIColor.whiteColor())
     }
 }
