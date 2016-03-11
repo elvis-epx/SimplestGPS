@@ -19,7 +19,7 @@ class CompassAnim
     var name: String
     var lost: Bool
     var view: UIView
-    var exponential: Bool
+    var fast: Bool
     var opacity: Int
 
     let MIN_SPEED = 1.0 // degrees/second
@@ -27,7 +27,7 @@ class CompassAnim
     let OPACITY_LOST = 12000.0 // points/sec
     let OPACITY_OK = 50000.0 // points/sec
     
-    init(name: String, view: UIView, mass: Double, drag: Double, exponential: Bool) {
+    init(name: String, view: UIView, mass: Double, drag: Double) {
         self.name = name
         self.speed = 0.0
         self.mass = mass
@@ -35,7 +35,7 @@ class CompassAnim
         self.target = 0.0
         self.current = 0.0
         self.lost = false
-        self.exponential = exponential
+        self.fast = false
         self.view = view
         opacity = 10000
     }
@@ -60,6 +60,10 @@ class CompassAnim
         while (self.current - self.target) >= 180.0 {
             self.current -= 360.0
         }
+    }
+    
+    func bigchange() {
+        self.fast = true
     }
     
     func tick(pdx: Double) -> Double
@@ -97,11 +101,12 @@ class CompassAnim
             // latch
             speed = 0
             current = target
+            self.fast = false
         } else {
             let force = target - current
             var force2 = abs(force)
-            if exponential {
-                // it just looks better this way, but MAX_SPEED is then needed
+            if fast {
+                // sometimes it just looks better this way, but MAX_SPEED is then needed
                 force2 = pow(force2, 1.5)
             }
             let acceleration = force2 / mass * (force > 0 ? 1 : -1)
@@ -127,12 +132,10 @@ class CompassAnim
         NSLog("%@: opacity %d",
               name, opacity)
  */
-
-        current %= 360.0
         
         view.transform = CGAffineTransformMakeRotation(CGFloat(current * M_PI / 180.0))
         view.alpha = CGFloat(opacity) / 10000.0
 
-        return current
+        return current % 360.0
     }
 }

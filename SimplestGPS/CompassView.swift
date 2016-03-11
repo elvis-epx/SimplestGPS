@@ -30,6 +30,9 @@ class CompassView: UIView {
     var tgtdistance: UITextView? = nil
     var tgtname: UITextView? = nil
     
+    var last_target = -1
+    var last_absolute = false
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
     }
@@ -47,9 +50,9 @@ class CompassView: UIView {
         tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.53, width: frame.width, height: frame.height * 0.1))
         tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.63, width: frame.width, height: frame.height * 0.1))
         
-        back_anim = CompassAnim(name: "compass", view: back!, mass: 0.4, drag: 6.0, exponential: false)
-        needle_anim = CompassAnim(name: "needle", view: needle!, mass: 0.25, drag: 4.0, exponential: true)
-        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle!, mass: 0.3, drag: 4.0, exponential: true)
+        back_anim = CompassAnim(name: "compass", view: back!, mass: 0.4, drag: 6.0)
+        needle_anim = CompassAnim(name: "needle", view: needle!, mass: 0.25, drag: 4.0)
+        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle!, mass: 0.3, drag: 4.0)
         
         self.backgroundColor = UIColor.clearColor()
         self.addSubview(bg!)
@@ -79,6 +82,11 @@ class CompassView: UIView {
             init2()
         }
         
+        let target_change = current_target != last_target
+        let ref_change = absolute != last_absolute
+        last_absolute = absolute
+        last_target = current_target
+        
         // heading_opt can be NaN, in this case the animation will keep rotating endlessly
         
         if !absolute {
@@ -88,6 +96,14 @@ class CompassView: UIView {
             needle_anim!.set(heading)
             back_anim!.set(0.0)
         }
+        if ref_change {
+            needle_anim!.bigchange()
+            back_anim!.bigchange()
+        }
+        if ref_change || target_change {
+            tgtneedle_anim!.bigchange()
+        }
+        
         if current_target < 0 {
             tgtname!.hidden = !compassonly
             tgtdistance!.hidden = !compassonly
@@ -120,8 +136,8 @@ class CompassView: UIView {
             let child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             let mini = TargetMiniNeedleView(frame: child_frame)
             let mini2 = TargetMiniInfoView(frame: child_frame)
-            let mini_anim = CompassAnim(name: "minitgtneedle", view: mini, mass: 0.36, drag: 3.5 + drand48() * 2, exponential: true)
-            let mini2_anim = CompassAnim(name: "minitgtneedle2", view: mini2, mass: 0.36, drag: 3.5 + drand48() * 2, exponential: true)
+            let mini_anim = CompassAnim(name: "minitgtneedle", view: mini, mass: 0.36, drag: 3.5 + drand48() * 2)
+            let mini2_anim = CompassAnim(name: "minitgtneedle2", view: mini2, mass: 0.36, drag: 3.5 + drand48() * 2)
             tgtminis.append(mini)
             tgtminis2.append(mini2)
             tgtminis_anim.append(mini_anim)
@@ -149,6 +165,11 @@ class CompassView: UIView {
                 tgtminis2[i].labels(targets[i].name, distance: targets[i].distance)
                 tgtminis_anim[i].set(tgtheading)
                 tgtminis2_anim[i].set(tgtheading)
+                if ref_change {
+                    tgtminis_anim[i].bigchange()
+                    tgtminis2_anim[i].bigchange()
+                }
+
             }
         }
     }
