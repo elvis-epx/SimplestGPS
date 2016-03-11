@@ -108,7 +108,7 @@ import UIKit
         super.viewWillAppear(animated)
         GPSModel2.model().addObs(self)
         blink_timer = NSTimer.scheduledTimerWithTimeInterval(0.33, target: self, selector: #selector(MapViewController.blink), userInfo: nil, repeats: true)
-        compass_timer = NSTimer.scheduledTimerWithTimeInterval(1.0 / 60.0, target: self, selector: #selector(MapViewController.compass_anim), userInfo: nil, repeats: true)
+        compass_timer = NSTimer.scheduledTimerWithTimeInterval(1.0 / 50.0, target: self, selector: #selector(MapViewController.compass_anim), userInfo: nil, repeats: true)
     }
     
     override func viewWillLayoutSubviews() {
