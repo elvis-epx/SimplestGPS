@@ -143,27 +143,27 @@ class CompassView: UIView {
         }
     }
     
-    func anim()
+    func anim(dx: Double)
     {
         var h: Double
         
-        h = back_anim.getv()
+        h = back_anim.getv(dx)
         if h == h {
             back.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
         }
         
-        h = needle_anim.getv()
+        h = needle_anim.getv(dx)
         if h == h {
             needle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
         }
         
-        h = tgtneedle_anim.getv()
+        h = tgtneedle_anim.getv(dx)
         if h == h {
             tgtneedle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
         }
         
         for i in 0..<tgtminis_anim.count {
-            h = tgtminis_anim[i].getv()
+            h = tgtminis_anim[i].getv(dx)
             if h == h {
                 tgtminis[i].transform =
                     CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))

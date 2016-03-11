@@ -16,6 +16,8 @@ class MapCanvasView: UIView
     var location: UIView? = nil
     var accuracy_area: UIView? = nil
     var compass: CompassView? = nil
+    var updater: CADisplayLink? = nil
+    var last_update: CFTimeInterval = Double.NaN
     
     let MODE_MAPONLY = 0
     let MODE_MAPCOMPASS = 1
@@ -28,12 +30,19 @@ class MapCanvasView: UIView
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.blackColor()
+        self.init2()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        self.init2()
+    }
+    
+    func init2() {
         self.backgroundColor = UIColor.blackColor()
+        updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.compass_anim))
+        updater!.frameInterval = 1
+        updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
     func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
@@ -202,10 +211,15 @@ class MapCanvasView: UIView
                            targets: targets, tgt_dist: tgt_dist)
     }
     
-    func compass_anim()
+    func compass_anim(sender: CADisplayLink)
     {
-        if (compass != nil) {
-            compass!.anim()
+        let this_update = sender.timestamp
+        if last_update == last_update {
+            let dx = this_update - last_update
+            if (compass != nil) {
+                compass!.anim(dx)
+            }
         }
+        last_update = this_update
     }
 }

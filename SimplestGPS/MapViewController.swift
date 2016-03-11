@@ -57,7 +57,6 @@ import UIKit
     
     var blink_phase = -1
     var blink_timer: NSTimer? = nil
-    var compass_timer: NSTimer? = nil
     var current_target = -1
     
     var debug = false
@@ -108,7 +107,6 @@ import UIKit
         super.viewWillAppear(animated)
         GPSModel2.model().addObs(self)
         blink_timer = NSTimer.scheduledTimerWithTimeInterval(0.33, target: self, selector: #selector(MapViewController.blink), userInfo: nil, repeats: true)
-        compass_timer = NSTimer.scheduledTimerWithTimeInterval(1.0 / 50.0, target: self, selector: #selector(MapViewController.compass_anim), userInfo: nil, repeats: true)
     }
     
     override func viewWillLayoutSubviews() {
@@ -123,7 +121,6 @@ import UIKit
         super.viewWillDisappear(animated)
         GPSModel2.model().delObs(self)
         blink_timer?.invalidate()
-        compass_timer?.invalidate()
     }
     
     func fail() {
@@ -490,11 +487,6 @@ import UIKit
             current_target = -1
         }
         repaint()
-    }
-    
-    func compass_anim()
-    {
-        canvas.compass_anim()
     }
     
     @IBAction func backToMain(sender: UIStoryboardSegue)

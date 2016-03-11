@@ -15,7 +15,6 @@ class CompassAnim
     var target: Double
     var current: Double
     var drag: Double
-    var last: NSDate? = nil
     var name: String
     var lost: Bool
     
@@ -31,8 +30,6 @@ class CompassAnim
     
     func set(target: Double)
     {
-        last = nil
-        
         lost = target != target
         if lost {
             self.target = self.current + 1.0
@@ -54,18 +51,14 @@ class CompassAnim
         }
     }
     
-    func getv() -> Double
+    func getv(pdx: Double) -> Double
     {
         let MIN_SPEED = 1.0 // degrees/second
         let MAX_SPEED = 180.0 // degrees/seconds
-        
-        if self.last == nil {
-            self.last = NSDate()
-            return current
-        }
+
+        var dx = pdx
         
         if !self.lost && target == current {
-            self.last = nil
             return Double.NaN
         }
         
@@ -74,13 +67,10 @@ class CompassAnim
             return current
         }
         
-        let now = NSDate()
-        var dx = now.timeIntervalSinceDate(self.last!)
         if dx > 1.0 {
             // we were probably at background
             dx = 0.0
         }
-        self.last = now
         
         if lost {
             target = current + 15.0
