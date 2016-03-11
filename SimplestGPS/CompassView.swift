@@ -11,28 +11,35 @@ import Foundation
 import UIKit
 
 class CompassView: UIView {
-    var bg: CompassBGView
+    var bg: CompassBGView? = nil
 
-    var back: BareCompassView
-    var back_anim: CompassAnim
+    var back: BareCompassView? = nil
+    var back_anim: CompassAnim? = nil
 
-    var needle: NeedleView
-    var needle_anim: CompassAnim
+    var needle: NeedleView? = nil
+    var needle_anim: CompassAnim? = nil
     
-    var tgtneedle: NeedleView
-    var tgtneedle_anim: CompassAnim
+    var tgtneedle: NeedleView? = nil
+    var tgtneedle_anim: CompassAnim? = nil
 
     var tgtminis: [TargetMiniNeedleView] = []
-    var tgtminis2: [TargetMiniInfoView] = []
     var tgtminis_anim: [CompassAnim] = []
+    var tgtminis2: [TargetMiniInfoView] = []
+    var tgtminis2_anim: [CompassAnim] = []
 
-
-    var tgtdistance: UITextView
-    var tgtname: UITextView
-    var child_frame: CGRect
+    var tgtdistance: UITextView? = nil
+    var tgtname: UITextView? = nil
     
     override init(frame: CGRect) {
-        child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
+        super.init(frame: frame)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func init2() {
+        let child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
         bg = CompassBGView(frame: child_frame)
         needle = NeedleView(frame: child_frame, color: UIColor.redColor())
         tgtneedle = NeedleView(frame: child_frame, color: UIColor.greenColor())
@@ -40,30 +47,25 @@ class CompassView: UIView {
         tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.53, width: frame.width, height: frame.height * 0.1))
         tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.63, width: frame.width, height: frame.height * 0.1))
         
-        back_anim = CompassAnim(name: "compass", mass: 0.2, drag: 4.0)
-        needle_anim = CompassAnim(name: "needle", mass: 0.25, drag: 4.0)
-        tgtneedle_anim = CompassAnim(name: "tgtneedle", mass: 0.3, drag: 4.0)
-
-        super.init(frame: frame)
-        self.backgroundColor = UIColor.clearColor()
-        self.addSubview(bg)
-        self.addSubview(needle)
-        self.addSubview(tgtneedle)
-        self.addSubview(back)
+        back_anim = CompassAnim(name: "compass", view: back!, mass: 0.4, drag: 6.0, exponential: false)
+        needle_anim = CompassAnim(name: "needle", view: needle!, mass: 0.25, drag: 4.0, exponential: true)
+        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle!, mass: 0.3, drag: 4.0, exponential: true)
         
-        tgtdistance.backgroundColor = UIColor.clearColor()
-        tgtdistance.font = UIFont.systemFontOfSize(frame.width / 15)
-        tgtdistance.textAlignment = .Center
-        self.addSubview(tgtdistance)
-   
-        tgtname.backgroundColor = UIColor.clearColor()
-        tgtname.font = UIFont.systemFontOfSize(frame.width / 20)
-        tgtname.textAlignment = .Center
-        self.addSubview(tgtname)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        self.backgroundColor = UIColor.clearColor()
+        self.addSubview(bg!)
+        self.addSubview(needle!)
+        self.addSubview(tgtneedle!)
+        self.addSubview(back!)
+        
+        tgtdistance!.backgroundColor = UIColor.clearColor()
+        tgtdistance!.font = UIFont.systemFontOfSize(frame.width / 15)
+        tgtdistance!.textAlignment = .Center
+        self.addSubview(tgtdistance!)
+        
+        tgtname!.backgroundColor = UIColor.clearColor()
+        tgtname!.font = UIFont.systemFontOfSize(frame.width / 20)
+        tgtname!.textAlignment = .Center
+        self.addSubview(tgtname!)
     }
     
     func send_data(compassonly: Bool,
@@ -73,50 +75,57 @@ class CompassView: UIView {
                       targets: [(heading: Double, name: String, distance: String)],
                       tgt_dist: Bool)
     {
+        if bg == nil {
+            init2()
+        }
+        
         // heading_opt can be NaN, in this case the animation will keep rotating endlessly
         
         if !absolute {
-            back_anim.set(-heading)
-            needle_anim.set(0)
+            back_anim!.set(-heading)
+            needle_anim!.set(0)
         } else {
-            needle_anim.set(heading)
-            back_anim.set(0.0)
+            needle_anim!.set(heading)
+            back_anim!.set(0.0)
         }
         if current_target < 0 {
-            tgtname.hidden = !compassonly
-            tgtdistance.hidden = !compassonly
+            tgtname!.hidden = !compassonly
+            tgtdistance!.hidden = !compassonly
             if compassonly {
-                tgtdistance.textColor = UIColor.redColor()
+                tgtdistance!.textColor = UIColor.redColor()
                 // tgtname.textColor = UIColor.redColor()
-                tgtdistance.text = speed
-                tgtname.text = ""
+                tgtdistance!.text = speed
+                tgtname!.text = ""
             }
-            tgtneedle.hidden = true
+            tgtneedle!.hidden = true
         } else {
-            tgtdistance.textColor = UIColor.cyanColor()
-            tgtname.textColor = UIColor.cyanColor()
-            tgtname.hidden = false
-            tgtdistance.hidden = false
-            tgtname.text = targets[current_target].name
-            tgtdistance.text = targets[current_target].distance
+            tgtdistance!.textColor = UIColor.cyanColor()
+            tgtname!.textColor = UIColor.cyanColor()
+            tgtname!.hidden = false
+            tgtdistance!.hidden = false
+            tgtname!.text = targets[current_target].name
+            tgtdistance!.text = targets[current_target].distance
             
-            tgtneedle.hidden = false
+            tgtneedle!.hidden = false
             var tgtheading = targets[current_target].heading
             if !absolute {
                 tgtheading -= heading
                 // NSLog("New relative heading for %d: %f", current_target, tgtheading)
             }
-            tgtneedle_anim.set(tgtheading)
+            tgtneedle_anim!.set(tgtheading)
         }
         
         var dirty = false
         while tgtminis.count < targets.count {
+            let child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             let mini = TargetMiniNeedleView(frame: child_frame)
             let mini2 = TargetMiniInfoView(frame: child_frame)
-            let mini_anim = CompassAnim(name: "minitgtneedle", mass: 0.36, drag: 3.5 + drand48() * 2)
+            let mini_anim = CompassAnim(name: "minitgtneedle", view: mini, mass: 0.36, drag: 3.5 + drand48() * 2, exponential: true)
+            let mini2_anim = CompassAnim(name: "minitgtneedle2", view: mini2, mass: 0.36, drag: 3.5 + drand48() * 2, exponential: true)
             tgtminis.append(mini)
             tgtminis2.append(mini2)
             tgtminis_anim.append(mini_anim)
+            tgtminis2_anim.append(mini2_anim)
             self.addSubview(mini)
             self.addSubview(mini2)
             dirty = true
@@ -139,37 +148,23 @@ class CompassView: UIView {
                 tgtminis2[i].hidden = i == current_target || !tgt_dist
                 tgtminis2[i].labels(targets[i].name, distance: targets[i].distance)
                 tgtminis_anim[i].set(tgtheading)
+                tgtminis2_anim[i].set(tgtheading)
             }
         }
     }
     
     func anim(dx: Double)
     {
-        var h: Double
-        
-        h = back_anim.getv(dx)
-        if h == h {
-            back.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
+        if bg == nil {
+            return
         }
         
-        h = needle_anim.getv(dx)
-        if h == h {
-            needle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
-        }
-        
-        h = tgtneedle_anim.getv(dx)
-        if h == h {
-            tgtneedle.transform = CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
-        }
-        
+        back_anim!.tick(dx)
+        needle_anim!.tick(dx)
+        tgtneedle_anim!.tick(dx)
         for i in 0..<tgtminis_anim.count {
-            h = tgtminis_anim[i].getv(dx)
-            if h == h {
-                tgtminis[i].transform =
-                    CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
-                tgtminis2[i].transform =
-                    CGAffineTransformMakeRotation(CGFloat(h * M_PI / 180.0))
-            }
+            tgtminis_anim[i].tick(dx)
+            tgtminis2_anim[i].tick(dx)
         }
     }
 }
