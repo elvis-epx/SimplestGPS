@@ -80,6 +80,9 @@ class MapCanvasView: UIView
                 compass!.removeFromSuperview()
                 self.addSubview(compass!)
             }
+            
+            // dirty; return to settle layout
+            return
         }
         
         for i in 0..<list.count {
@@ -100,6 +103,8 @@ class MapCanvasView: UIView
             accuracy_area!.alpha = 0.2
             accuracy_area!.backgroundColor = UIColor.yellowColor()
             self.addSubview(accuracy_area!)
+            // dirty; return to settle layout
+            return
         }
         
         if location == nil {
@@ -107,6 +112,8 @@ class MapCanvasView: UIView
             location!.layer.cornerRadius = 8
             location!.alpha = 1
             self.addSubview(location!)
+            // dirty; return to settle layout
+            return
         }
 
         if color > 0 {
@@ -120,6 +127,8 @@ class MapCanvasView: UIView
             let compass_frame = CGRect(x: 0, y: slack / 2, width: self.frame.width, height: self.frame.width)
             compass = CompassView.init(frame: compass_frame)
             self.addSubview(compass!)
+            // dirty; return to settle layout
+            return
         }
 
         accuracy_area!.frame = facc
@@ -133,7 +142,8 @@ class MapCanvasView: UIView
     func send_targets(list: [(CGFloat, CGFloat)])
     {
         let updated_targets = targets.count < list.count
-        
+
+        var dirty = false
         while targets.count < list.count {
             let f = CGRect(x: 0, y: 0, width: 16, height: 16)
             let target = UIView.init(frame: f)
@@ -142,6 +152,11 @@ class MapCanvasView: UIView
             target.alpha = 1
             self.addSubview(target)
             targets.append(target)
+            dirty = true
+        }
+        if dirty {
+            // dirty; return to settle layout
+            return
         }
         
         if updated_targets && compass != nil {

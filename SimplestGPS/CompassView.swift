@@ -119,8 +119,6 @@ class CompassView: UIView {
             tgtminis_anim.append(mini_anim)
             self.addSubview(mini)
             self.addSubview(mini2)
-            mini.hidden = true
-            mini2.hidden = true
             dirty = true
         }
         
