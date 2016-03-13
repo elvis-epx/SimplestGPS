@@ -50,7 +50,7 @@ class CompassView: UIView {
         tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.53, width: frame.width, height: frame.height * 0.1))
         tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.63, width: frame.width, height: frame.height * 0.1))
         
-        back_anim = CompassAnim(name: "compass", view: back!, mass: 0.4, drag: 6.0)
+        back_anim = CompassAnim(name: "compass", view: back!, mass: 0.4, drag: 4.0)
         needle_anim = CompassAnim(name: "needle", view: needle!, mass: 0.25, drag: 4.0)
         tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle!, mass: 0.3, drag: 4.0)
         

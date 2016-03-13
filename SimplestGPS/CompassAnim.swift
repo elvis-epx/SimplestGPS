@@ -22,7 +22,7 @@ class CompassAnim
     var fast: Bool
     var opacity: Int
 
-    let MIN_SPEED = 1.0 // degrees/second
+    let MIN_SPEED = 0.5 // degrees/second
     let MAX_SPEED = 180.0 // degrees/seconds
     let OPACITY_LOST = 12000.0 // points/sec
     let OPACITY_OK = 50000.0 // points/sec
@@ -91,13 +91,11 @@ class CompassAnim
             opacity = min(9999, max(0, opacity))
         } else {
             // restore opacity
-            if opacity < 10000 {
-                opacity += Int(OPACITY_OK * dx)
-            }
+            opacity += Int(OPACITY_OK * dx)
             opacity = min(10000, opacity)
         }
         
-        if (abs(target - current) < 0.1 && abs(speed) <= MIN_SPEED) {
+        if (abs(target - current) < (MIN_SPEED / 6) && abs(speed) <= MIN_SPEED) {
             // latch
             speed = 0
             current = target
@@ -113,20 +111,27 @@ class CompassAnim
     
             speed -= speed * drag * dx
             speed += acceleration * dx
-            if speed < 0 && speed > -MIN_SPEED {
-                speed = -MIN_SPEED
-            } else if speed > 0 && speed < MIN_SPEED {
-                speed = MIN_SPEED
-            }
             speed = max(speed, -MAX_SPEED)
             speed = min(speed, MAX_SPEED)
+            
+            // calculate this separately because small accelerations cannot invert
+            // speed's signal when it is MIN_SPEED, so casting speed to MIN_SPEED
+            // would make the needle to go to the wrong direction for a while
+            var effective_speed = speed
+            if effective_speed < 0 && effective_speed > -MIN_SPEED {
+                effective_speed = -MIN_SPEED
+            } else if speed > 0 && effective_speed < MIN_SPEED {
+                effective_speed = MIN_SPEED
+            }
         
-            current += speed * dx
+            current += effective_speed * dx
            
             /*
-            NSLog("%@: Force %f eforce %f accel %f spd %f cur %f -> %f",
-                  name, force, force2, acceleration, speed, current, target)
-             */
+            if self.name == "tgtneedle" {
+                NSLog("%@: Force %f eforce %f accel %f spd %f cur %f -> %f",
+                      name, force, force2, acceleration, speed, current, target)
+            }
+            */
         }
         /*
         NSLog("%@: opacity %d",
