@@ -105,12 +105,10 @@ class CompassView: UIView {
         }
         
         if current_target < 0 {
-            if compassonly {
-                tgtdistance!.textColor = UIColor.redColor()
-                // tgtname.textColor = UIColor.redColor()
-                tgtdistance!.text = speed
-                tgtname!.text = ""
-            }
+            tgtdistance!.textColor = UIColor.redColor()
+            // tgtname.textColor = UIColor.redColor()
+            tgtdistance!.text = speed
+            tgtname!.text = ""
             tgtneedle!.hidden = true
         } else {
             tgtdistance!.textColor = UIColor.cyanColor()
