@@ -47,8 +47,8 @@ class CompassView: UIView {
         needle = NeedleView(frame: child_frame, color: UIColor.redColor())
         tgtneedle = NeedleView(frame: child_frame, color: UIColor.greenColor())
         back = BareCompassView(frame: child_frame)
-        tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.53, width: frame.width, height: frame.height * 0.1))
-        tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.63, width: frame.width, height: frame.height * 0.1))
+        tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.65, width: frame.width, height: frame.height * 0.1))
+        tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.57, width: frame.width, height: frame.height * 0.1))
         
         back_anim = CompassAnim(name: "compass", view: back!, mass: 0.4, drag: 4.0)
         needle_anim = CompassAnim(name: "needle", view: needle!, mass: 0.25, drag: 4.0)
@@ -105,8 +105,6 @@ class CompassView: UIView {
         }
         
         if current_target < 0 {
-            tgtname!.hidden = !compassonly
-            tgtdistance!.hidden = !compassonly
             if compassonly {
                 tgtdistance!.textColor = UIColor.redColor()
                 // tgtname.textColor = UIColor.redColor()
@@ -117,8 +115,6 @@ class CompassView: UIView {
         } else {
             tgtdistance!.textColor = UIColor.cyanColor()
             tgtname!.textColor = UIColor.cyanColor()
-            tgtname!.hidden = false
-            tgtdistance!.hidden = false
             tgtname!.text = targets[current_target].name
             tgtdistance!.text = targets[current_target].distance
             
