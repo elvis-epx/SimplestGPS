@@ -16,7 +16,11 @@ class TargetMiniInfoView: UIView {
     override init(frame: CGRect)
     {
         name = UITextView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.width / 10))
+        name.editable = false
+        name.selectable = false
         distance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.035, width: frame.width, height: frame.width / 10))
+        distance.editable = false
+        distance.selectable = false
 
         super.init(frame: frame)
         self.backgroundColor = UIColor.clearColor()

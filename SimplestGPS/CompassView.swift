@@ -49,6 +49,10 @@ class CompassView: UIView {
         back = BareCompassView(frame: child_frame)
         tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.65, width: frame.width, height: frame.height * 0.1))
         tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.57, width: frame.width, height: frame.height * 0.1))
+        tgtdistance!.editable = false
+        tgtdistance!.selectable = false
+        tgtname!.editable = false
+        tgtname!.selectable = false
         
         back_anim = CompassAnim(name: "compass", view: back!, mass: 0.4, drag: 4.0)
         needle_anim = CompassAnim(name: "needle", view: needle!, mass: 0.25, drag: 4.0)

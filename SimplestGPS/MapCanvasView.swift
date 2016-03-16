@@ -16,6 +16,7 @@ class MapCanvasView: UIView
     var location: UIView? = nil
     var accuracy_area: UIView? = nil
     var compass: CompassView? = nil
+    
     var updater: CADisplayLink? = nil
     var updater2: CADisplayLink? = nil
     var last_update: CFTimeInterval = Double.NaN
