@@ -17,7 +17,13 @@ class MapCanvasView: UIView
     var accuracy_area: UIView? = nil
     var compass: CompassView? = nil
     var updater: CADisplayLink? = nil
+    var updater2: CADisplayLink? = nil
     var last_update: CFTimeInterval = Double.NaN
+    var last_update2: CFTimeInterval = Double.NaN
+    var last_update_blink: CFTimeInterval = Double.NaN
+    var blink_status: Bool = false
+
+    var target_count: Int = 0;
     
     let MODE_MAPONLY = 0
     let MODE_MAPCOMPASS = 1
@@ -39,10 +45,15 @@ class MapCanvasView: UIView
     }
     
     func init2() {
-        self.backgroundColor = UIColor.blackColor()
+        self.mode = MODE_MAPONLY;
+        self.backgroundColor = UIColor.grayColor() // congruent with mode = 0
+        
         updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.compass_anim))
         updater!.frameInterval = 1
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
+        updater2 = CADisplayLink(target: self, selector: #selector(MapCanvasView.map_anim))
+        updater2!.frameInterval = 2
+        updater2!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
     func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
@@ -102,7 +113,7 @@ class MapCanvasView: UIView
         }
     }
     
-    func send_pos(x: CGFloat, y: CGFloat, color: Int, accuracy: CGFloat)
+    func send_pos(x: CGFloat, y: CGFloat, accuracy: CGFloat)
     {
         let f = CGRect(x: x - 8, y: y - 8, width: 16, height: 16)
         let facc = CGRect(x: x - accuracy, y: y - accuracy, width: accuracy * 2, height: accuracy * 2)
@@ -125,12 +136,6 @@ class MapCanvasView: UIView
             return
         }
 
-        if color > 0 {
-            location!.backgroundColor = UIColor.redColor()
-        } else {
-            location!.backgroundColor = UIColor.yellowColor()
-        }
-        
         if compass == nil {
             let slack = self.frame.height - self.frame.width
             let compass_frame = CGRect(x: 0, y: slack / 2, width: self.frame.width, height: self.frame.width)
@@ -150,22 +155,19 @@ class MapCanvasView: UIView
 
     func send_targets(list: [(CGFloat, CGFloat)])
     {
-        let updated_targets = targets.count < list.count
+        self.target_count = list.count
 
-        var dirty = false
-        while targets.count < list.count {
+        let updated_targets = targets.count < target_count
+
+        while targets.count < target_count {
             let f = CGRect(x: 0, y: 0, width: 16, height: 16)
             let target = UIView.init(frame: f)
             target.backgroundColor = UIColor.blueColor()
             target.layer.cornerRadius = 8
             target.alpha = 1
+            target.hidden = true
             self.addSubview(target)
             targets.append(target)
-            dirty = true
-        }
-        if dirty {
-            // dirty; return to settle layout
-            return
         }
         
         if updated_targets && compass != nil {
@@ -173,12 +175,16 @@ class MapCanvasView: UIView
             compass!.removeFromSuperview()
             self.addSubview(compass!)
         }
-        
+
+        if updated_targets {
+            // dirty; return to settle layout
+            return
+        }
+
         for i in 0..<targets.count {
-            if i < list.count {
+            if i < self.target_count {
                 let f = CGRect(x: list[i].0 - 8, y: list[i].1 - 8, width: 16, height: 16)
                 targets[i].frame = f
-                targets[i].hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
             } else {
                 targets[i].hidden = true
             }
@@ -190,6 +196,14 @@ class MapCanvasView: UIView
                       targets: [(heading: Double, name: String, distance: String)],
                       tgt_dist: Bool)
     {
+        if mode != self.mode {
+            if mode == MODE_MAPONLY || mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING {
+                self.backgroundColor = UIColor.grayColor()
+            } else {
+                self.backgroundColor = UIColor.blackColor()
+            }
+        }
+
         self.mode = mode
         
         if compass == nil {
@@ -213,13 +227,45 @@ class MapCanvasView: UIView
     
     func compass_anim(sender: CADisplayLink)
     {
-        let this_update = sender.timestamp
-        if last_update == last_update {
-            let dx = this_update - last_update
-            if (compass != nil) {
-                compass!.anim(dx)
-            }
+        if compass == nil {
+            return;
         }
+        
+        let this_update = sender.timestamp
+        
+        if last_update.isNaN {
+            last_update = this_update
+        }
+        
+        let dx = this_update - last_update
+        compass!.anim(dx)
         last_update = this_update
+    }
+    
+    func map_anim(sender: CADisplayLink)
+    {
+        let this_update = sender.timestamp
+        
+        if last_update_blink.isNaN || last_update2.isNaN {
+            last_update_blink = this_update;
+            last_update2 = this_update
+        }
+        
+        let dx = this_update - last_update2
+        let dx2 = this_update - last_update_blink
+        if dx2 > 0.33333 {
+            if blink_status {
+                location!.backgroundColor = UIColor.redColor()
+            } else {
+                location!.backgroundColor = UIColor.yellowColor()
+            }
+            for i in 0..<target_count {
+                targets[i].hidden = blink_status || mode == MODE_COMPASS || mode == MODE_HEADING
+            }
+            blink_status = !blink_status
+            last_update_blink = this_update
+        }
+
+        last_update2 = this_update
     }
 }

@@ -55,8 +55,6 @@ import UIKit
     var gpslat: Double = Double.NaN
     var gpslong: Double = Double.NaN
     
-    var blink_phase = -1
-    var blink_timer: NSTimer? = nil
     var current_target = -1
     
     var debug = false
@@ -106,7 +104,6 @@ import UIKit
         NSLog("     map will appear")
         super.viewWillAppear(animated)
         GPSModel2.model().addObs(self)
-        blink_timer = NSTimer.scheduledTimerWithTimeInterval(0.33, target: self, selector: #selector(MapViewController.blink), userInfo: nil, repeats: true)
     }
     
     override func viewWillLayoutSubviews() {
@@ -120,7 +117,6 @@ import UIKit
         NSLog("     map will disappear")
         super.viewWillDisappear(animated)
         GPSModel2.model().delObs(self)
-        blink_timer?.invalidate()
     }
     
     func fail() {
@@ -177,13 +173,6 @@ import UIKit
         return x / 3600.0
     }
     
-    func blink()
-    {
-        blink_phase += 1
-        blink_phase %= 2
-        repaint()
-    }
-
     func repaint()
     {
         if clat.isNaN {
@@ -201,12 +190,10 @@ import UIKit
         
         // send compass data
         var targets_compass: [(heading: Double, name: String, distance: String)] = []
-        var tgt = 0
-        while tgt < GPSModel2.model().target_count() {
+        for tgt in 0..<GPSModel2.model().target_count() {
             targets_compass.append((heading: GPSModel2.model().target_heading(tgt),
                 name: GPSModel2.model().target_name(tgt),
                 distance: GPSModel2.model().target_distance_formatted(tgt)))
-            tgt += 1
         }
         if current_target >= targets_compass.count {
             current_target = -1
@@ -290,36 +277,32 @@ import UIKit
         if GPSModel2.ins(gpslat, _long: gpslong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
             let x = GPSModel2.long_to(gpslong, a: slong0, b: slong1, scrw: scrw)
             let y = GPSModel2.lat_to(gpslat, a: slat0, b: slat1, scrh: scrh)
-            canvas.send_pos(x, y: y, color: blink_phase, accuracy: CGFloat(accuracy_px))
+            canvas.send_pos(x, y: y, accuracy: CGFloat(accuracy_px))
             if debug {
                 NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
             }
         } else {
-            canvas.send_pos(-1, y: -1, color: 0, accuracy: 0)
+            canvas.send_pos(-1, y: -1, accuracy: 0)
             if debug {
                 NSLog("My position %f %f not in space", clat, clong)
             }
         }
         
         var targets: [(CGFloat, CGFloat)] = []
-        if blink_phase > 0 {
-            var tgt = 0;
-            while tgt < GPSModel2.model().target_count() {
-                let tlat = GPSModel2.model().target_latitude(tgt)
-                let tlong = GPSModel2.model().target_longitude(tgt)
-                if GPSModel2.ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-                    let x = GPSModel2.long_to(tlong, a: slong0, b: slong1, scrw: scrw)
-                    let y = GPSModel2.lat_to(tlat, a: slat0, b: slat1, scrh: scrh)
-                    targets.append(x, y)
-                    if debug {
-                        NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
-                    }
-                } else {
-                    if debug {
-                        NSLog("Target[%d] %f %f not in space", tgt, tlat, tlong)
-                    }
+        for tgt in 0..<GPSModel2.model().target_count() {
+            let tlat = GPSModel2.model().target_latitude(tgt)
+            let tlong = GPSModel2.model().target_longitude(tgt)
+            if GPSModel2.ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
+                let x = GPSModel2.long_to(tlong, a: slong0, b: slong1, scrw: scrw)
+                let y = GPSModel2.lat_to(tlat, a: slat0, b: slat1, scrh: scrh)
+                targets.append(x, y)
+                if debug {
+                    NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
                 }
-                tgt += 1
+            } else {
+                if debug {
+                    NSLog("Target[%d] %f %f not in space", tgt, tlat, tlong)
+                }
             }
         }
         canvas.send_targets(targets)
