@@ -9,6 +9,22 @@
 import Foundation
 import UIKit
 
+public struct MapDescriptor {
+    let img: UIImage
+    let name: String
+    let sortprio: CGFloat
+    let lat0: Double
+    let lat1: Double
+    let long0: Double
+    let long1: Double
+    let midlat: Double
+    let midlong: Double
+    var boundsx: CGFloat = 0
+    var boundsy: CGFloat = 0
+    var centerx: CGFloat = 0
+    var centery: CGFloat = 0
+}
+
 @objc class MapViewController: UIViewController, ModelListener
 {
     @IBOutlet weak var canvas: MapCanvasView!
@@ -39,6 +55,7 @@ import UIKit
     let zoom_min: Double = 30
     let zoom_step: Double = 1.25
     let zoom_max: Double = 3600
+    
     // we assume that maps have Mercator projection so we cannot go down to 90 degrees either
     let max_latitude = 90.0 - 5.0 - 3600 / 3600.0
     
@@ -46,6 +63,9 @@ import UIKit
     var center_lat: Double = Double.NaN
     var center_long: Double = Double.NaN
     var touch_point: CGPoint? = nil
+    
+    // Current list of maps on screen
+    var current_maps: [MapDescriptor]? = nil
     
     // Screen position for painting purposes (either screen position or GPS position)
     var clat: Double = Double.NaN
@@ -72,7 +92,7 @@ import UIKit
         center_lat = Double.NaN
         center_long = Double.NaN
         recenter()
-        repaint(true)
+        repaint(true, gesture: false)
     }
     
     override func viewDidLoad()
@@ -144,7 +164,7 @@ import UIKit
             calculate_zoom(false) // does repaint()
             return
         }
-        repaint(false)
+        repaint(false, gesture: false)
     }
     
     func recenter()
@@ -193,7 +213,7 @@ import UIKit
         return diag_height_proportion * zoom_in_heightradius_m(x)
     }
     
-    func repaint(immediately: Bool)
+    func repaint(immediately: Bool, gesture: Bool)
     {
         if clat.isNaN {
             return
@@ -203,26 +223,28 @@ import UIKit
             return
         }
         
-        scale.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
-        // latitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
-        // longitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
-        // accuracy.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
-        
-        // send compass data
-        var targets_compass: [(heading: Double, name: String, distance: String)] = []
-        for tgt in 0..<GPSModel2.model().target_count() {
-            targets_compass.append((heading: GPSModel2.model().target_heading(tgt),
-                name: GPSModel2.model().target_name(tgt),
-                distance: GPSModel2.model().target_distance_formatted(tgt)))
+        if !gesture {
+            scale.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+            // latitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
+            // longitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
+            // accuracy.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
+            
+            // send compass data
+            var targets_compass: [(heading: Double, name: String, distance: String)] = []
+            for tgt in 0..<GPSModel2.model().target_count() {
+                targets_compass.append((heading: GPSModel2.model().target_heading(tgt),
+                    name: GPSModel2.model().target_name(tgt),
+                    distance: GPSModel2.model().target_distance_formatted(tgt)))
+            }
+            if current_target >= targets_compass.count {
+                current_target = -1
+            }
+            canvas.send_compass(mode, heading: GPSModel2.model().heading(),
+                                altitude: GPSModel2.model().altitude_formatted(),
+                                speed: GPSModel2.model().speed_formatted(),
+                                current_target: current_target, targets: targets_compass,
+                                tgt_dist: tgt_dist)
         }
-        if current_target >= targets_compass.count {
-            current_target = -1
-        }
-        canvas.send_compass(mode, heading: GPSModel2.model().heading(),
-                            altitude: GPSModel2.model().altitude_formatted(),
-                            speed: GPSModel2.model().speed_formatted(),
-                            current_target: current_target, targets: targets_compass,
-                            tgt_dist: tgt_dist)
         
         let zoom_m_diagonal = zoom_in_heightradius_m(zoom_factor)
         let zoom_height = zoom_in_degrees(zoom_factor)
@@ -233,54 +255,89 @@ import UIKit
         
         let scale_m = 2 * zoom_in_widthradius_m(zoom_factor)
         
-        scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
-        latitude.text = GPSModel2.model().latitude_formatted()
-        longitude.text = GPSModel2.model().longitude_formatted()
-        altitude.text = GPSModel2.model().altitude_formatted()
-        accuracy.text = GPSModel2.model().accuracy_formatted()
+        if !gesture {
+            scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
+            latitude.text = GPSModel2.model().latitude_formatted()
+            longitude.text = GPSModel2.model().longitude_formatted()
+            altitude.text = GPSModel2.model().altitude_formatted()
+            accuracy.text = GPSModel2.model().accuracy_formatted()
+        }
         
         let accuracy_px = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
         
-        var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
+        var map_list_changed = false
         
-        for map in GPSModel2.model().get_maps() {
-            if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
-                                    lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
-
-                let (centerx, centery) = GPSModel2.to_raster(
-                                                (map.lat0 + map.lat1) / 2,
-                                                long: (map.long0 + map.long1) / 2,
-                                                clat: clat, clong: clong,
-                                                lat_height: zoom_height, scrh: scrh, scrw: scrw,
-                                                longitude_proportion: longitude_latitude_proportion)
-                
-                let boundsx = CGFloat(scrw * abs(map.long1 - map.long0) / zoom_width)
-                let boundsy = CGFloat(scrh * abs(map.lat1 - map.lat0) / zoom_height)
-
-                let img = GPSModel2.model().get_map_image(map.file)
-                if (img != nil) {
-                    plot.append((img!, map.file.absoluteString, boundsx, boundsy, centerx, centery,
-                        boundsy))
-                    if debug {
-                        NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1,
-                              map.long0, map.long1, boundsx, boundsy, centerx, centery)
+        if !gesture || current_maps == nil {
+            // only recalculate map list when we are not in a hurry
+            var provisional_list: [MapDescriptor] = []
+            
+            for map in GPSModel2.model().get_maps() {
+                if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
+                                        lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
+                    
+                    let img = GPSModel2.model().get_map_image(map.file)
+                    if (img != nil) {
+                        provisional_list.append(MapDescriptor(
+                            img: img!, name: map.file.absoluteString,
+                            sortprio: CGFloat(abs(map.lat1 - map.lat0)),
+                            lat0: map.lat0, lat1: map.lat1, long0: map.long0, long1: map.long1,
+                            midlat: (map.lat0 + map.lat1) / 2, midlong: (map.long0 + map.long1) / 2,
+                            boundsx: 0, boundsy: 0, centerx: 0, centery: 0))
+                        if debug {
+                            NSLog("Map lat %f..%f, long %f..%f",
+                            map.lat0, map.lat1, map.long0, map.long1)
+                        }
+                    } else {
+                        if debug {
+                            NSLog("Map not available")
+                        }
                     }
                 } else {
                     if debug {
-                        NSLog("Map not available")
+                        NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
                     }
                 }
+            }
+            
+            // smaller images should be blitted last since they are probably more detailed maps of the area
+            provisional_list.sortInPlace({ $0.sortprio > $1.sortprio } )
+            
+            if current_maps == nil {
+                map_list_changed = true
+                current_maps = provisional_list
+                
+            } else if current_maps!.count != provisional_list.count {
+                // obviously changed
+                map_list_changed = true
+                current_maps = provisional_list
+                
             } else {
-                if debug {
-                    NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
+                for i in 0..<provisional_list.count {
+                    if provisional_list[i].name != current_maps![i].name {
+                        // replacement, or reordering
+                        map_list_changed = true
+                        current_maps = provisional_list
+                        break
+                    }
                 }
             }
         }
         
-        // smaller images should be blitted last since they are probably more detailed maps of the area
-        plot.sortInPlace({ $0.6 > $1.6 } )
+        for i in 0..<current_maps!.count {
+            let map = current_maps![i]
+            (current_maps![i].centerx, current_maps![i].centery) =
+                GPSModel2.to_raster(
+                    (map.lat0 + map.lat1) / 2,
+                    long: (map.long0 + map.long1) / 2,
+                    clat: clat, clong: clong,
+                    lat_height: zoom_height, scrh: scrh, scrw: scrw,
+                    longitude_proportion: longitude_latitude_proportion)
+                
+            current_maps![i].boundsx = CGFloat(scrw * abs(map.long1 - map.long0) / zoom_width)
+            current_maps![i].boundsy = CGFloat(scrh * abs(map.lat1 - map.lat0) / zoom_height)
+        }
         
-        canvas.send_img(plot)
+        canvas.send_img(current_maps!, changed: map_list_changed)
         
         if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
             /* point relative 0,0 = screen center */
@@ -327,7 +384,7 @@ import UIKit
         }
         
         if debug {
-            NSLog("Painted with %d maps", plot.count)
+            NSLog("Painted with %d maps", current_maps!.count)
         }
     }
     
@@ -374,7 +431,7 @@ import UIKit
         zoom_factor = max(zoom_factor, zoom_min)
         zoom_factor = min(zoom_factor, zoom_max)
         
-        repaint(true)
+        repaint(true, gesture: false)
     }
     
     func pan(rec:UIPanGestureRecognizer)
@@ -424,7 +481,7 @@ import UIKit
             center_long = GPSModel2.normalize_longitude(center_long)
             
             recenter()
-            repaint(true)
+            repaint(true, gesture: true)
             
         default:
             break
@@ -437,7 +494,7 @@ import UIKit
         zoom_factor = max(zoom_factor, zoom_min)
         zoom_factor = min(zoom_factor, zoom_max)
         rec.scale = 1.0
-        repaint(true)
+        repaint(true, gesture: true)
     }
     
     func onefinger(rec:UITapGestureRecognizer)
@@ -477,14 +534,14 @@ import UIKit
     {
         NSLog("tgd")
         tgt_dist = !tgt_dist
-        repaint(false)
+        repaint(false, gesture: false)
     }
     
     @IBAction func mod_button(sender: AnyObject)
     {
         mode += 1
         mode %= MODE_COUNT
-        repaint(false)
+        repaint(false, gesture: false)
     }
     
     @IBAction func tgt_button(sender: AnyObject)
@@ -493,7 +550,7 @@ import UIKit
         if current_target >= GPSModel2.model().target_count() {
             current_target = -1
         }
-        repaint(false)
+        repaint(false, gesture: false)
     }
     
     @IBAction func backToMain(sender: UIStoryboardSegue)

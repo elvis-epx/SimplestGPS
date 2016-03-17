@@ -63,34 +63,24 @@ class MapCanvasView: UIView
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
-    func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
-        var rebuild = list.count != image_views.count
-        
-        if !rebuild {
-            // test if some image of the stack has changed
-            for i in 0..<list.count {
-                if image_views[i].0 != list[i].1 {
-                    rebuild = true
-                    break
-                }
-            }
-        }
-        
-        if rebuild {
+    func send_img(list: [MapDescriptor], changed: Bool) {
+        if changed || list.count != image_views.count {
             // NSLog("Rebuilding image stack")
 
             for (_, image) in image_views {
+                image.hidden = true
                 image.removeFromSuperview()
             }
             image_views = []
             image_anims = []
             
-            for (img, name, _, _, _, _, _) in list {
-                let image = UIImageView(image: img)
+            for map in list {
+                let image = UIImageView(image: map.img)
                 let anim = PositionAnim(name: "img", view: image, mass: 0.5, drag: 6.0,
                                         size: self.frame)
-                image_views.append(name, image)
+                image_views.append((map.name, image))
                 image_anims.append(anim)
+                image.hidden = true
                 self.addSubview(image)
             }
             
@@ -116,11 +106,12 @@ class MapCanvasView: UIView
             return
         }
         
+        // NSLog("-------------------------")
         for i in 0..<list.count {
-            let (_, _, boundsx, boundsy, centerx_rel, centery_rel, _) = list[i]
-            // FIXME animate rotation in conjunction with point animation
-            image_views[i].1.bounds = CGRect(x: 0, y: 0, width: boundsx, height: boundsy)
-            image_anims[i].set_rel(CGPoint(x: centerx_rel, y: centery_rel))
+            let map = list[i]
+            // NSLog("img %f %f %f %f", map.centerx, map.centery, map.boundsx, map.boundsy)
+            image_views[i].1.bounds = CGRect(x: 0, y: 0, width: map.boundsx, height: map.boundsy)
+            image_anims[i].set_rel(CGPoint(x: map.centerx, y: map.centery))
             image_views[i].1.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
         }
     }
