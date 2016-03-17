@@ -76,8 +76,7 @@ class MapCanvasView: UIView
             
             for map in list {
                 let image = UIImageView(image: map.img)
-                let anim = PositionAnim(name: "img", view: image, mass: 0.5, drag: 6.0,
-                                        size: self.frame)
+                let anim = PositionAnim(name: "img", view: image, size: self.frame)
                 image_views.append((map.name, image))
                 image_anims.append(anim)
                 image.hidden = true
@@ -129,8 +128,7 @@ class MapCanvasView: UIView
             accuracy_view!.alpha = 0.2
             accuracy_view!.backgroundColor = UIColor.yellowColor()
             self.addSubview(accuracy_view!)
-            accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, mass: 0.5, drag: 6.0,
-                                         size: self.frame)
+            accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, size: self.frame)
             // dirty; return to settle layout
             return
         }
@@ -140,8 +138,7 @@ class MapCanvasView: UIView
             location_view!.layer.cornerRadius = 8
             location_view!.alpha = 1
             self.addSubview(location_view!)
-            location_anim = PositionAnim(name: "location", view: location_view!, mass: 0.5, drag: 6.0,
-                                         size: self.frame)
+            location_anim = PositionAnim(name: "location", view: location_view!, size: self.frame)
             // dirty; return to settle layout
             return
         }
@@ -180,8 +177,7 @@ class MapCanvasView: UIView
             target.hidden = true
             self.addSubview(target)
             target_views.append(target)
-            let anim = PositionAnim(name: "tgt", view: target, mass: 0.5, drag: 6.0,
-                                         size: self.frame)
+            let anim = PositionAnim(name: "tgt", view: target, size: self.frame)
             target_anims.append(anim)
         }
         

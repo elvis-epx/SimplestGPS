@@ -92,7 +92,7 @@ public struct MapDescriptor {
         center_lat = Double.NaN
         center_long = Double.NaN
         recenter()
-        repaint(true, gesture: false)
+        repaint(false, gesture: false)
     }
     
     override func viewDidLoad()
