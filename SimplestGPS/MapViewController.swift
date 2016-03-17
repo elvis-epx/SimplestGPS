@@ -71,7 +71,7 @@ import UIKit
         center_lat = Double.NaN
         center_long = Double.NaN
         recenter()
-        repaint()
+        repaint(true)
     }
     
     override func viewDidLoad()
@@ -138,9 +138,10 @@ import UIKit
         gpslong = GPSModel2.model().longitude()
         recenter()
         if calc_zoom {
-            calculate_zoom(false)
+            calculate_zoom(false) // does repaint()
+            return
         }
-        repaint()
+        repaint(false)
     }
     
     func recenter()
@@ -173,7 +174,7 @@ import UIKit
         return x / 3600.0
     }
     
-    func repaint()
+    func repaint(immediately: Bool)
     {
         if clat.isNaN {
             return
@@ -282,7 +283,7 @@ import UIKit
                 NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
             }
         } else {
-            canvas.send_pos(-1, y: -1, accuracy: 0)
+            canvas.send_pos(CGFloat.NaN, y: CGFloat.NaN, accuracy: 0)
             if debug {
                 NSLog("My position %f %f not in space", clat, clong)
             }
@@ -308,6 +309,11 @@ import UIKit
         canvas.send_targets(targets)
         
         GPSModel2.model().releas()
+        
+        if immediately {
+            // do not animate changes
+            canvas.update_immediately()
+        }
         
         if debug {
             NSLog("Painted with %d maps", plot.count)
@@ -364,7 +370,7 @@ import UIKit
         zoom_factor = max(zoom_factor, zoom_min)
         zoom_factor = min(zoom_factor, zoom_max)
         
-        repaint()
+        repaint(true)
     }
     
     func pan(rec:UIPanGestureRecognizer)
@@ -400,7 +406,7 @@ import UIKit
                 center_long = GPSModel2.normalize_longitude(center_long)
 
                 recenter()
-                repaint()
+                repaint(true)
             
             default:
                 break
@@ -413,7 +419,7 @@ import UIKit
         zoom_factor = max(zoom_factor, zoom_min)
         zoom_factor = min(zoom_factor, zoom_max)
         rec.scale = 1.0
-        repaint()
+        repaint(true)
     }
 
     func onefinger(rec:UITapGestureRecognizer)
@@ -453,14 +459,14 @@ import UIKit
     {
         NSLog("tgd")
         tgt_dist = !tgt_dist
-        repaint()
+        repaint(false)
     }
     
     @IBAction func mod_button(sender: AnyObject)
     {
         mode += 1
         mode %= MODE_COUNT
-        repaint()
+        repaint(false)
     }
     
     @IBAction func tgt_button(sender: AnyObject)
@@ -469,7 +475,7 @@ import UIKit
         if current_target >= GPSModel2.model().target_count() {
             current_target = -1
         }
-        repaint()
+        repaint(false)
     }
     
     @IBAction func backToMain(sender: UIStoryboardSegue)

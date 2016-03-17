@@ -11,18 +11,26 @@ import UIKit
 
 class MapCanvasView: UIView
 {
-    var images: [(String,UIImageView)] = []
-    var targets: [UIView] = []
-    var location: UIView? = nil
-    var accuracy_area: UIView? = nil
+    var image_views: [(String,UIImageView)] = []
+    var image_anims: [PositionAnim] = []
+    
+    var target_views: [UIView] = []
+    var target_anims: [PositionAnim] = []
+
+    var location_view: UIView? = nil
+    var location_anim: PositionAnim? = nil
+
+    var accuracy_view: UIView? = nil
+    var accuracy_anim: PositionAnim? = nil
+    
     var compass: CompassView? = nil
     
     var updater: CADisplayLink? = nil
-    var updater2: CADisplayLink? = nil
     var last_update: CFTimeInterval = Double.NaN
     var last_update2: CFTimeInterval = Double.NaN
     var last_update_blink: CFTimeInterval = Double.NaN
     var blink_status: Bool = false
+    var immediate = false
 
     var target_count: Int = 0;
     
@@ -49,21 +57,18 @@ class MapCanvasView: UIView
         self.mode = MODE_MAPONLY;
         self.backgroundColor = UIColor.grayColor() // congruent with mode = 0
         
-        updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.compass_anim))
+        updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.anim))
         updater!.frameInterval = 1
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
-        updater2 = CADisplayLink(target: self, selector: #selector(MapCanvasView.map_anim))
-        updater2!.frameInterval = 2
-        updater2!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
     func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
-        var rebuild = list.count != images.count
+        var rebuild = list.count != image_views.count
         
         if !rebuild {
             // test if some image of the stack has changed
             for i in 0..<list.count {
-                if images[i].0 != list[i].1 {
+                if image_views[i].0 != list[i].1 {
                     rebuild = true
                     break
                 }
@@ -73,27 +78,31 @@ class MapCanvasView: UIView
         if rebuild {
             // NSLog("Rebuilding image stack")
 
-            for (_, image) in images {
+            for (_, image) in image_views {
                 image.removeFromSuperview()
             }
-            images = []
+            image_views = []
+            image_anims = []
             
             for (img, name, _, _, _, _, _) in list {
                 let image = UIImageView(image: img)
-                images.append(name, image)
+                let anim = PositionAnim(name: "img", view: image, mass: 0.5, drag: 6.0,
+                                        size: self.frame)
+                image_views.append(name, image)
+                image_anims.append(anim)
                 self.addSubview(image)
             }
             
             // maps changed: bring points to front
-            if accuracy_area != nil {
-                accuracy_area!.removeFromSuperview()
-                self.addSubview(accuracy_area!)
+            if accuracy_view != nil {
+                accuracy_view!.removeFromSuperview()
+                self.addSubview(accuracy_view!)
             }
-            if location != nil {
-                location!.removeFromSuperview()
-                self.addSubview(location!)
+            if location_view != nil {
+                location_view!.removeFromSuperview()
+                self.addSubview(location_view!)
             }
-            for target in targets {
+            for target in target_views {
                 target.removeFromSuperview()
                 self.addSubview(target)
             }
@@ -108,31 +117,35 @@ class MapCanvasView: UIView
         
         for i in 0..<list.count {
             let (_, _, x0, x1, y0, y1, _) = list[i]
-            let rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
-            images[i].1.frame = rect
-            images[i].1.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+            // let rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
+            image_views[i].1.bounds = CGRect(x: 0, y: 0, width: x1 - x0, height: y1 - y0)
+            image_anims[i].set(CGPoint(x: (x0 + x1) / 2, y: (y0 + y1) / 2))
+            image_views[i].1.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
         }
     }
     
     func send_pos(x: CGFloat, y: CGFloat, accuracy: CGFloat)
     {
-        let f = CGRect(x: x - 8, y: y - 8, width: 16, height: 16)
-        let facc = CGRect(x: x - accuracy, y: y - accuracy, width: accuracy * 2, height: accuracy * 2)
+        let point = CGPoint(x: x, y: y)
         
-        if accuracy_area == nil {
-            accuracy_area = UIView.init(frame: facc)
-            accuracy_area!.alpha = 0.2
-            accuracy_area!.backgroundColor = UIColor.yellowColor()
-            self.addSubview(accuracy_area!)
+        if accuracy_view == nil {
+            accuracy_view = UIView.init(frame: CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2))
+            accuracy_view!.alpha = 0.2
+            accuracy_view!.backgroundColor = UIColor.yellowColor()
+            self.addSubview(accuracy_view!)
+            accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, mass: 0.5, drag: 6.0,
+                                         size: self.frame)
             // dirty; return to settle layout
             return
         }
         
-        if location == nil {
-            location = UIView.init(frame: f)
-            location!.layer.cornerRadius = 8
-            location!.alpha = 1
-            self.addSubview(location!)
+        if location_view == nil {
+            location_view = UIView.init(frame: CGRect(x: 0, y: 0, width: 16, height: 16))
+            location_view!.layer.cornerRadius = 8
+            location_view!.alpha = 1
+            self.addSubview(location_view!)
+            location_anim = PositionAnim(name: "location", view: location_view!, mass: 0.5, drag: 6.0,
+                                         size: self.frame)
             // dirty; return to settle layout
             return
         }
@@ -146,21 +159,22 @@ class MapCanvasView: UIView
             return
         }
 
-        accuracy_area!.frame = facc
-        accuracy_area!.layer.cornerRadius = accuracy
-        accuracy_area!.hidden = (x == 0 || mode == MODE_COMPASS || mode == MODE_HEADING)
+        accuracy_anim!.set(point)
+        accuracy_view!.layer.cornerRadius = accuracy
+        accuracy_view!.bounds = CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2)
+        accuracy_view!.hidden = (x <= 0 || mode == MODE_COMPASS || mode == MODE_HEADING)
         
-        location!.frame = f
-        location!.hidden = (x == 0 || mode == MODE_COMPASS || mode == MODE_HEADING)
+        location_anim!.set(point)
+        location_view!.hidden = (x <= 0 || mode == MODE_COMPASS || mode == MODE_HEADING)
     }
 
     func send_targets(list: [(CGFloat, CGFloat)])
     {
         self.target_count = list.count
 
-        let updated_targets = targets.count < target_count
+        let updated_targets = target_views.count < target_count
 
-        while targets.count < target_count {
+        while target_views.count < target_count {
             let f = CGRect(x: 0, y: 0, width: 16, height: 16)
             let target = UIView.init(frame: f)
             target.backgroundColor = UIColor.blueColor()
@@ -168,7 +182,10 @@ class MapCanvasView: UIView
             target.alpha = 1
             target.hidden = true
             self.addSubview(target)
-            targets.append(target)
+            target_views.append(target)
+            let anim = PositionAnim(name: "tgt", view: target, mass: 0.5, drag: 6.0,
+                                         size: self.frame)
+            target_anims.append(anim)
         }
         
         if updated_targets && compass != nil {
@@ -182,14 +199,19 @@ class MapCanvasView: UIView
             return
         }
 
-        for i in 0..<targets.count {
+        for i in 0..<target_views.count {
             if i < self.target_count {
-                let f = CGRect(x: list[i].0 - 8, y: list[i].1 - 8, width: 16, height: 16)
-                targets[i].frame = f
+                target_anims[i].set(CGPoint(x: list[i].0, y: list[i].1))
             } else {
-                targets[i].hidden = true
+                target_anims[i].set(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN))
+                target_views[i].hidden = true
             }
         }
+    }
+    
+    func update_immediately() {
+        // disables map animations for the next updates
+        immediate = true
     }
     
     func send_compass(mode: Int, heading: Double, altitude: String, speed: String,
@@ -226,24 +248,7 @@ class MapCanvasView: UIView
                            targets: targets, tgt_dist: tgt_dist)
     }
     
-    func compass_anim(sender: CADisplayLink)
-    {
-        if compass == nil {
-            return;
-        }
-        
-        let this_update = sender.timestamp
-        
-        if last_update.isNaN {
-            last_update = this_update
-        }
-        
-        let dx = this_update - last_update
-        compass!.anim(dx)
-        last_update = this_update
-    }
-    
-    func map_anim(sender: CADisplayLink)
+    func anim(sender: CADisplayLink)
     {
         let this_update = sender.timestamp
         
@@ -256,17 +261,30 @@ class MapCanvasView: UIView
         let dx2 = this_update - last_update_blink
         if dx2 > 0.33333 {
             if blink_status {
-                location!.backgroundColor = UIColor.redColor()
+                location_view?.backgroundColor = UIColor.redColor()
             } else {
-                location!.backgroundColor = UIColor.yellowColor()
+                location_view?.backgroundColor = UIColor.yellowColor()
             }
             for i in 0..<target_count {
-                targets[i].hidden = blink_status || mode == MODE_COMPASS || mode == MODE_HEADING
+                target_views[i].hidden = blink_status || mode == MODE_COMPASS || mode == MODE_HEADING
             }
             blink_status = !blink_status
             last_update_blink = this_update
         }
 
+        for i in 0..<target_count {
+            target_anims[i].tick(dx, immediate: immediate)
+        }
+        for i in 0..<image_anims.count {
+            image_anims[i].tick(dx, immediate: immediate)
+        }
+
+        // FIXME
+        accuracy_anim?.tick(dx, immediate: immediate)
+        location_anim?.tick(dx, immediate: immediate)
+        compass?.anim(dx)
+
+        immediate = false
         last_update2 = this_update
     }
 }
