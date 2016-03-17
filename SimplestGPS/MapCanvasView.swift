@@ -62,7 +62,7 @@ class MapCanvasView: UIView
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
-    func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
+    func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
         var rebuild = list.count != image_views.count
         
         if !rebuild {
@@ -84,7 +84,7 @@ class MapCanvasView: UIView
             image_views = []
             image_anims = []
             
-            for (img, name, _, _, _, _, _) in list {
+            for (img, name, _, _, _, _, _, _) in list {
                 let image = UIImageView(image: img)
                 let anim = PositionAnim(name: "img", view: image, mass: 0.5, drag: 6.0,
                                         size: self.frame)
@@ -116,10 +116,11 @@ class MapCanvasView: UIView
         }
         
         for i in 0..<list.count {
-            let (_, _, x0, x1, y0, y1, _) = list[i]
-            // let rect = CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
-            image_views[i].1.bounds = CGRect(x: 0, y: 0, width: x1 - x0, height: y1 - y0)
-            image_anims[i].set(CGPoint(x: (x0 + x1) / 2, y: (y0 + y1) / 2))
+            let (_, _, boundsx, boundsy, centerx, centery, angle, _) = list[i]
+            // FIXME animate rotation
+            image_views[i].1.transform = CGAffineTransformMakeRotation(angle)
+            image_views[i].1.bounds = CGRect(x: 0, y: 0, width: boundsx, height: boundsy)
+            image_anims[i].set(CGPoint(x: centerx, y: centery))
             image_views[i].1.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
         }
     }
@@ -279,7 +280,6 @@ class MapCanvasView: UIView
             image_anims[i].tick(dx, immediate: immediate)
         }
 
-        // FIXME
         accuracy_anim?.tick(dx, immediate: immediate)
         location_anim?.tick(dx, immediate: immediate)
         compass?.anim(dx)

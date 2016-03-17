@@ -198,74 +198,76 @@ import CoreLocation
         }
         return x
     }
-    
-    // returns whether a point is inside a lat/long "square"
-    class func ins(lat: Double, _long: Double, lata: Double, latb: Double, _longa: Double, _longb: Double) -> Bool
+
+    // checks whether a coordinate is inside a circle
+    class func inside(lat: Double, long: Double, lat_circle: Double, long_circle: Double, radius: Double) -> Bool
     {
-        var long = normalize_longitude(_long)
-        var longa = normalize_longitude(_longa)
-        var longb = normalize_longitude(_longb)
+        let _lat = lat
+        var _long = normalize_longitude(long)
+
+        let _lata = lat_circle
+        var _longa = normalize_longitude(long_circle)
         
-        if nearer_180(longa, b: longb) {
-            long = offset_180(long)
-            longa = offset_180(longa)
-            longb = offset_180(longb)
+        if nearer_180(_long, b: _longa) {
+            _long = offset_180(_long)
+            _longa = offset_180(_longa)
         }
-        
-        let lat0 = min(lata, latb)
-        let lat1 = max(lata, latb)
-        let long0 = min(longa, longb)
-        let long1 = max(longa, longb)
-        return lat >= lat0 && lat <= lat1 && long >= long0 && long <= long1
-    }
-    
-    class func iins(maplata: Double, maplatb: Double, _maplonga: Double, _maplongb: Double, lata: Double, latb: Double, _longa: Double, _longb: Double) -> Bool
-    {
-        var maplonga = normalize_longitude(_maplonga)
-        var maplongb = normalize_longitude(_maplongb)
-        var longa = normalize_longitude(_longa)
-        var longb = normalize_longitude(_longb)
-        
-        if nearer_180(longa, b: longb) || nearer_180(maplonga, b: maplongb) {
-            longa = offset_180(longa)
-            longb = offset_180(longb)
-            maplonga = offset_180(maplonga)
-            maplongb = offset_180(maplongb)
-        }
-        
-        let maplat0 = min(maplata, maplatb)
-        let maplat1 = max(maplata, maplatb)
-        let maplong0 = min(maplonga, maplongb)
-        let maplong1 = max(maplonga, maplongb)
-        let lat0 = min(lata, latb)
-        let lat1 = max(lata, latb)
-        let long0 = min(longa, longb)
-        let long1 = max(longa, longb)
-        return maplat0 <= lat1 && maplat1 >= lat0 && maplong0 <= long1 && maplong1 >= long0
-    }
-    
-    /* Convert latitude to screen coordinate */
-    class func lat_to(x: Double, a: Double, b: Double, scrh: Double) -> CGFloat
-    {
-        return CGFloat(scrh * (x - a) / (b - a))
-    }
-    
-    /* Convert longitude to screen coordinate */
-    class func long_to(x: Double, a: Double, b: Double, scrw: Double) -> CGFloat
-    {
-        var xx = normalize_longitude(x)
-        var aa = normalize_longitude(a)
-        var bb = normalize_longitude(b)
-        
-        if nearer_180(a, b: b) {
-            xx = offset_180(xx)
-            aa = offset_180(aa)
-            bb = offset_180(bb)
-        }
-        
-        return CGFloat(scrw * (xx - aa) / (bb - aa))
+
+        return harvesine(_lat, lat2: _lata, long1: _long, long2: _longa) <= radius
     }
 
+    class func clamp(value: Double, mini: Double, maxi: Double) -> Double
+    {
+        return max(mini, min(maxi, value))
+    }
+    
+
+    class func map_inside(maplata: Double, maplatb: Double, maplonga: Double, maplongb: Double,
+                          lat_circle: Double, long_circle: Double, radius: Double) -> Bool
+    {
+        let _maplata = min(maplata, maplatb)
+        let _maplatb = max(maplata, maplatb)
+        var _maplonga = normalize_longitude(maplonga)
+        var _maplongb = normalize_longitude(maplongb)
+        let _lata = lat_circle
+        var _longa = normalize_longitude(long_circle)
+        
+        if nearer_180(_longa, b: _maplonga) || nearer_180(_longa, b: _maplongb) {
+            _longa = offset_180(_longa)
+            _maplonga = offset_180(_maplonga)
+            _maplongb = offset_180(_maplongb)
+        }
+        
+        (_maplonga, _maplongb) = (min(_maplonga, _maplongb), max(_maplonga, _maplongb))
+        
+        // from http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
+        // Find the closest point to the circle within the rectangle
+        let closest_long = clamp(_longa, mini: _maplonga, maxi: _maplongb);
+        let closest_lat = clamp(_lata, mini: _maplata, maxi: _maplatb);
+        
+        return harvesine(closest_lat, lat2: _lata, long1: closest_long, long2: _longa) <= radius
+    }
+    
+    class func to_raster(lat: Double, long: Double, clat: Double, clong: Double, heading: Double,
+                         zoom_height: Double, scrh: Double, scrw: Double, longitude_proportion: Double)
+        -> (CGFloat, CGFloat)
+    {
+        var _long = normalize_longitude(long)
+        var _clong = normalize_longitude(clong)
+        if nearer_180(_long, b: _clong) {
+            _long = offset_180(_long)
+            _clong = offset_180(_clong)
+        }
+        // find distance from center point, in pixels
+        let dlat = scrh * -(lat - clat) / zoom_height
+        let dlong = scrh * longitude_proportion * (_long - _clong) / zoom_height
+        // convert to polar and rotate
+        let dabs = hypot(dlat, dlong)
+        let angle = atan2(dlat, dlong) - heading
+        // convert back to cartesian and offset to middle of screen
+        return (CGFloat(scrw / 2 + dabs * cos(angle)), CGFlaot(scrh / 2 + dabs * sin(angle)))
+    }
+    
     class func do_format_heading(n: Double) -> String
     {
         if n != n {

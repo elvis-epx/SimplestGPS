@@ -21,7 +21,8 @@ import UIKit
     @IBOutlet weak var latitude: UILabel!
     var scrw: Double = Double.NaN
     var scrh: Double = Double.NaN
-    var width_prop: Double = Double.NaN
+    var width_height_proportion: Double = Double.NaN
+    var diag_height_proportion: Double = Double.NaN
     
     let MODE_MAPONLY = 0
     let MODE_MAPCOMPASS = 1
@@ -29,10 +30,10 @@ import UIKit
     let MODE_COMPASS = 3
     let MODE_HEADING = 4
     let MODE_COUNT = 5
-
+    
     var mode = 1
     var tgt_dist = true
-
+    
     // in seconds of latitude degree across the screen height
     var zoom_factor: Double = 900
     let zoom_min: Double = 30
@@ -49,8 +50,12 @@ import UIKit
     // Screen position for painting purposes (either screen position or GPS position)
     var clat: Double = Double.NaN
     var clong: Double = Double.NaN
-    var long_prop: Double = 1
- 
+    var longitude_latitude_proportion: Double = 1
+    
+    // Heading angle for transforms (in radians)
+    var screen_heading: Double = M_PI / 2
+    var DEFAULT_SCREEN_HEADING: Double = M_PI / 2
+    
     // Most current GPS position
     var gpslat: Double = Double.NaN
     var gpslong: Double = Double.NaN
@@ -58,7 +63,7 @@ import UIKit
     var current_target = -1
     
     var debug = false
-
+    
     func do_zoomauto(all_targets: Bool)
     {
         // NSLog("zoom auto")
@@ -88,7 +93,7 @@ import UIKit
         tap.numberOfTapsRequired = 3
         tap.numberOfTouchesRequired = 1
         canvas.addGestureRecognizer(tap)
-
+        
         let tap2 = UITapGestureRecognizer(target: self, action: #selector(MapViewController.twofingers(_:)))
         tap2.numberOfTapsRequired = 3
         tap2.numberOfTouchesRequired = 2
@@ -110,7 +115,8 @@ import UIKit
         // NSLog("     map layout")
         scrw = Double(canvas.bounds.size.width)
         scrh = Double(canvas.bounds.size.height)
-        width_prop = scrw / scrh
+        width_height_proportion = scrw / scrh
+        diag_height_proportion = sqrt(scrw * scrw + scrh * scrh) / scrh
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -136,6 +142,17 @@ import UIKit
         let calc_zoom = gpslat.isNaN
         gpslat = GPSModel2.model().latitude()
         gpslong = GPSModel2.model().longitude()
+        
+        if mode == MODE_MAPHEADING {
+            var h = GPSModel2.model().heading()
+            if h.isNaN {
+                h = 0
+            }
+            screen_heading = h * M_PI / 180
+        } else {
+            screen_heading = DEFAULT_SCREEN_HEADING
+        }
+        
         recenter()
         if calc_zoom {
             calculate_zoom(false) // does repaint()
@@ -162,16 +179,32 @@ import UIKit
             clat = max(-max_latitude, clat)
         }
         
-        long_prop = GPSModel2.longitude_proportion(clat)
-        if long_prop.isNaN {
-            long_prop = 1
+        longitude_latitude_proportion = GPSModel2.longitude_proportion(clat)
+        if longitude_latitude_proportion.isNaN {
+            longitude_latitude_proportion = 1
         }
     }
     
-    // Convert zoom factor to degrees of latitude
-    func zoom_deg(x: Double) -> Double
+    func zoom_in_degrees(x: Double) -> Double
     {
+        // zoom is in seconds, convert to degrees
         return x / 3600.0
+    }
+    
+    func zoom_in_widthradius_m(x: Double) -> Double
+    {
+        return width_height_proportion * zoom_in_heightradius_m(x)
+    }
+    
+    func zoom_in_heightradius_m(x: Double) -> Double
+    {
+        // zoom is in latitude seconds, convert to minutes, then to distance
+        return 1853.0 * x / 60.0 / 2.0
+    }
+    
+    func zoom_in_diagradius_m(x: Double) -> Double
+    {
+        return diag_height_proportion * zoom_in_heightradius_m(x)
     }
     
     func repaint(immediately: Bool)
@@ -204,80 +237,70 @@ import UIKit
                             speed: GPSModel2.model().speed_formatted(),
                             current_target: current_target, targets: targets_compass,
                             tgt_dist: tgt_dist)
-
-        // calculate screen size in GPS
-        // NOTE: longitude coordinates may be denormalized (e.g. -181W or +181E)
-        let dzoom = zoom_deg(zoom_factor)
-        let slat0 = clat + dzoom / 2.0
-        let slat1 = clat - dzoom / 2.0
-        let slong0 = clong - (dzoom * width_prop / long_prop) / 2.0
-        let slong1 = clong + (dzoom * width_prop / long_prop) / 2.0
+        
+        let zoom_m_diagonal = zoom_in_heightradius_m(zoom_factor)
+        let zoom_height = zoom_in_degrees(zoom_factor)
+        let zoom_width = zoom_height / longitude_latitude_proportion * width_height_proportion
         if debug {
-            NSLog("Coordinate space is lat %f to %f (for %f px), long %f to %f (for %f px)", slat0, slat1, scrh, slong0, slong1, scrw)
-            NSLog("Coordinate space is %f tall %f wide", slat1 - slat0, slong1 - slong0)
+            NSLog("Coordinate space is lat %f long %f radius %f", clat, clong, zoom_m_diagonal)
         }
         
-        let scale_m = 1852.0 * 60 * long_prop * abs(slong1 - slong0)
+        let scale_m = 2 * zoom_in_heightradius_m(zoom_factor)
+        
         scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
         latitude.text = GPSModel2.model().latitude_formatted()
         longitude.text = GPSModel2.model().longitude_formatted()
         altitude.text = GPSModel2.model().altitude_formatted()
         accuracy.text = GPSModel2.model().accuracy_formatted()
-
+        
         let accuracy_px = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
         
-        var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
+        var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
         
-            for map in GPSModel2.model().get_maps() {
-                if GPSModel2.iins(map.lat0, maplatb: map.lat1, _maplonga: map.long0, _maplongb: map.long1,
-                                  lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-                    let x0 = GPSModel2.long_to(map.long0, a: slong0, b: slong1, scrw: scrw)
-                    let x1 = GPSModel2.long_to(map.long1, a: slong0, b: slong1, scrw: scrw)
-                    let y0 = GPSModel2.lat_to(map.lat0, a: slat0, b: slat1, scrh: scrh)
-                    let y1 = GPSModel2.lat_to(map.lat1, a: slat0, b: slat1, scrh: scrh)
-                    let img = GPSModel2.model().get_map_image(map.file)
-                    if (img != nil) {
-                        plot.append((img!, map.file.absoluteString, x0, x1, y0, y1, abs(y1 - y0)))
-                        if debug {
-                            NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1, map.long0, map.long1, x0, x1, y0, y1)
-                        }
-                    } else {
-                        if debug {
-                            NSLog("Map not available")
-                        }
+        for map in GPSModel2.model().get_maps() {
+            if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
+                                    lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
+
+                let (centerx, centery) = GPSModel2.to_raster(
+                                                (map.lat0 + map.lat1) / 2,
+                                                long: (map.long0 + map.long1) / 2,
+                                                clat: clat, clong: clong,
+                                                heading: screen_heading,
+                                                zoom_height: zoom_height, scrh: scrh, scrw: scrw,
+                                                longitude_proportion: longitude_latitude_proportion)
+                
+                let boundsx = CGFloat(scrw * abs(map.long1 - map.long0) / zoom_width)
+                let boundsy = CGFloat(scrh * abs(map.lat1 - map.lat0) / zoom_height)
+
+                let img = GPSModel2.model().get_map_image(map.file)
+                if (img != nil) {
+                    plot.append((img!, map.file.absoluteString, boundsx, boundsy, centerx, centery,
+                        CGFloat(screen_heading), boundsy))
+                    if debug {
+                        NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1,
+                              map.long0, map.long1, boundsx, boundsy, centerx, centery)
                     }
                 } else {
                     if debug {
-                        NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
+                        NSLog("Map not available")
                     }
                 }
-            }
-        
-            // smaller images should be blitted last since they are probably more detailed maps of the area
-            plot.sortInPlace({ $0.5 > $1.5 } )
-        
-            // optimize the case when more than a map covers the whole screen
-            var i = plot.count - 1
-            while i > 0 {
-                let x0 = plot[i].2
-                let x1 = plot[i].3
-                let y0 = plot[i].4
-                let y1 = plot[i].5
-                if x0 <= 0 && x1 >= CGFloat(scrw) && y0 <= 0 && y1 >= CGFloat(scrh) {
-                    // remove maps beneath the topmost that covers the whole screen
-                    for _ in 1...i {
-                        plot.removeAtIndex(0)
-                    }
-                    break
+            } else {
+                if debug {
+                    NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
                 }
-                i -= 1
             }
+        }
+        
+        // smaller images should be blitted last since they are probably more detailed maps of the area
+        plot.sortInPlace({ $0.6 > $1.6 } )
         
         canvas.send_img(plot)
         
-        if GPSModel2.ins(gpslat, _long: gpslong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-            let x = GPSModel2.long_to(gpslong, a: slong0, b: slong1, scrw: scrw)
-            let y = GPSModel2.lat_to(gpslat, a: slat0, b: slat1, scrh: scrh)
+        if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
+            let (x, y) = GPSModel2.to_raster(gpslat, long: gpslong, clat: clat, clong: clong, heading: screen_heading,
+                                             zoom_height: zoom_height, scrh: scrh, scrw: scrw,
+                                             longitude_proportion: longitude_latitude_proportion)
             canvas.send_pos(x, y: y, accuracy: CGFloat(accuracy_px))
             if debug {
                 NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
@@ -293,9 +316,9 @@ import UIKit
         for tgt in 0..<GPSModel2.model().target_count() {
             let tlat = GPSModel2.model().target_latitude(tgt)
             let tlong = GPSModel2.model().target_longitude(tgt)
-            if GPSModel2.ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
-                let x = GPSModel2.long_to(tlong, a: slong0, b: slong1, scrw: scrw)
-                let y = GPSModel2.lat_to(tlat, a: slat0, b: slat1, scrh: scrh)
+            if GPSModel2.inside(tlat, long: tlong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
+                let (x, y) = GPSModel2.to_raster(tlat, long: tlong, clat: clat, clong: clong, heading: screen_heading, zoom_height: zoom_height, scrh: scrh, scrw: scrw,
+                                                 longitude_proportion: longitude_latitude_proportion)
                 targets.append(x, y)
                 if debug {
                     NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
@@ -325,33 +348,27 @@ import UIKit
         if scrw.isNaN || gpslat.isNaN || GPSModel2.model().target_count() <= 0 {
             return
         }
-
+        
         // force current position in center
         center_lat = Double.NaN
         center_long = Double.NaN
         recenter()
-
+        
         var new_zoom_factor = zoom_min / zoom_step
         var ok = false
         
         while (!ok && new_zoom_factor <= zoom_max) {
             new_zoom_factor *= zoom_step
-
-            // calculate screen size in GPS
-            // NOTE: longitude may be denormalized (e.g. -181W)
-            let dzoom = zoom_deg(new_zoom_factor)
-            let slat0 = clat + dzoom / 2
-            let slat1 = clat - dzoom / 2
-            let slong0 = clong - (dzoom * width_prop / long_prop) / 2
-            let slong1 = clong + (dzoom * width_prop / long_prop) / 2
-
+            
+            // radius, in meters, of a circle occupying the width of the screen
+            let dzoom = zoom_in_widthradius_m(new_zoom_factor)
             // check whether at least one target, or all targets, fit in current zoom
+            
             ok = all_targets
-            var tgt = 0;
-            while tgt < GPSModel2.model().target_count() {
+            for tgt in 0..<GPSModel2.model().target_count() {
                 let tlat = GPSModel2.model().target_latitude(tgt)
                 let tlong = GPSModel2.model().target_longitude(tgt)
-                if GPSModel2.ins(tlat, _long: tlong, lata: slat0, latb: slat1, _longa: slong0, _longb: slong1) {
+                if GPSModel2.inside(tlat, long: tlong, lat_circle: clat, long_circle: clong, radius: dzoom) {
                     if !all_targets {
                         ok = true
                         break
@@ -362,7 +379,6 @@ import UIKit
                         break
                     }
                 }
-                tgt += 1
             }
         }
         
@@ -376,43 +392,58 @@ import UIKit
     func pan(rec:UIPanGestureRecognizer)
     {
         switch rec.state {
-            case .Began:
-                touch_point = rec.locationInView(canvas)
-                // NSLog("Drag began at %f %f", touch_point!.x, touch_point!.y)
-        
-            case .Changed:
-                if scrw.isNaN || gpslat.isNaN {
-                    return
-                }
-                let new_point = rec.locationInView(canvas)
-                let dx = new_point.x - touch_point!.x
-                let dy = new_point.y - touch_point!.y
-                touch_point = new_point
-                // NSLog("Drag moved by %f %f", dx, dy)
-                if center_lat.isNaN {
-                    center_lat = gpslat
-                    center_long = gpslong
-                }
-                // zoom = measurement of latitude
-                let dzoom = zoom_deg(zoom_factor)
-                center_long += dzoom * width_prop / long_prop * (Double(-dx) / scrw)
-                center_lat += dzoom * (Double(dy) / scrh)
-                
-                // do not allow latitude above the Mercator reasonable limit
-                center_lat = min(max_latitude, center_lat)
-                center_lat = max(-max_latitude, center_lat)
-                
-                // handle cross of 180W meridian, normalize longitude
-                center_long = GPSModel2.normalize_longitude(center_long)
-
-                recenter()
-                repaint(true)
+        case .Began:
+            touch_point = rec.locationInView(canvas)
+            // NSLog("Drag began at %f %f", touch_point!.x, touch_point!.y)
             
-            default:
-                break
+        case .Changed:
+            if scrw.isNaN || gpslat.isNaN {
+                return
+            }
+            let new_point = rec.locationInView(canvas)
+            
+            var dx = new_point.x - touch_point!.x
+            var dy = new_point.y - touch_point!.y
+            
+            // convert to a polar vector
+            let dabs = hypot(dx, dy)
+            var dangle = CGFloat(atan2(dy, dx))
+            // take into account the current screen heading
+            dangle += CGFloat(screen_heading)
+            // recalculate cartesian vector
+            dx = cos(dangle) * dabs
+            dy = sin(dangle) * dabs
+            
+            touch_point = new_point
+            
+            // NSLog("Drag moved by %f %f", dx, dy)
+            if center_lat.isNaN {
+                center_lat = gpslat
+                center_long = gpslong
+            }
+            
+            // zoom = measurement of latitude
+            let dzoom = zoom_in_degrees(zoom_factor)
+            
+            // FIXME check if this holds when screen heading is tilted
+            center_long += dzoom * width_height_proportion / longitude_latitude_proportion * (Double(-dx) / scrw)
+            center_lat += dzoom * (Double(dy) / scrh)
+            
+            // do not allow latitude above the Mercator reasonable limit
+            center_lat = min(max_latitude, center_lat)
+            center_lat = max(-max_latitude, center_lat)
+            
+            // handle cross of 180W meridian, normalize longitude
+            center_long = GPSModel2.normalize_longitude(center_long)
+            
+            recenter()
+            repaint(true)
+            
+        default:
+            break
         }
     }
-
+    
     func pinch(rec:UIPinchGestureRecognizer)
     {
         zoom_factor /= Double(rec.scale)
@@ -421,7 +452,7 @@ import UIKit
         rec.scale = 1.0
         repaint(true)
     }
-
+    
     func onefinger(rec:UITapGestureRecognizer)
     {
         NSLog("One finger")
@@ -432,7 +463,7 @@ import UIKit
             break
         }
     }
-
+    
     func twofingers(rec:UITapGestureRecognizer)
     {
         NSLog("Two fingers")
