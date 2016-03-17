@@ -53,8 +53,8 @@ import UIKit
     var longitude_latitude_proportion: Double = 1
     
     // Heading angle for transforms (in radians)
-    var screen_heading: Double = M_PI / 2
-    var DEFAULT_SCREEN_HEADING: Double = M_PI / 2
+    var screen_heading: Double = 0
+    var DEFAULT_SCREEN_HEADING: Double = 0
     
     // Most current GPS position
     var gpslat: Double = Double.NaN
@@ -243,9 +243,9 @@ import UIKit
         let zoom_width = zoom_height / longitude_latitude_proportion * width_height_proportion
         if debug {
             NSLog("Coordinate space is lat %f long %f radius %f", clat, clong, zoom_m_diagonal)
-        }
+        }
         
-        let scale_m = 2 * zoom_in_heightradius_m(zoom_factor)
+        let scale_m = 2 * zoom_in_widthradius_m(zoom_factor)
         
         scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
         latitude.text = GPSModel2.model().latitude_formatted()
@@ -266,7 +266,7 @@ import UIKit
                                                 long: (map.long0 + map.long1) / 2,
                                                 clat: clat, clong: clong,
                                                 heading: screen_heading,
-                                                zoom_height: zoom_height, scrh: scrh, scrw: scrw,
+                                                lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                                 longitude_proportion: longitude_latitude_proportion)
                 
                 let boundsx = CGFloat(scrw * abs(map.long1 - map.long0) / zoom_width)
@@ -299,7 +299,7 @@ import UIKit
         
         if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
             let (x, y) = GPSModel2.to_raster(gpslat, long: gpslong, clat: clat, clong: clong, heading: screen_heading,
-                                             zoom_height: zoom_height, scrh: scrh, scrw: scrw,
+                                             lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                              longitude_proportion: longitude_latitude_proportion)
             canvas.send_pos(x, y: y, accuracy: CGFloat(accuracy_px))
             if debug {
@@ -317,7 +317,8 @@ import UIKit
             let tlat = GPSModel2.model().target_latitude(tgt)
             let tlong = GPSModel2.model().target_longitude(tgt)
             if GPSModel2.inside(tlat, long: tlong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
-                let (x, y) = GPSModel2.to_raster(tlat, long: tlong, clat: clat, clong: clong, heading: screen_heading, zoom_height: zoom_height, scrh: scrh, scrw: scrw,
+                let (x, y) = GPSModel2.to_raster(tlat, long: tlong, clat: clat, clong: clong,
+                                                 heading: screen_heading, lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                                  longitude_proportion: longitude_latitude_proportion)
                 targets.append(x, y)
                 if debug {
@@ -409,7 +410,7 @@ import UIKit
             let dabs = hypot(dx, dy)
             var dangle = CGFloat(atan2(dy, dx))
             // take into account the current screen heading
-            dangle += CGFloat(screen_heading)
+            dangle -= CGFloat(screen_heading)
             // recalculate cartesian vector
             dx = cos(dangle) * dabs
             dy = sin(dangle) * dabs
@@ -425,7 +426,6 @@ import UIKit
             // zoom = measurement of latitude
             let dzoom = zoom_in_degrees(zoom_factor)
             
-            // FIXME check if this holds when screen heading is tilted
             center_long += dzoom * width_height_proportion / longitude_latitude_proportion * (Double(-dx) / scrw)
             center_lat += dzoom * (Double(dy) / scrh)
             

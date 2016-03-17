@@ -249,7 +249,7 @@ import CoreLocation
     }
     
     class func to_raster(lat: Double, long: Double, clat: Double, clong: Double, heading: Double,
-                         zoom_height: Double, scrh: Double, scrw: Double, longitude_proportion: Double)
+                         lat_height: Double, scrh: Double, scrw: Double, longitude_proportion: Double)
         -> (CGFloat, CGFloat)
     {
         var _long = normalize_longitude(long)
@@ -259,13 +259,13 @@ import CoreLocation
             _clong = offset_180(_clong)
         }
         // find distance from center point, in pixels
-        let dlat = scrh * -(lat - clat) / zoom_height
-        let dlong = scrh * longitude_proportion * (_long - _clong) / zoom_height
+        let dlat = scrh * -(lat - clat) / lat_height
+        let dlong = scrh * longitude_proportion * (_long - _clong) / lat_height
         // convert to polar and rotate
         let dabs = hypot(dlat, dlong)
-        let angle = atan2(dlat, dlong) - heading
+        let angle = atan2(dlat, dlong) + heading
         // convert back to cartesian and offset to middle of screen
-        return (CGFloat(scrw / 2 + dabs * cos(angle)), CGFlaot(scrh / 2 + dabs * sin(angle)))
+        return (CGFloat(scrw / 2 + dabs * cos(angle)), CGFloat(scrh / 2 + dabs * sin(angle)))
     }
     
     class func do_format_heading(n: Double) -> String
