@@ -167,23 +167,24 @@ class CompassView: UIView {
                     tgtminis_anim[i].bigchange()
                     tgtminis2_anim[i].bigchange()
                 }
-
             }
         }
     }
     
-    func anim(dx: Double)
+    func anim(dx: Double) -> (Double, Bool)
     {
         if bg == nil {
-            return
+            return (0.0, false)
         }
         
-        back_anim!.tick(dx)
+        let ret = back_anim!.tick(dx)
         needle_anim!.tick(dx)
         tgtneedle_anim!.tick(dx)
         for i in 0..<tgtminis_anim.count {
             tgtminis_anim[i].tick(dx)
             tgtminis2_anim[i].tick(dx)
         }
+        
+        return ret
     }
 }

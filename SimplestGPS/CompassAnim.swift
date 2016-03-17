@@ -66,11 +66,11 @@ class CompassAnim
         self.fast = true
     }
     
-    func tick(pdx: Double) -> Double
+    func tick(pdx: Double) -> (Double, Bool)
     {
         if !self.lost && target == current && opacity == 10000 {
             // nothing to do
-            return Double.NaN
+            return (current % 360.0, false)
         }
 
         var dx = pdx
@@ -141,6 +141,6 @@ class CompassAnim
         view.transform = CGAffineTransformMakeRotation(CGFloat(current * M_PI / 180.0))
         view.alpha = CGFloat(opacity) / 10000.0
 
-        return current % 360.0
+        return (current % 360.0, true)
     }
 }

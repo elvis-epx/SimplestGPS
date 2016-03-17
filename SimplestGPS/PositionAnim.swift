@@ -20,6 +20,7 @@ class PositionAnim
     var view: UIView
     var fast: Bool
     var size: CGRect
+    var last_angle: CGFloat
     
     let MIN_SPEED: CGFloat // points/second
     var MAX_SPEED: CGFloat // points/seconds
@@ -29,16 +30,20 @@ class PositionAnim
         self.vspeed = CGVector(dx: 0.0, dy: 0.0)
         self.mass = CGFloat(mass)
         self.drag = CGFloat(drag)
+        
+        // coordinates are RELATIVE: 0.0 is the middle of CGRect size!
         self.target = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
         self.current = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
+
         self.fast = false
         self.size = size
         self.view = view
         self.MAX_SPEED = size.height
         self.MIN_SPEED = self.MAX_SPEED / 200
+        self.last_angle = 0
     }
     
-    func set(target: CGPoint)
+    func set_rel(target: CGPoint)
     {
         self.target = target
     }
@@ -47,15 +52,26 @@ class PositionAnim
         self.fast = true
     }
     
-    func tick(pdt: Double, immediate: Bool) -> CGPoint
+    func tick(pdt: Double, angle: CGFloat, immediate: Bool) -> Bool
     {
-        if target.x.isNaN || target == current {
-            // nothing to do
-            // NSLog("%@ %f %f", name, current.x, current.y)
-            return current
+        if target.x.isNaN && current.x.isNaN {
+            // nothing to do (pathologic case)
+            return false
         }
         
-        if immediate || self.current.x.isNaN {
+        /* Assumes that angle is animated by CompassAnim and already changes smoothly */
+        let changed_angle = angle != last_angle
+        if changed_angle {
+            view.transform = CGAffineTransformMakeRotation(angle)
+            last_angle = angle
+        }
+    
+        if target.x.isNaN || target == current {
+            // nothing to do (typical case)
+            if !changed_angle {
+                return false
+            }
+        } else if immediate || self.current.x.isNaN {
             // goes immediately to place
             vspeed = CGVector(dx: 0, dy: 0)
             current = target
@@ -113,8 +129,16 @@ class PositionAnim
         
         // NSLog("%@ %f %f", name, current.x, current.y)
         
-        view.center = current
+        // convert to polar and rotate
+        let vector_abs = hypot(current.x, current.y)
+        let vector_angle = atan2(current.y, current.x) + angle
+        // convert back to cartesian and offset to middle of screen
+        let x = self.size.width / 2 + vector_abs * cos(vector_angle)
+        let y = self.size.height / 2 + vector_abs * sin(vector_angle)
+
+        let current_rot = CGPoint(x: x, y: y)
+        view.center = current_rot
         
-        return current
+        return true
     }
 }

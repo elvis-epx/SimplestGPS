@@ -52,10 +52,6 @@ import UIKit
     var clong: Double = Double.NaN
     var longitude_latitude_proportion: Double = 1
     
-    // Heading angle for transforms (in radians)
-    var screen_heading: Double = 0
-    var DEFAULT_SCREEN_HEADING: Double = 0
-    
     // Most current GPS position
     var gpslat: Double = Double.NaN
     var gpslong: Double = Double.NaN
@@ -142,16 +138,6 @@ import UIKit
         let calc_zoom = gpslat.isNaN
         gpslat = GPSModel2.model().latitude()
         gpslong = GPSModel2.model().longitude()
-        
-        if mode == MODE_MAPHEADING {
-            var h = GPSModel2.model().heading()
-            if h.isNaN {
-                h = 0
-            }
-            screen_heading = h * M_PI / 180
-        } else {
-            screen_heading = DEFAULT_SCREEN_HEADING
-        }
         
         recenter()
         if calc_zoom {
@@ -243,7 +229,7 @@ import UIKit
         let zoom_width = zoom_height / longitude_latitude_proportion * width_height_proportion
         if debug {
             NSLog("Coordinate space is lat %f long %f radius %f", clat, clong, zoom_m_diagonal)
-        }
+        }
         
         let scale_m = 2 * zoom_in_widthradius_m(zoom_factor)
         
@@ -255,7 +241,7 @@ import UIKit
         
         let accuracy_px = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
         
-        var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
+        var plot: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)] = []
         
         for map in GPSModel2.model().get_maps() {
             if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
@@ -265,7 +251,6 @@ import UIKit
                                                 (map.lat0 + map.lat1) / 2,
                                                 long: (map.long0 + map.long1) / 2,
                                                 clat: clat, clong: clong,
-                                                heading: screen_heading,
                                                 lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                                 longitude_proportion: longitude_latitude_proportion)
                 
@@ -275,7 +260,7 @@ import UIKit
                 let img = GPSModel2.model().get_map_image(map.file)
                 if (img != nil) {
                     plot.append((img!, map.file.absoluteString, boundsx, boundsy, centerx, centery,
-                        CGFloat(screen_heading), boundsy))
+                        boundsy))
                     if debug {
                         NSLog("Map lat %f..%f, long %f..%f translated to x:%f-%f y:%f-%f", map.lat0, map.lat1,
                               map.long0, map.long1, boundsx, boundsy, centerx, centery)
@@ -298,15 +283,16 @@ import UIKit
         canvas.send_img(plot)
         
         if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
-            let (x, y) = GPSModel2.to_raster(gpslat, long: gpslong, clat: clat, clong: clong, heading: screen_heading,
+            /* point relative 0,0 = screen center */
+            let (xrel, yrel) = GPSModel2.to_raster(gpslat, long: gpslong, clat: clat, clong: clong,
                                              lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                              longitude_proportion: longitude_latitude_proportion)
-            canvas.send_pos(x, y: y, accuracy: CGFloat(accuracy_px))
+            canvas.send_pos_rel(xrel, yrel: yrel, accuracy: CGFloat(accuracy_px))
             if debug {
-                NSLog("My position %f %f translated to %f,%f", clat, clong, x, y)
+                NSLog("My position %f %f translated to rel %f,%f", clat, clong, xrel, yrel)
             }
         } else {
-            canvas.send_pos(CGFloat.NaN, y: CGFloat.NaN, accuracy: 0)
+            canvas.send_pos_rel(CGFloat.NaN, yrel: CGFloat.NaN, accuracy: 0)
             if debug {
                 NSLog("My position %f %f not in space", clat, clong)
             }
@@ -317,12 +303,13 @@ import UIKit
             let tlat = GPSModel2.model().target_latitude(tgt)
             let tlong = GPSModel2.model().target_longitude(tgt)
             if GPSModel2.inside(tlat, long: tlong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
-                let (x, y) = GPSModel2.to_raster(tlat, long: tlong, clat: clat, clong: clong,
-                                                 heading: screen_heading, lat_height: zoom_height, scrh: scrh, scrw: scrw,
+                /* point relative 0,0 = screen center */
+                let (xrel, yrel) = GPSModel2.to_raster(tlat, long: tlong, clat: clat, clong: clong,
+                                                 lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                                  longitude_proportion: longitude_latitude_proportion)
-                targets.append(x, y)
+                targets.append(xrel, yrel)
                 if debug {
-                    NSLog("Target[%d] %f %f translated to %f,%f", tgt, tlat, tlong, x, y)
+                    NSLog("Target[%d] %f %f translated to rel %f,%f", tgt, tlat, tlong, xrel, yrel)
                 }
             } else {
                 if debug {
@@ -330,7 +317,7 @@ import UIKit
                 }
             }
         }
-        canvas.send_targets(targets)
+        canvas.send_targets_rel(targets)
         
         GPSModel2.model().releas()
         
@@ -410,7 +397,7 @@ import UIKit
             let dabs = hypot(dx, dy)
             var dangle = CGFloat(atan2(dy, dx))
             // take into account the current screen heading
-            dangle -= CGFloat(screen_heading)
+            dangle -= canvas.current_heading()
             // recalculate cartesian vector
             dx = cos(dangle) * dabs
             dy = sin(dangle) * dabs

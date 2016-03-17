@@ -42,6 +42,7 @@ class MapCanvasView: UIView
     let MODE_COUNT = 5
     
     var mode = 0
+    var _current_heading = CGFloat(0.0)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -62,7 +63,7 @@ class MapCanvasView: UIView
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
-    func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
+    func send_img(list: [(UIImage, String, CGFloat, CGFloat, CGFloat, CGFloat, CGFloat)]) {
         var rebuild = list.count != image_views.count
         
         if !rebuild {
@@ -84,7 +85,7 @@ class MapCanvasView: UIView
             image_views = []
             image_anims = []
             
-            for (img, name, _, _, _, _, _, _) in list {
+            for (img, name, _, _, _, _, _) in list {
                 let image = UIImageView(image: img)
                 let anim = PositionAnim(name: "img", view: image, mass: 0.5, drag: 6.0,
                                         size: self.frame)
@@ -116,18 +117,18 @@ class MapCanvasView: UIView
         }
         
         for i in 0..<list.count {
-            let (_, _, boundsx, boundsy, centerx, centery, angle, _) = list[i]
-            // FIXME animate rotation
-            image_views[i].1.transform = CGAffineTransformMakeRotation(angle)
+            let (_, _, boundsx, boundsy, centerx_rel, centery_rel, _) = list[i]
+            // FIXME animate rotation in conjunction with point animation
             image_views[i].1.bounds = CGRect(x: 0, y: 0, width: boundsx, height: boundsy)
-            image_anims[i].set(CGPoint(x: centerx, y: centery))
+            image_anims[i].set_rel(CGPoint(x: centerx_rel, y: centery_rel))
             image_views[i].1.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
         }
     }
     
-    func send_pos(x: CGFloat, y: CGFloat, accuracy: CGFloat)
+    func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat)
     {
-        let point = CGPoint(x: x, y: y)
+        /* Point is relative: 0 ,0 = middle of screen */
+        let pointrel = CGPoint(x: xrel, y: yrel)
         
         if accuracy_view == nil {
             accuracy_view = UIView.init(frame: CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2))
@@ -160,17 +161,18 @@ class MapCanvasView: UIView
             return
         }
 
-        accuracy_anim!.set(point)
+        accuracy_anim!.set_rel(pointrel)
         accuracy_view!.layer.cornerRadius = accuracy
         accuracy_view!.bounds = CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2)
-        accuracy_view!.hidden = (x <= 0 || mode == MODE_COMPASS || mode == MODE_HEADING)
+        accuracy_view!.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
         
-        location_anim!.set(point)
-        location_view!.hidden = (x <= 0 || mode == MODE_COMPASS || mode == MODE_HEADING)
+        location_anim!.set_rel(pointrel)
+        location_view!.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
     }
 
-    func send_targets(list: [(CGFloat, CGFloat)])
+    func send_targets_rel(list: [(CGFloat, CGFloat)])
     {
+        /* Points are relative: 0, 0 = middle of screen */
         self.target_count = list.count
 
         let updated_targets = target_views.count < target_count
@@ -202,9 +204,9 @@ class MapCanvasView: UIView
 
         for i in 0..<target_views.count {
             if i < self.target_count {
-                target_anims[i].set(CGPoint(x: list[i].0, y: list[i].1))
+                target_anims[i].set_rel(CGPoint(x: list[i].0, y: list[i].1))
             } else {
-                target_anims[i].set(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN))
+                target_anims[i].set_rel(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN))
                 target_views[i].hidden = true
             }
         }
@@ -273,18 +275,32 @@ class MapCanvasView: UIView
             last_update_blink = this_update
         }
 
-        for i in 0..<target_count {
-            target_anims[i].tick(dx, immediate: immediate)
-        }
-        for i in 0..<image_anims.count {
-            image_anims[i].tick(dx, immediate: immediate)
-        }
+        if compass != nil {
+            let (new_heading, _) = compass!.anim(dx)
+            // NSLog("Animated heading: %f", new_heading)
+            if mode == MODE_MAPHEADING {
+                _current_heading = CGFloat(new_heading * M_PI / 180.0)
+            } else {
+                _current_heading = 0
+            }
 
-        accuracy_anim?.tick(dx, immediate: immediate)
-        location_anim?.tick(dx, immediate: immediate)
-        compass?.anim(dx)
+            for i in 0..<target_count {
+                target_anims[i].tick(dx, angle: _current_heading, immediate: immediate)
+            }
+            for i in 0..<image_anims.count {
+                image_anims[i].tick(dx, angle: _current_heading, immediate: immediate)
+            }
+            accuracy_anim?.tick(dx, angle: _current_heading, immediate: immediate)
+            location_anim?.tick(dx, angle: _current_heading, immediate: immediate)
 
-        immediate = false
+            immediate = false
+        }
+        
         last_update2 = this_update
+    }
+    
+    func current_heading() -> CGFloat
+    {
+        return _current_heading;
     }
 }

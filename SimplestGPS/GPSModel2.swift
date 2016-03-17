@@ -248,8 +248,9 @@ import CoreLocation
         return harvesine(closest_lat, lat2: _lata, long1: closest_long, long2: _longa) <= radius
     }
     
-    class func to_raster(lat: Double, long: Double, clat: Double, clong: Double, heading: Double,
-                         lat_height: Double, scrh: Double, scrw: Double, longitude_proportion: Double)
+    class func to_raster(lat: Double, long: Double, clat: Double, clong: Double,
+                         lat_height: Double, scrh: Double, scrw: Double,
+                         longitude_proportion: Double)
         -> (CGFloat, CGFloat)
     {
         var _long = normalize_longitude(long)
@@ -261,11 +262,7 @@ import CoreLocation
         // find distance from center point, in pixels
         let dlat = scrh * -(lat - clat) / lat_height
         let dlong = scrh * longitude_proportion * (_long - _clong) / lat_height
-        // convert to polar and rotate
-        let dabs = hypot(dlat, dlong)
-        let angle = atan2(dlat, dlong) + heading
-        // convert back to cartesian and offset to middle of screen
-        return (CGFloat(scrw / 2 + dabs * cos(angle)), CGFloat(scrh / 2 + dabs * sin(angle)))
+        return (CGFloat(dlong), CGFloat(dlat))
     }
     
     class func do_format_heading(n: Double) -> String
