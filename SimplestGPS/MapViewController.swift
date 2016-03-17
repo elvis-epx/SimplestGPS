@@ -338,22 +338,22 @@ public struct MapDescriptor {
         }
         
         canvas.send_img(current_maps!, changed: map_list_changed)
-        
+
+        /*
         if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
-            /* point relative 0,0 = screen center */
+            // point relative 0,0 = screen center
+        */
             let (xrel, yrel) = GPSModel2.to_raster(gpslat, long: gpslong, clat: clat, clong: clong,
                                              lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                              longitude_proportion: longitude_latitude_proportion)
             canvas.send_pos_rel(xrel, yrel: yrel, accuracy: CGFloat(accuracy_px))
-            if debug {
-                NSLog("My position %f %f translated to rel %f,%f", clat, clong, xrel, yrel)
-            }
+        /*
+            NSLog("My position %f %f translated to rel %f,%f", clat, clong, xrel, yrel)
         } else {
             canvas.send_pos_rel(CGFloat.NaN, yrel: CGFloat.NaN, accuracy: 0)
-            if debug {
-                NSLog("My position %f %f not in space", clat, clong)
-            }
+            NSLog("My position %f %f not in space", clat, clong)
         }
+        */
         
         var targets: [(CGFloat, CGFloat)] = []
         for tgt in 0..<GPSModel2.model().target_count() {
