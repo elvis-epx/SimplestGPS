@@ -40,13 +40,13 @@ class PositionAnim
         self.target = target
         
         if !self.current.x.isNaN && !self.target.x.isNaN {
-            let distance = CGFloat(hypotf(Float(target.x - current.x), Float(target.y - current.y)))
+            let distance = hypot(target.x - current.x, target.y - current.y)
             last_distance = distance
             vspeed = CGVector(dx: (target.x - current.x) / SETTLE_TIME, dy: (target.y - current.y) / SETTLE_TIME)
         }
     }
     
-    func tick(pdt: Double, angle: CGFloat, immediate: Bool) -> Bool
+    func tick(pdt: CGFloat, angle: CGFloat, immediate: Bool) -> Bool
     {
         if target.x.isNaN && current.x.isNaN {
             // nothing to do (pathologic case)
@@ -72,7 +72,7 @@ class PositionAnim
             current = target
 
         } else {
-            var dt = CGFloat(pdt)
+            var dt = pdt
             if dt > 1.0 {
                 // we were probably at background
                 dt = 0.000001
@@ -81,7 +81,7 @@ class PositionAnim
             current.x += vspeed.dx * dt
             current.y += vspeed.dy * dt
             
-            let distance = CGFloat(hypotf(Float(target.x - current.x), Float(target.y - current.y)))
+            let distance = hypot(target.x - current.x, target.y - current.y)
             if distance > last_distance {
                 // distance increasing; stop
                 vspeed = CGVector(dx: 0, dy: 0)

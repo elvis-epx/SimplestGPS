@@ -76,10 +76,10 @@ class CompassView: UIView {
     }
     
     func send_data(compassonly: Bool,
-                   absolute: Bool, transparent: Bool, heading: Double,
+                   absolute: Bool, transparent: Bool, heading: CGFloat,
                    altitude: String, speed: String,
                       current_target: Int,
-                      targets: [(heading: Double, name: String, distance: String)],
+                      targets: [(heading: CGFloat, name: String, distance: String)],
                       tgt_dist: Bool)
     {
         if bg == nil {
@@ -134,8 +134,12 @@ class CompassView: UIView {
             let child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             let mini = TargetMiniNeedleView(frame: child_frame)
             let mini2 = TargetMiniInfoView(frame: child_frame)
-            let mini_anim = CompassAnim(name: "minitgtneedle", view: mini, mass: 0.36, drag: 3.5 + drand48() * 2)
-            let mini2_anim = CompassAnim(name: "minitgtneedle2", view: mini2, mass: 0.36, drag: 3.5 + drand48() * 2)
+            let mini_anim = CompassAnim(name: "minitgtneedle",
+                                        view: mini, mass: 0.36,
+                                        drag: 3.5 + CGFloat(drand48()) * 2)
+            let mini2_anim = CompassAnim(name: "minitgtneedle2",
+                                         view: mini2, mass: 0.36,
+                                         drag: 3.5 + CGFloat(drand48()) * 2)
             tgtminis.append(mini)
             tgtminis2.append(mini2)
             tgtminis_anim.append(mini_anim)
@@ -171,7 +175,7 @@ class CompassView: UIView {
         }
     }
     
-    func anim(dx: Double) -> (Double, Bool)
+    func anim(dx: CGFloat) -> (CGFloat, Bool)
     {
         if bg == nil {
             return (0.0, false)

@@ -11,23 +11,23 @@ import UIKit
 
 class CompassAnim
 {
-    var speed: Double
-    var mass: Double
-    var target: Double
-    var current: Double
-    var drag: Double
+    var speed: CGFloat
+    var mass: CGFloat
+    var target: CGFloat
+    var current: CGFloat
+    var drag: CGFloat
     var name: String
     var lost: Bool
     var view: UIView
     var fast: Bool
     var opacity: Int
 
-    let MIN_SPEED = 0.5 // degrees/second
-    let MAX_SPEED = 180.0 // degrees/seconds
-    let OPACITY_LOST = 12000.0 // points/sec
-    let OPACITY_OK = 50000.0 // points/sec
+    let MIN_SPEED = CGFloat(0.5) // degrees/second
+    let MAX_SPEED = CGFloat(180.0) // degrees/seconds
+    let OPACITY_LOST = CGFloat(12000.0) // points/sec
+    let OPACITY_OK = CGFloat(50000.0) // points/sec
     
-    init(name: String, view: UIView, mass: Double, drag: Double) {
+    init(name: String, view: UIView, mass: CGFloat, drag: CGFloat) {
         self.name = name
         self.speed = 0.0
         self.mass = mass
@@ -40,7 +40,7 @@ class CompassAnim
         opacity = 10000
     }
     
-    func set(target: Double)
+    func set(target: CGFloat)
     {
         lost = target != target
         if lost {
@@ -66,7 +66,7 @@ class CompassAnim
         self.fast = true
     }
     
-    func tick(pdx: Double) -> (Double, Bool)
+    func tick(pdx: CGFloat) -> (CGFloat, Bool)
     {
         if !self.lost && target == current && opacity == 10000 {
             // nothing to do
@@ -134,11 +134,10 @@ class CompassAnim
             */
         }
         /*
-        NSLog("%@: opacity %d",
-              name, opacity)
- */
+        NSLog("%@: opacity %d", name, opacity)
+        */
         
-        view.transform = CGAffineTransformMakeRotation(CGFloat(current * M_PI / 180.0))
+        view.transform = CGAffineTransformMakeRotation(current * CGFloat(M_PI / 180.0))
         view.alpha = CGFloat(opacity) / 10000.0
 
         return (current % 360.0, true)

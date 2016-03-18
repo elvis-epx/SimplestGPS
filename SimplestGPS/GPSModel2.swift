@@ -180,18 +180,44 @@ import CoreLocation
         }
         return x
     }
-    
+
+    // make sure that longitude is in range -180 <= x < +180
+    class func normalize_longitude_cgfloat(x: CGFloat) -> CGFloat
+    {
+        if x < -180 {
+            // 181W -> 179E
+            return 360 - x
+        } else if x >= 180 {
+            // 181E -> 179W
+            return x - 360
+        }
+        return x
+    }
+
     // test whether a longitude range is nearer to meridian 180 than meridian 0
     class func nearer_180(a: Double, b: Double) -> Bool
     {
         // note: this test assumes that range is < 180 degrees
         return (abs(a) + abs(b)) >= 180
     }
-    
+
+    class func nearer_180_cgfloat(a: CGFloat, b: CGFloat) -> Bool
+    {
+        return (abs(a) + abs(b)) >= 180
+    }
+
     // converts longitude, so values across +180/-180 line are directly comparable
     // It actually moves the 180 "problem" to the meridian 0 (longitude line becomes 359..0..1)
     // so this function should be used only when the range of interest does NOT cross 0
     class func offset_180(x: Double) -> Double
+    {
+        if x < 0 {
+            return x + 360
+        }
+        return x
+    }
+
+    class func offset_180_cgfloat(x: CGFloat) -> CGFloat
     {
         if x < 0 {
             return x + 360
@@ -246,23 +272,6 @@ import CoreLocation
         let closest_lat = clamp(_lata, mini: _maplata, maxi: _maplatb);
         
         return harvesine(closest_lat, lat2: _lata, long1: closest_long, long2: _longa) <= radius
-    }
-    
-    class func to_raster(lat: Double, long: Double, clat: Double, clong: Double,
-                         lat_height: Double, scrh: Double, scrw: Double,
-                         longitude_proportion: Double)
-        -> (CGFloat, CGFloat)
-    {
-        var _long = normalize_longitude(long)
-        var _clong = normalize_longitude(clong)
-        if nearer_180(_long, b: _clong) {
-            _long = offset_180(_long)
-            _clong = offset_180(_clong)
-        }
-        // find distance from center point, in pixels
-        let dlat = scrh * -(lat - clat) / lat_height
-        let dlong = scrh * longitude_proportion * (_long - _clong) / lat_height
-        return (CGFloat(dlong), CGFloat(dlat))
     }
     
     class func do_format_heading(n: Double) -> String
@@ -512,6 +521,11 @@ import CoreLocation
     class func longitude_proportion(lat: Double) -> Double
     {
         return cos(abs(lat) * M_PI / 180.0)
+    }
+
+    class func longitude_proportion_cgfloat(lat: CGFloat) -> CGFloat
+    {
+        return CGFloat(longitude_proportion(Double(lat)))
     }
     
     class func azimuth(lat1: Double, lat2: Double, long1: Double, long2: Double) -> Double

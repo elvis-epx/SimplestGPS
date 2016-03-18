@@ -27,7 +27,6 @@ class MapCanvasView: UIView
     
     var updater: CADisplayLink? = nil
     var last_update: CFTimeInterval = Double.NaN
-    var last_update2: CFTimeInterval = Double.NaN
     var last_update_blink: CFTimeInterval = Double.NaN
     var blink_status: Bool = false
     var immediate = false
@@ -207,9 +206,9 @@ class MapCanvasView: UIView
         immediate = true
     }
     
-    func send_compass(mode: Int, heading: Double, altitude: String, speed: String,
+    func send_compass(mode: Int, heading: CGFloat, altitude: String, speed: String,
                       current_target: Int,
-                      targets: [(heading: Double, name: String, distance: String)],
+                      targets: [(heading: CGFloat, name: String, distance: String)],
                       tgt_dist: Bool)
     {
         if mode != self.mode {
@@ -245,14 +244,12 @@ class MapCanvasView: UIView
     {
         let this_update = sender.timestamp
         
-        if last_update_blink.isNaN || last_update2.isNaN {
+        if last_update_blink.isNaN || last_update.isNaN {
             last_update_blink = this_update;
-            last_update2 = this_update
+            last_update = this_update
         }
         
-        let dx = this_update - last_update2
-        let dx2 = this_update - last_update_blink
-        if dx2 > 0.33333 {
+        if (this_update - last_update_blink) > 0.33333 {
             if blink_status {
                 location_view?.backgroundColor = UIColor.redColor()
             } else {
@@ -266,10 +263,12 @@ class MapCanvasView: UIView
         }
 
         if compass != nil {
+            let dx = CGFloat(this_update - last_update)
+            
             let (new_heading, _) = compass!.anim(dx)
             // NSLog("Animated heading: %f", new_heading)
             if mode == MODE_MAPHEADING {
-                _current_heading = CGFloat(new_heading * M_PI / 180.0)
+                _current_heading = new_heading * CGFloat(M_PI / 180.0)
             } else {
                 _current_heading = 0
             }
@@ -286,7 +285,7 @@ class MapCanvasView: UIView
             immediate = false
         }
         
-        last_update2 = this_update
+        last_update = this_update
     }
     
     func current_heading() -> CGFloat

@@ -13,12 +13,12 @@ public struct MapDescriptor {
     let img: UIImage
     let name: String
     let sortprio: CGFloat
-    let lat0: Double
-    let lat1: Double
-    let long0: Double
-    let long1: Double
-    let midlat: Double
-    let midlong: Double
+    let lat0: CGFloat
+    let lat1: CGFloat
+    let long0: CGFloat
+    let long1: CGFloat
+    let midlat: CGFloat
+    let midlong: CGFloat
     var boundsx: CGFloat = 0
     var boundsy: CGFloat = 0
     var centerx: CGFloat = 0
@@ -35,10 +35,10 @@ public struct MapDescriptor {
     @IBOutlet weak var accuracy: UILabel!
     @IBOutlet weak var longitude: UILabel!
     @IBOutlet weak var latitude: UILabel!
-    var scrw: Double = Double.NaN
-    var scrh: Double = Double.NaN
-    var width_height_proportion: Double = Double.NaN
-    var diag_height_proportion: Double = Double.NaN
+    var scrw = CGFloat.NaN
+    var scrh = CGFloat.NaN
+    var width_height_proportion = CGFloat.NaN
+    var diag_height_proportion = CGFloat.NaN
     
     let MODE_MAPONLY = 0
     let MODE_MAPCOMPASS = 1
@@ -51,30 +51,30 @@ public struct MapDescriptor {
     var tgt_dist = true
     
     // in seconds of latitude degree across the screen height
-    var zoom_factor: Double = 900
-    let zoom_min: Double = 30
-    let zoom_step: Double = 1.25
-    let zoom_max: Double = 3600
+    var zoom_factor: CGFloat = 900
+    let zoom_min: CGFloat = 30
+    let zoom_step: CGFloat = 1.25
+    let zoom_max: CGFloat = 3600
     
     // we assume that maps have Mercator projection so we cannot go down to 90 degrees either
-    let max_latitude = 90.0 - 5.0 - 3600 / 3600.0
+    let max_latitude = CGFloat(90.0 - 5.0 - 3600 / 3600.0)
     
     // Screen position (NaN = center follows GPS position)
-    var center_lat: Double = Double.NaN
-    var center_long: Double = Double.NaN
+    var center_lat = CGFloat.NaN
+    var center_long = CGFloat.NaN
     var touch_point: CGPoint? = nil
     
     // Current list of maps on screen
     var current_maps: [MapDescriptor]? = nil
     
     // Screen position for painting purposes (either screen position or GPS position)
-    var clat: Double = Double.NaN
-    var clong: Double = Double.NaN
-    var longitude_latitude_proportion: Double = 1
+    var clat = CGFloat.NaN
+    var clong = CGFloat.NaN
+    var longitude_latitude_proportion: CGFloat = 1
     
     // Most current GPS position
-    var gpslat: Double = Double.NaN
-    var gpslong: Double = Double.NaN
+    var gpslat = CGFloat.NaN
+    var gpslong = CGFloat.NaN
     
     var current_target = -1
     
@@ -89,8 +89,8 @@ public struct MapDescriptor {
     func do_centerme()
     {
         // NSLog("center me")
-        center_lat = Double.NaN
-        center_long = Double.NaN
+        center_lat = CGFloat.NaN
+        center_long = CGFloat.NaN
         recenter()
         repaint(false, gesture: false)
     }
@@ -129,8 +129,8 @@ public struct MapDescriptor {
     
     override func viewWillLayoutSubviews() {
         // NSLog("     map layout")
-        scrw = Double(canvas.bounds.size.width)
-        scrh = Double(canvas.bounds.size.height)
+        scrw = canvas.bounds.size.width
+        scrh = canvas.bounds.size.height
         width_height_proportion = scrw / scrh
         diag_height_proportion = sqrt(scrw * scrw + scrh * scrh) / scrh
     }
@@ -156,8 +156,8 @@ public struct MapDescriptor {
             return;
         }
         let calc_zoom = gpslat.isNaN
-        gpslat = GPSModel2.model().latitude()
-        gpslong = GPSModel2.model().longitude()
+        gpslat = CGFloat(GPSModel2.model().latitude())
+        gpslong = CGFloat(GPSModel2.model().longitude())
         
         recenter()
         if calc_zoom {
@@ -185,32 +185,49 @@ public struct MapDescriptor {
             clat = max(-max_latitude, clat)
         }
         
-        longitude_latitude_proportion = GPSModel2.longitude_proportion(clat)
+        longitude_latitude_proportion = GPSModel2.longitude_proportion_cgfloat(clat)
         if longitude_latitude_proportion.isNaN {
             longitude_latitude_proportion = 1
         }
     }
     
-    func zoom_in_degrees(x: Double) -> Double
+    func zoom_in_degrees(x: CGFloat) -> CGFloat
     {
         // zoom is in seconds, convert to degrees
         return x / 3600.0
     }
     
-    func zoom_in_widthradius_m(x: Double) -> Double
+    func zoom_in_widthradius_m(x: CGFloat) -> CGFloat
     {
         return width_height_proportion * zoom_in_heightradius_m(x)
     }
     
-    func zoom_in_heightradius_m(x: Double) -> Double
+    func zoom_in_heightradius_m(x: CGFloat) -> CGFloat
     {
         // zoom is in latitude seconds, convert to minutes, then to distance
         return 1853.0 * x / 60.0 / 2.0
     }
     
-    func zoom_in_diagradius_m(x: Double) -> Double
+    func zoom_in_diagradius_m(x: CGFloat) -> CGFloat
     {
         return diag_height_proportion * zoom_in_heightradius_m(x)
+    }
+    
+    func to_raster(lat: CGFloat, long: CGFloat, clat: CGFloat, clong: CGFloat,
+                         lat_height: CGFloat, scrh: CGFloat, scrw: CGFloat,
+                         longitude_proportion: CGFloat)
+        -> (CGFloat, CGFloat)
+    {
+        var _long = GPSModel2.normalize_longitude_cgfloat(long)
+        var _clong = GPSModel2.normalize_longitude_cgfloat(clong)
+        if GPSModel2.nearer_180_cgfloat(_long, b: _clong) {
+            _long = GPSModel2.offset_180_cgfloat(_long)
+            _clong = GPSModel2.offset_180_cgfloat(_clong)
+        }
+        // find distance from center point, in pixels
+        let dlat = scrh * -(lat - clat) / lat_height
+        let dlong = scrh * longitude_proportion * (_long - _clong) / lat_height
+        return (dlong, dlat)
     }
     
     func repaint(immediately: Bool, gesture: Bool)
@@ -230,19 +247,22 @@ public struct MapDescriptor {
             // accuracy.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
             
             // send compass data
-            var targets_compass: [(heading: Double, name: String, distance: String)] = []
+            var targets_compass: [(heading: CGFloat, name: String, distance: String)] = []
             for tgt in 0..<GPSModel2.model().target_count() {
-                targets_compass.append((heading: GPSModel2.model().target_heading(tgt),
+                targets_compass.append((
+                    heading: CGFloat(GPSModel2.model().target_heading(tgt)),
                     name: GPSModel2.model().target_name(tgt),
                     distance: GPSModel2.model().target_distance_formatted(tgt)))
             }
             if current_target >= targets_compass.count {
                 current_target = -1
             }
-            canvas.send_compass(mode, heading: GPSModel2.model().heading(),
+            canvas.send_compass(mode,
+                                heading: CGFloat(GPSModel2.model().heading()),
                                 altitude: GPSModel2.model().altitude_formatted(),
                                 speed: GPSModel2.model().speed_formatted(),
-                                current_target: current_target, targets: targets_compass,
+                                current_target: current_target,
+                                targets: targets_compass,
                                 tgt_dist: tgt_dist)
         }
         
@@ -256,14 +276,15 @@ public struct MapDescriptor {
         let scale_m = 2 * zoom_in_widthradius_m(zoom_factor)
         
         if !gesture {
-            scale.text = GPSModel2.format_distance_t(scale_m, met: GPSModel2.model().get_metric())
+            scale.text = GPSModel2.format_distance_t(Double(scale_m),
+                                                    met: GPSModel2.model().get_metric())
             latitude.text = GPSModel2.model().latitude_formatted()
             longitude.text = GPSModel2.model().longitude_formatted()
             altitude.text = GPSModel2.model().altitude_formatted()
             accuracy.text = GPSModel2.model().accuracy_formatted()
         }
         
-        let accuracy_px = scrw * GPSModel2.model().horizontal_accuracy() / scale_m
+        let accuracy_px = scrw * CGFloat(GPSModel2.model().horizontal_accuracy()) / scale_m
         
         var map_list_changed = false
         
@@ -272,16 +293,23 @@ public struct MapDescriptor {
             var provisional_list: [MapDescriptor] = []
             
             for map in GPSModel2.model().get_maps() {
-                if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
-                                        lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
+                if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0,
+                                        maplongb: map.long1,
+                                        lat_circle: Double(clat),
+                                        long_circle: Double(clong),
+                                        radius: Double(zoom_m_diagonal)) {
                     
                     let img = GPSModel2.model().get_map_image(map.file)
                     if (img != nil) {
                         provisional_list.append(MapDescriptor(
                             img: img!, name: map.file.absoluteString,
                             sortprio: CGFloat(abs(map.lat1 - map.lat0)),
-                            lat0: map.lat0, lat1: map.lat1, long0: map.long0, long1: map.long1,
-                            midlat: (map.lat0 + map.lat1) / 2, midlong: (map.long0 + map.long1) / 2,
+                            lat0: CGFloat(map.lat0),
+                            lat1: CGFloat(map.lat1),
+                            long0: CGFloat(map.long0),
+                            long1: CGFloat(map.long1),
+                            midlat: CGFloat(map.lat0 + map.lat1) / 2,
+                            midlong: CGFloat(map.long0 + map.long1) / 2,
                             boundsx: 0, boundsy: 0, centerx: 0, centery: 0))
                         if debug {
                             NSLog("Map lat %f..%f, long %f..%f",
@@ -326,7 +354,7 @@ public struct MapDescriptor {
         for i in 0..<current_maps!.count {
             let map = current_maps![i]
             (current_maps![i].centerx, current_maps![i].centery) =
-                GPSModel2.to_raster(
+                to_raster(
                     (map.lat0 + map.lat1) / 2,
                     long: (map.long0 + map.long1) / 2,
                     clat: clat, clong: clong,
@@ -343,7 +371,7 @@ public struct MapDescriptor {
         if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
             // point relative 0,0 = screen center
         */
-            let (xrel, yrel) = GPSModel2.to_raster(gpslat, long: gpslong, clat: clat, clong: clong,
+            let (xrel, yrel) = to_raster(gpslat, long: gpslong, clat: clat, clong: clong,
                                              lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                              longitude_proportion: longitude_latitude_proportion)
             canvas.send_pos_rel(xrel, yrel: yrel, accuracy: CGFloat(accuracy_px))
@@ -359,11 +387,15 @@ public struct MapDescriptor {
         for tgt in 0..<GPSModel2.model().target_count() {
             let tlat = GPSModel2.model().target_latitude(tgt)
             let tlong = GPSModel2.model().target_longitude(tgt)
-            if GPSModel2.inside(tlat, long: tlong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
+            if GPSModel2.inside(tlat, long: tlong,
+                                lat_circle: Double(clat),
+                                long_circle: Double(clong),
+                                radius: Double(zoom_m_diagonal)) {
                 /* point relative 0,0 = screen center */
-                let (xrel, yrel) = GPSModel2.to_raster(tlat, long: tlong, clat: clat, clong: clong,
-                                                 lat_height: zoom_height, scrh: scrh, scrw: scrw,
-                                                 longitude_proportion: longitude_latitude_proportion)
+                let (xrel, yrel) = to_raster(CGFloat(tlat), long: CGFloat(tlong),
+                                             clat: clat, clong: clong,
+                                             lat_height: zoom_height, scrh: scrh, scrw: scrw,
+                                             longitude_proportion: longitude_latitude_proportion)
                 targets.append(xrel, yrel)
                 if debug {
                     NSLog("Target[%d] %f %f translated to rel %f,%f", tgt, tlat, tlong, xrel, yrel)
@@ -395,8 +427,8 @@ public struct MapDescriptor {
         }
         
         // force current position in center
-        center_lat = Double.NaN
-        center_long = Double.NaN
+        center_lat = CGFloat.NaN
+        center_long = CGFloat.NaN
         recenter()
         
         var new_zoom_factor = zoom_min / zoom_step
@@ -413,7 +445,9 @@ public struct MapDescriptor {
             for tgt in 0..<GPSModel2.model().target_count() {
                 let tlat = GPSModel2.model().target_latitude(tgt)
                 let tlong = GPSModel2.model().target_longitude(tgt)
-                if GPSModel2.inside(tlat, long: tlong, lat_circle: clat, long_circle: clong, radius: dzoom) {
+                if GPSModel2.inside(tlat, long: tlong, lat_circle: Double(clat),
+                                    long_circle: Double(clong),
+                                    radius: Double(dzoom)) {
                     if !all_targets {
                         ok = true
                         break
@@ -452,7 +486,7 @@ public struct MapDescriptor {
             
             // convert to a polar vector
             let dabs = hypot(dx, dy)
-            var dangle = CGFloat(atan2(dy, dx))
+            var dangle = atan2(dy, dx)
             // take into account the current screen heading
             dangle -= canvas.current_heading()
             // recalculate cartesian vector
@@ -470,15 +504,15 @@ public struct MapDescriptor {
             // zoom = measurement of latitude
             let dzoom = zoom_in_degrees(zoom_factor)
             
-            center_long += dzoom * width_height_proportion / longitude_latitude_proportion * (Double(-dx) / scrw)
-            center_lat += dzoom * (Double(dy) / scrh)
+            center_long += dzoom * width_height_proportion / longitude_latitude_proportion * ((-dx) / scrw)
+            center_lat += dzoom * dy / scrh
             
             // do not allow latitude above the Mercator reasonable limit
             center_lat = min(max_latitude, center_lat)
             center_lat = max(-max_latitude, center_lat)
             
             // handle cross of 180W meridian, normalize longitude
-            center_long = GPSModel2.normalize_longitude(center_long)
+            center_long = GPSModel2.normalize_longitude_cgfloat(center_long)
             
             recenter()
             repaint(true, gesture: true)
@@ -490,7 +524,7 @@ public struct MapDescriptor {
     
     func pinch(rec:UIPinchGestureRecognizer)
     {
-        zoom_factor /= Double(rec.scale)
+        zoom_factor /= rec.scale
         zoom_factor = max(zoom_factor, zoom_min)
         zoom_factor = min(zoom_factor, zoom_max)
         rec.scale = 1.0
