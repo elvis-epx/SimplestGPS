@@ -33,26 +33,27 @@ class NeedleView: UIView {
         if ctx == nil {
             return
         }
-        let radius = CGFloat((CGFloat(self.bounds.size.width) * 0.75) / 2)
+        let radius = self.bounds.size.width * 0.75 / 2
         let off = radius * 0.055
-        let center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2)
+        let center = CGPointMake(self.bounds.size.width / 2,
+                                 self.bounds.size.height / 2)
 
         CGContextSetStrokeColorWithColor(ctx, color.CGColor)
         CGContextSetLineWidth(ctx, 1.5)
-        CGContextMoveToPoint(ctx, center.x + off, center.y - radius) //start at this point
-        CGContextAddLineToPoint(ctx, center.x + off, center.y + radius + off * 3) //draw to this point
+        CGContextMoveToPoint(ctx, center.x + off, center.y - radius)
+        CGContextAddLineToPoint(ctx, center.x + off, center.y + radius + off * 3)
         CGContextStrokePath(ctx)
         
-        CGContextMoveToPoint(ctx, center.x - off, center.y - radius) //start at this point
-        CGContextAddLineToPoint(ctx, center.x - off, center.y + radius + off * 3) //draw to this point
+        CGContextMoveToPoint(ctx, center.x - off, center.y - radius)
+        CGContextAddLineToPoint(ctx, center.x - off, center.y + radius + off * 3)
         CGContextStrokePath(ctx)
 
-        CGContextMoveToPoint(ctx, center.x - 4 * off, center.y - radius + off * 6) //start at this point
-        CGContextAddLineToPoint(ctx, center.x, center.y - radius - off * 3) //draw to this point
+        CGContextMoveToPoint(ctx, center.x - 4 * off, center.y - radius + off * 6)
+        CGContextAddLineToPoint(ctx, center.x, center.y - radius - off * 3)
         CGContextStrokePath(ctx)
 
-        CGContextMoveToPoint(ctx, center.x + 4 * off, center.y - radius + off * 6) //start at this point
-        CGContextAddLineToPoint(ctx, center.x, center.y - radius - off * 3) //draw to this point
+        CGContextMoveToPoint(ctx, center.x + 4 * off, center.y - radius + off * 6)
+        CGContextAddLineToPoint(ctx, center.x, center.y - radius - off * 3)
         CGContextStrokePath(ctx)
     }
 }
