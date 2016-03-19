@@ -120,9 +120,11 @@ class MapCanvasView: UIView
 
         /* update coordinates (controller changed the descriptor .1 in-place) */
         for (name, view) in image_views {
-            view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
-            image_anims[name]!.set_rel(CGPoint(x: view.1.centerx, y: view.1.centery))
-            view.0.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+            image_anims[name]!.set_rel(CGPoint(x: view.1.centerx, y: view.1.centery), block: {
+                view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
+                view.0.hidden = (self.mode == self.MODE_COMPASS
+                                || self.mode == self.MODE_HEADING)
+            })
         }
     }
     
@@ -160,13 +162,17 @@ class MapCanvasView: UIView
             return
         }
 
-        accuracy_anim!.set_rel(pointrel)
-        accuracy_view!.layer.cornerRadius = accuracy
-        accuracy_view!.bounds = CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2)
-        accuracy_view!.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+        accuracy_anim!.set_rel(pointrel, block: {
+            self.accuracy_view!.layer.cornerRadius = accuracy
+            self.accuracy_view!.bounds = CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2)
+            self.accuracy_view!.hidden = (self.mode == self.MODE_COMPASS
+                                        || self.mode == self.MODE_HEADING)
+            })
         
-        location_anim!.set_rel(pointrel)
-        location_view!.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+        location_anim!.set_rel(pointrel, block: {
+            self.location_view!.hidden = (self.mode == self.MODE_COMPASS
+                                            || self.mode == self.MODE_HEADING)
+            })
     }
 
     func send_targets_rel(list: [(CGFloat, CGFloat)])
@@ -200,10 +206,11 @@ class MapCanvasView: UIView
 
         for i in 0..<target_views.count {
             if i < self.target_count {
-                target_anims[i].set_rel(CGPoint(x: list[i].0, y: list[i].1))
+                target_anims[i].set_rel(CGPoint(x: list[i].0, y: list[i].1), block: {})
             } else {
-                target_anims[i].set_rel(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN))
-                target_views[i].hidden = true
+                target_anims[i].set_rel(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN), block: {
+                    self.target_views[i].hidden = true
+                })
             }
         }
     }

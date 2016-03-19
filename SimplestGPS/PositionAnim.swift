@@ -20,6 +20,7 @@ class PositionAnim
     var last_angle: CGFloat
     var last_distance: CGFloat
     let SETTLE_TIME = CGFloat(0.5)
+    var block: (() -> Void)?
     
     init(name: String, view: UIView, size: CGRect) {
         self.name = name
@@ -35,9 +36,10 @@ class PositionAnim
         self.last_distance = 0
     }
     
-    func set_rel(target: CGPoint)
+    func set_rel(target: CGPoint, block: () -> Void)
     {
         self.target = target
+        self.block = block
         
         if !self.current.x.isNaN && !self.target.x.isNaN {
             let distance = hypot(target.x - current.x, target.y - current.y)
@@ -48,6 +50,11 @@ class PositionAnim
     
     func tick(pdt: CGFloat, angle: CGFloat, immediate: Bool) -> Bool
     {
+        if self.block != nil {
+            block!();
+            self.block = nil
+        }
+        
         if target.x.isNaN && current.x.isNaN {
             // nothing to do (pathologic case)
             return false

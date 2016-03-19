@@ -62,6 +62,7 @@ import UIKit
     var gpslong = CGFloat.NaN
     
     var current_target = -1
+    var update_timer: NSTimer? = nil
     
     var debug = false
     
@@ -110,6 +111,10 @@ import UIKit
         NSLog("     map will appear")
         super.viewWillAppear(animated)
         GPSModel2.model().addObs(self)
+        update_timer = NSTimer(timeInterval: 0.5, target: self,
+                               selector: #selector(MapViewController.update),
+                        userInfo: nil, repeats: true)
+        NSRunLoop.currentRunLoop().addTimer(update_timer!, forMode: NSRunLoopCommonModes)
     }
     
     override func viewWillLayoutSubviews() {
@@ -124,6 +129,10 @@ import UIKit
         NSLog("     map will disappear")
         super.viewWillDisappear(animated)
         GPSModel2.model().delObs(self)
+        if update_timer != nil {
+            update_timer!.invalidate()
+            update_timer = nil
+        }
     }
     
     func fail() {
