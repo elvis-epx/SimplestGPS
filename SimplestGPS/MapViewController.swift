@@ -23,7 +23,7 @@ import UIKit
     var width_prop: Double = 1
     
     // in seconds of latitude degree across the screen height
-    var zoom_factor: Double = 900
+    var zoom_factor: Double = 60
     let zoom_min: Double = 30
     let zoom_step: Double = 1.25
     let zoom_max: Double = 3600
@@ -120,13 +120,9 @@ import UIKit
         if scrw == 0 {
             return;
         }
-        let calc_zoom = gpslat == 0
         gpslat = GPSModel2.model().latitude()
         gpslong = GPSModel2.model().longitude()
         recenter()
-        if calc_zoom {
-            calculate_zoom()
-        }
         repaint()
     }
     
