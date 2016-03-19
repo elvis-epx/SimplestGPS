@@ -66,6 +66,10 @@ class MapCanvasView: UIView
         if changed || list.count != image_views.count {
             // NSLog("Rebuilding image stack")
 
+            // FIXME optimize case when maps are only removed, not added
+            // FIXME balance-line maps, instead of complete replacement
+            // FIXME make image_views and image_anims associative arrays
+            
             for (_, image) in image_views {
                 image.hidden = true
                 image.removeFromSuperview()
@@ -75,6 +79,9 @@ class MapCanvasView: UIView
             image_anims = []
             
             for map in list {
+                
+                // FIXME empty views colored for non-images (loading, memory full, etc)
+                
                 let image = UIImageView(image: map.img)
                 let anim = PositionAnim(name: "img", view: image, size: self.frame)
                 image_views.append((map.name, image))

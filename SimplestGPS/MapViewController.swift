@@ -9,22 +9,6 @@
 import Foundation
 import UIKit
 
-public struct MapDescriptor {
-    let img: UIImage
-    let name: String
-    let sortprio: CGFloat
-    let lat0: CGFloat
-    let lat1: CGFloat
-    let long0: CGFloat
-    let long1: CGFloat
-    let midlat: CGFloat
-    let midlong: CGFloat
-    var boundsx: CGFloat = 0
-    var boundsy: CGFloat = 0
-    var centerx: CGFloat = 0
-    var centery: CGFloat = 0
-}
-
 @objc class MapViewController: UIViewController, ModelListener
 {
     @IBOutlet weak var canvas: MapCanvasView!
@@ -65,7 +49,8 @@ public struct MapDescriptor {
     var touch_point: CGPoint? = nil
     
     // Current list of maps on screen
-    var current_maps: [MapDescriptor]? = nil
+    var current_maps: [MapDescriptor] = []
+    var last_map_update: Double = 0;
     
     // Screen position for painting purposes (either screen position or GPS position)
     var clat = CGFloat.NaN
@@ -290,29 +275,32 @@ public struct MapDescriptor {
         
         var map_list_changed = false
         
-        if !gesture || current_maps == nil {
+        let now = NSDate().timeIntervalSince1970
+        if last_map_update == 0 {
+            last_map_update = now - 0.5
+        }
+        
+        if !gesture && (now - last_map_update) > 1.0 {
             // only recalculate map list when we are not in a hurry
+            last_map_update = now
+
             var provisional_list: [MapDescriptor] = []
             
-            for map in GPSModel2.model().get_maps() {
-                if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0,
-                                        maplongb: map.long1,
-                                        lat_circle: Double(clat),
-                                        long_circle: Double(clong),
-                                        radius: Double(zoom_m_diagonal)) {
+            for map in GPSModel2.model().get_maps(Double(clat),
+                                                  clong: Double(clong),
+                                                  radius: Double(zoom_m_diagonal)) {
+                                                    
+                    // FIXME send empty/missing maps, paint w/ colors
+                    // FIXME detect when map changes or is removed/empty, rebuild
+                    // FIXME prioritize images nearer the center
+                    // FIXME delay get_map_image to later?
+                    // FIXME map_image_peek call?
+                    // FIXME abolish provisional list, use map list from model()
+                    // FIXME add missing fields to model() struct (bounds*, mid*, center*)
+                    // FIXME get 'changed' status from model instead of finding here.
                     
-                    let img = GPSModel2.model().get_map_image(map.file)
-                    if (img != nil) {
-                        provisional_list.append(MapDescriptor(
-                            img: img!, name: map.file.absoluteString,
-                            sortprio: CGFloat(abs(map.lat1 - map.lat0)),
-                            lat0: CGFloat(map.lat0),
-                            lat1: CGFloat(map.lat1),
-                            long0: CGFloat(map.long0),
-                            long1: CGFloat(map.long1),
-                            midlat: CGFloat(map.lat0 + map.lat1) / 2,
-                            midlong: CGFloat(map.long0 + map.long1) / 2,
-                            boundsx: 0, boundsy: 0, centerx: 0, centery: 0))
+                    if (map.img != nil) {
+                        provisional_list.append(map)
                         if debug {
                             NSLog("Map lat %f..%f, long %f..%f",
                             map.lat0, map.lat1, map.long0, map.long1)
@@ -322,28 +310,20 @@ public struct MapDescriptor {
                             NSLog("Map not available")
                         }
                     }
-                } else {
-                    if debug {
-                        NSLog("Map %f %f, %f %f not in space", map.lat0, map.lat1, map.long0, map.long1)
-                    }
-                }
             }
             
             // smaller images should be blitted last since they are probably more detailed maps of the area
             provisional_list.sortInPlace({ $0.sortprio > $1.sortprio } )
-            
-            if current_maps == nil {
-                map_list_changed = true
-                current_maps = provisional_list
-                
-            } else if current_maps!.count != provisional_list.count {
+
+            // FIXME get 'changed' status from model instead of finding here.
+            if current_maps.count != provisional_list.count {
                 // obviously changed
                 map_list_changed = true
                 current_maps = provisional_list
                 
             } else {
                 for i in 0..<provisional_list.count {
-                    if provisional_list[i].name != current_maps![i].name {
+                    if provisional_list[i].name != current_maps[i].name {
                         // replacement, or reordering
                         map_list_changed = true
                         current_maps = provisional_list
@@ -353,21 +333,20 @@ public struct MapDescriptor {
             }
         }
         
-        for i in 0..<current_maps!.count {
-            let map = current_maps![i]
-            (current_maps![i].centerx, current_maps![i].centery) =
+        for i in 0..<current_maps.count {
+            let map = current_maps[i]
+            (current_maps[i].centerx, current_maps[i].centery) =
                 to_raster(
-                    (map.lat0 + map.lat1) / 2,
-                    long: (map.long0 + map.long1) / 2,
+                    CGFloat(map.midlat), long: CGFloat(map.midlong),
                     clat: clat, clong: clong,
                     lat_height: zoom_height, scrh: scrh, scrw: scrw,
                     longitude_proportion: longitude_latitude_proportion)
                 
-            current_maps![i].boundsx = CGFloat(scrw * abs(map.long1 - map.long0) / zoom_width)
-            current_maps![i].boundsy = CGFloat(scrh * abs(map.lat1 - map.lat0) / zoom_height)
+            current_maps[i].boundsx = CGFloat(scrw * CGFloat(map.longwidth) / zoom_width)
+            current_maps[i].boundsy = CGFloat(scrh * CGFloat(map.latheight) / zoom_height)
         }
         
-        canvas.send_img(current_maps!, changed: map_list_changed)
+        canvas.send_img(current_maps, changed: map_list_changed)
 
         /*
         if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
@@ -418,7 +397,7 @@ public struct MapDescriptor {
         }
         
         if debug {
-            NSLog("Painted with %d maps", current_maps!.count)
+            NSLog("Painted with %d maps", current_maps.count)
         }
     }
     

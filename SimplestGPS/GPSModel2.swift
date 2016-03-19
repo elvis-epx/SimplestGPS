@@ -16,7 +16,47 @@ import CoreLocation
     func update()
 }
 
-// FIXME metric in Settings, listen changes
+// could not be struct because we want this to passed around by reference
+public class MapDescriptor {
+    static let IMAGE_NIL = 0
+    static let IMAGE_LOADING = 1
+    static let IMAGE_LOADED = 2
+    static let IMAGE_FAILED = 3
+    
+    let file: NSURL
+    var img: UIImage? = nil
+    var imgstatus: Int = IMAGE_NIL
+    let name: String
+    let sortprio: Double
+    let lat0: Double
+    let lat1: Double
+    let long0: Double
+    let long1: Double
+    let latheight: Double
+    let longwidth: Double
+    let midlat: Double
+    let midlong: Double
+    var boundsx: CGFloat = 0
+    var boundsy: CGFloat = 0
+    var centerx: CGFloat = 0
+    var centery: CGFloat = 0
+    
+    init(file: NSURL, name: String, sortprio: Double, latNW: Double, longNW: Double, latheight: Double, longwidth: Double)
+    {
+        self.file = file
+        self.name = name
+        self.sortprio = sortprio
+        self.lat0 = latNW
+        self.long0 = longNW
+        self.latheight = latheight
+        self.longwidth = longwidth
+        
+        self.lat1 = latNW - latheight
+        self.long1 = longNW + longwidth
+        self.midlat = lat0 - latheight / 2
+        self.midlong = long0 + longwidth / 2
+    }
+}
 
 @objc class GPSModel2: NSObject, CLLocationManagerDelegate {
     var observers = [ModelListener]()
@@ -33,9 +73,7 @@ import CoreLocation
     var metric: Int = 1;
     var editing: Int = -1
     
-    var maps: [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double,
-                latheight: Double, longwidth: Double)] = [];
-    var mapimages: [String: UIImage] = [:]
+    var maps: [MapDescriptor] = [];
     
     var memoryWarningObserver : NSObjectProtocol!
     var prefsObserver : NSObjectProtocol!
@@ -247,7 +285,6 @@ import CoreLocation
         return max(mini, min(maxi, value))
     }
     
-
     class func map_inside(maplata: Double, maplatb: Double, maplonga: Double, maplongb: Double,
                           lat_circle: Double, long_circle: Double, radius: Double) -> Bool
     {
@@ -649,9 +686,42 @@ import CoreLocation
         return value;
     }
 
-    func get_maps() -> [(file: NSURL, lat0: Double, lat1: Double, long0: Double, long1: Double,
-        latheight: Double, longwidth: Double)] {
-            return [] + maps[0..<maps.count]
+    // FIXME convert tuple type to struct
+    // FIXME store distance calculated by map_inside, and inlcusion status, to prioritize maps
+    // FIXME load in thread
+    // FIXME load 'slowly', one at a time
+    // FIXME gauge memory usage
+    // FIXME detect limit in memory usage
+    // FIXME downsize image when memory full
+    // FIXME LRU removal
+    // FIXME do not load if memory full
+    // FIXME report when list changes
+
+    func get_maps(clat: Double, clong: Double, radius: Double) -> [MapDescriptor] {
+            
+        var ret: [MapDescriptor] = []
+        
+        for i in 0..<maps.count {
+            let map = maps[i]
+            if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
+                                    lat_circle: clat, long_circle: clong, radius: radius) {
+                if map.imgstatus == MapDescriptor.IMAGE_NIL {
+                    if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
+                        map.img = img
+                        map.imgstatus = MapDescriptor.IMAGE_LOADED
+                        NSLog("Image %@ loaded", map.name)
+                    } else {
+                        NSLog("Image %@ NOT LOADED", map.name)
+                        map.imgstatus = MapDescriptor.IMAGE_FAILED
+                    }
+                }
+            }
+            if map.img != nil {
+                // FIXME send always, caller will have to check imgstatus
+                ret.append(map)
+            }
+        }
+        return ret
     }
     
     func latitude() -> Double
@@ -1106,9 +1176,15 @@ import CoreLocation
                     long += coords.dx / ((1852.0 * 60) * GPSModel2.longitude_proportion(lat))
                     NSLog("   compensated to %f %f", lat, long)
                 }
-                maps.append((file: url, lat0: lat, lat1: lat - coords.latheight,
-                    long0: long, long1: long + coords.longwidth,
-                    latheight: coords.latheight, longwidth: coords.longwidth))
+                
+                let map = MapDescriptor(file: url,
+                                    name: url.absoluteString,
+                                    sortprio: coords.latheight,
+                                    latNW: coords.lat,
+                                    longNW: coords.long,
+                                    latheight: coords.latheight,
+                                    longwidth: coords.longwidth)
+                maps.append(map)
             }
         }
         
@@ -1143,26 +1219,11 @@ import CoreLocation
     
     func memory_low() {
         NSLog("Memory low, purging images")
-        mapimages = [:]
-    }
-    
-    func get_map_image(url: NSURL) -> UIImage?
-    {
-        let name = url.absoluteString
-        if let img = mapimages[name] {
-            // NSLog("Image cached")
-            return img
+        // FIXME do it better, set state
+        for i in 0..<maps.count {
+            maps[i].img = nil
+            maps[i].imgstatus = MapDescriptor.IMAGE_NIL
         }
-        if let img = UIImage(data: NSData(contentsOfURL: url)!) {
-            NSLog("Image %@ loaded", name)
-            mapimages[name] = img
-            return img
-        }
-        
-        NSLog("Image %@ NOT LOADED", name)
-        // remove map from list, so it is no longer requested
-        maps = maps.filter() {$0.file.absoluteString == name}
-        return nil
     }
 
     static let singleton = GPSModel2();
