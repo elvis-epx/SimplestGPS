@@ -287,7 +287,7 @@ public class MapDescriptor {
     }
     
     class func map_inside(maplata: Double, maplatb: Double, maplonga: Double, maplongb: Double,
-                          lat_circle: Double, long_circle: Double, radius: Double) -> Bool
+                          lat_circle: Double, long_circle: Double, radius: Double) -> Int
     {
         let _maplata = min(maplata, maplatb)
         let _maplatb = max(maplata, maplatb)
@@ -308,8 +308,32 @@ public class MapDescriptor {
         // Find the closest point to the circle within the rectangle
         let closest_long = clamp(_longa, mini: _maplonga, maxi: _maplongb);
         let closest_lat = clamp(_lata, mini: _maplata, maxi: _maplatb);
+        let d = harvesine(closest_lat, lat2: _lata, long1: closest_long, long2: _longa)
+            
+        if d > radius {
+            // no intersection
+            return 0
+        } else if d > 0 {
+            // intersects but not completely enclosed by map
+            return 1
+        }
         
-        return harvesine(closest_lat, lat2: _lata, long1: closest_long, long2: _longa) <= radius
+        // is the circle completely enclosed by map?
+        // convert circle to a box
+        let radius_lat = radius / 1853.0 / 60.0
+        let radius_long = radius_lat / longitude_proportion(_lata)
+        let lat0_circle = _lata - radius_lat
+        let lat1_circle = _lata + radius_lat
+        let long0_circle = _longa - radius_long
+        let long1_circle = _longa + radius_long
+        
+        if lat0_circle >= _maplata && lat1_circle <= _maplatb
+                && long0_circle >= _maplonga && long1_circle <= _maplongb {
+            // box enclosed in map
+            return 2
+        }
+        
+        return 1
     }
     
     class func do_format_heading(n: Double) -> String
@@ -539,6 +563,11 @@ public class MapDescriptor {
     {
         // http://www.movable-type.co.uk/scripts/latlong.html
         
+        if lat1 == lat2 && long1 == long2 {
+            // avoid a non-zero result due to FP limitations
+            return 0;
+        }
+        
         let R = 6371000.0; // metres
         let phi1 = lat1 * M_PI / 180.0;
         let phi2 = lat2 * M_PI / 180.0;
@@ -550,6 +579,12 @@ public class MapDescriptor {
             sin(deltalambda/2) * sin(deltalambda/2);
         let c = 2 * atan2(sqrt(a), sqrt(1.0 - a));
         let d = R * c;
+        
+        if d < 0.1 {
+            // make sure it returns a round 0 when distance is negligible
+            return 0
+        }
+        
         return d;
     }
     
@@ -705,10 +740,14 @@ public class MapDescriptor {
             
         var new_list: [String:MapDescriptor] = [:]
         
-        for i in 0..<maps.count {
+        // 'maps' ordered by priority (last map = more priority)
+        // satrt by higher priority maps (if one encloses the screen circle, call it a day.)
+        
+        for i in (0..<maps.count).reverse() {
             let map = maps[i]
-            if GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
-                                    lat_circle: clat, long_circle: clong, radius: radius) {
+            let ins = GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
+                                    lat_circle: clat, long_circle: clong, radius: radius)
+            if ins > 0 {
                 if map.imgstatus == MapDescriptor.IMAGE_NIL {
                     if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
                         map.img = img
@@ -722,6 +761,10 @@ public class MapDescriptor {
                 if map.img != nil {
                     // FIXME send always, caller will have to check imgstatus
                     new_list[map.name] = map
+                    if ins > 1 {
+                        // map encloses the screen circle completely
+                        break
+                    }
                 }
             }
         }

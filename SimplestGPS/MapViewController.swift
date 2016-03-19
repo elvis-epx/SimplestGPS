@@ -312,7 +312,6 @@ import UIKit
             map.boundsy = CGFloat(scrh * CGFloat(map.latheight) / zoom_height)
         }
         
-        // FIXME save processing time and memory when mode does not need map
         canvas.send_img(current_maps, changed: map_list_changed)
 
         /*
