@@ -27,7 +27,7 @@ public class MapDescriptor {
     var img: UIImage? = nil
     var imgstatus: Int = IMAGE_NIL
     let name: String
-    let sortprio: Double
+    let priority: Double
     let lat0: Double
     let lat1: Double
     let long0: Double
@@ -36,16 +36,16 @@ public class MapDescriptor {
     let longwidth: Double
     let midlat: Double
     let midlong: Double
-    var boundsx: CGFloat = 0
-    var boundsy: CGFloat = 0
-    var centerx: CGFloat = 0
-    var centery: CGFloat = 0
+    var boundsx: CGFloat = 0 // manipulated by Controller
+    var boundsy: CGFloat = 0 // manipulated by Controller
+    var centerx: CGFloat = 0 // manipulated by Controller
+    var centery: CGFloat = 0 // manipulated by Controller
     
-    init(file: NSURL, name: String, sortprio: Double, latNW: Double, longNW: Double, latheight: Double, longwidth: Double)
+    init(file: NSURL, name: String, priority: Double, latNW: Double, longNW: Double, latheight: Double, longwidth: Double)
     {
         self.file = file
         self.name = name
-        self.sortprio = sortprio
+        self.priority = priority
         self.lat0 = latNW
         self.long0 = longNW
         self.latheight = latheight
@@ -74,7 +74,7 @@ public class MapDescriptor {
     var editing: Int = -1
     
     var maps: [MapDescriptor] = [];
-    var current_map_list: [MapDescriptor] = []
+    var current_map_list: [String:MapDescriptor] = [:]
     
     var memoryWarningObserver : NSObjectProtocol!
     var prefsObserver : NSObjectProtocol!
@@ -695,10 +695,11 @@ public class MapDescriptor {
     // FIXME downsize image when memory full
     // FIXME LRU removal
     // FIXME do not load if memory full
+    // FIXME remove map if completely blocked by another
 
-    func get_maps(clat: Double, clong: Double, radius: Double) -> [MapDescriptor]? {
+    func get_maps(clat: Double, clong: Double, radius: Double) -> [String:MapDescriptor]? {
             
-        var new_list: [MapDescriptor] = []
+        var new_list: [String:MapDescriptor] = [:]
         
         for i in 0..<maps.count {
             let map = maps[i]
@@ -714,24 +715,21 @@ public class MapDescriptor {
                         map.imgstatus = MapDescriptor.IMAGE_FAILED
                     }
                 }
-            }
-            if map.img != nil {
-                // FIXME send always, caller will have to check imgstatus
-                new_list.append(map)
+                if map.img != nil {
+                    // FIXME send always, caller will have to check imgstatus
+                    new_list[map.name] = map
+                }
             }
         }
         
-        // smaller maps go to last and are painted on top of the others
-        new_list.sortInPlace({ $0.sortprio > $1.sortprio } )
-
         var changed = false
         
         if current_map_list.count != new_list.count {
             changed = true
         } else {
-            for i in 0..<new_list.count {
-                if new_list[i].name != current_map_list[i].name {
-                    // replacement, or reordering
+            for (name, _) in new_list {
+                if current_map_list[name] == nil {
+                    // replacement
                     changed = true
                     break
                 }
@@ -1201,7 +1199,7 @@ public class MapDescriptor {
                 
                 let map = MapDescriptor(file: url,
                                     name: url.absoluteString,
-                                    sortprio: coords.latheight,
+                                    priority: coords.latheight,
                                     latNW: coords.lat,
                                     longNW: coords.long,
                                     latheight: coords.latheight,
@@ -1209,6 +1207,9 @@ public class MapDescriptor {
                 maps.append(map)
             }
         }
+        
+        // smaller maps go to last and are painted on top of the others
+        maps.sortInPlace({ $0.priority > $1.priority } )
         
         let notifications = NSNotificationCenter.defaultCenter()
         memoryWarningObserver = notifications.addObserverForName(UIApplicationDidReceiveMemoryWarningNotification,

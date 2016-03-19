@@ -49,7 +49,7 @@ import UIKit
     var touch_point: CGPoint? = nil
     
     // Current list of maps on screen
-    var current_maps: [MapDescriptor] = []
+    var current_maps: [String:MapDescriptor] = [:]
     var last_map_update: Double = 0;
     
     // Screen position for painting purposes (either screen position or GPS position)
@@ -293,20 +293,18 @@ import UIKit
             }
         }
         
-        for i in 0..<current_maps.count {
-            let map = current_maps[i]
-            
-            (current_maps[i].centerx, current_maps[i].centery) =
-                to_raster(
+        for (name, map) in current_maps {
+            (map.centerx, map.centery) = to_raster(
                     CGFloat(map.midlat), long: CGFloat(map.midlong),
                     clat: clat, clong: clong,
                     lat_height: zoom_height, scrh: scrh, scrw: scrw,
                     longitude_proportion: longitude_latitude_proportion)
                 
-            current_maps[i].boundsx = CGFloat(scrw * CGFloat(map.longwidth) / zoom_width)
-            current_maps[i].boundsy = CGFloat(scrh * CGFloat(map.latheight) / zoom_height)
+            map.boundsx = CGFloat(scrw * CGFloat(map.longwidth) / zoom_width)
+            map.boundsy = CGFloat(scrh * CGFloat(map.latheight) / zoom_height)
         }
         
+        // FIXME save processing time and memory when mode does not need map
         canvas.send_img(current_maps, changed: map_list_changed)
 
         /*

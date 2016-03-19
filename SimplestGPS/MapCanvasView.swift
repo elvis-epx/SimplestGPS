@@ -11,8 +11,8 @@ import UIKit
 
 class MapCanvasView: UIView
 {
-    var image_views: [(String,UIImageView)] = []
-    var image_anims: [PositionAnim] = []
+    var image_views: [String: (UIImageView, MapDescriptor)] = [:]
+    var image_anims: [String: PositionAnim] = [:]
     
     var target_views: [UIView] = []
     var target_anims: [PositionAnim] = []
@@ -62,52 +62,53 @@ class MapCanvasView: UIView
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
-    func send_img(list: [MapDescriptor], changed: Bool) {
+    func send_img(list: [String:MapDescriptor], changed: Bool) {
+        if accuracy_view == nil {
+            return;
+        }
+        
         // FIXME detect change in map state (map.imgstatus) that does NOT change the list
-        if changed || list.count != image_views.count {
-            // NSLog("Rebuilding image stack")
+        // FIXME handle case when map is loaded, replace by map w/o replacing View
+        if changed {
+            NSLog("Map list changed, %d elements", list.count)
+            // check current image views that are no longer necessary and remove them
+            for (name, image) in image_views {
+                if list[name] == nil {
+                    NSLog("Removing map view %@", name)
+                    image.0.hidden = true
+                    image.0.removeFromSuperview()
+                    image.0.image = nil
+                    image_views.removeValueForKey(name)
+                    image_anims.removeValueForKey(name)
+                }
+            }
+            
+            // create image views that are requested but don't exist
+            for (name, map) in list {
+                if image_views[name] == nil {
+                    NSLog("Adding map view %@", name)
+                    // find where the new view fits on stack
+                    // this works because two maps already on-screen will never exchange priorities
+                    // priorities need only to be checked when a new map is added to screen
+                    // FIXME change position as image is loaded
+                    var below = accuracy_view!
+                    for (_, view) in image_views {
+                        if view.1.priority < map.priority {
+                            // found a view on screen whose priority is better than ours
+                            below = view.0
+                        }
+                    }
 
-            // FIXME optimize case when maps are only removed, not added
-            // FIXME balance-line maps, instead of complete replacement
-            // FIXME make image_views and image_anims associative arrays
-            // FIXME handle case when map is loaded, replace by map w/o replacing View
-            
-            for (_, image) in image_views {
-                image.hidden = true
-                image.removeFromSuperview()
-                image.image = nil
-            }
-            image_views = []
-            image_anims = []
-            
-            for map in list {
+                    // FIXME empty views colored for non-images (loading, memory full, etc)
                 
-                // FIXME empty views colored for non-images (loading, memory full, etc)
-                
-                let image = UIImageView(image: map.img)
-                let anim = PositionAnim(name: "img", view: image, size: self.frame)
-                image_views.append((map.name, image))
-                image_anims.append(anim)
-                image.hidden = true
-                self.addSubview(image)
-            }
-            
-            // maps changed: bring points to front
-            if accuracy_view != nil {
-                accuracy_view!.removeFromSuperview()
-                self.addSubview(accuracy_view!)
-            }
-            if location_view != nil {
-                location_view!.removeFromSuperview()
-                self.addSubview(location_view!)
-            }
-            for target in target_views {
-                target.removeFromSuperview()
-                self.addSubview(target)
-            }
-            if compass != nil {
-                compass!.removeFromSuperview()
-                self.addSubview(compass!)
+                    let image = UIImageView(image: map.img)
+                    let anim = PositionAnim(name: "img", view: image, size: self.frame)
+                    image_views[name] = (image, map)
+                    image_anims[name] = anim
+                    image.hidden = true
+                    
+                    self.insertSubview(image, belowSubview: below)
+                }
             }
             
             // dirty; return to settle layout
@@ -116,14 +117,12 @@ class MapCanvasView: UIView
             }
             return
         }
-        
-        // NSLog("-------------------------")
-        for i in 0..<list.count {
-            let map = list[i]
-            // NSLog("img %f %f %f %f", map.centerx, map.centery, map.boundsx, map.boundsy)
-            image_views[i].1.bounds = CGRect(x: 0, y: 0, width: map.boundsx, height: map.boundsy)
-            image_anims[i].set_rel(CGPoint(x: map.centerx, y: map.centery))
-            image_views[i].1.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+
+        /* update coordinates (controller changed the descriptor .1 in-place) */
+        for (name, view) in image_views {
+            view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
+            image_anims[name]!.set_rel(CGPoint(x: view.1.centerx, y: view.1.centery))
+            view.0.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
         }
     }
     
@@ -172,6 +171,10 @@ class MapCanvasView: UIView
 
     func send_targets_rel(list: [(CGFloat, CGFloat)])
     {
+        if compass == nil {
+            return
+        }
+        
         /* Points are relative: 0, 0 = middle of screen */
         self.target_count = list.count
 
@@ -184,16 +187,10 @@ class MapCanvasView: UIView
             target.layer.cornerRadius = 8
             target.alpha = 1
             target.hidden = true
-            self.addSubview(target)
+            self.insertSubview(target, belowSubview: compass!)
             target_views.append(target)
             let anim = PositionAnim(name: "tgt", view: target, size: self.frame)
             target_anims.append(anim)
-        }
-        
-        if updated_targets && compass != nil {
-            // new target subviews are on top of the compass, move compass back to the top
-            compass!.removeFromSuperview()
-            self.addSubview(compass!)
         }
 
         if updated_targets {
@@ -286,8 +283,8 @@ class MapCanvasView: UIView
             for i in 0..<target_count {
                 target_anims[i].tick(dx, angle: _current_heading, immediate: immediate)
             }
-            for i in 0..<image_anims.count {
-                image_anims[i].tick(dx, angle: _current_heading, immediate: immediate)
+            for (_, anim) in image_anims {
+                anim.tick(dx, angle: _current_heading, immediate: immediate)
             }
             accuracy_anim?.tick(dx, angle: _current_heading, immediate: immediate)
             location_anim?.tick(dx, angle: _current_heading, immediate: immediate)
