@@ -74,6 +74,7 @@ public class MapDescriptor {
     var editing: Int = -1
     
     var maps: [MapDescriptor] = [];
+    var current_map_list: [MapDescriptor] = []
     
     var memoryWarningObserver : NSObjectProtocol!
     var prefsObserver : NSObjectProtocol!
@@ -686,7 +687,6 @@ public class MapDescriptor {
         return value;
     }
 
-    // FIXME convert tuple type to struct
     // FIXME store distance calculated by map_inside, and inlcusion status, to prioritize maps
     // FIXME load in thread
     // FIXME load 'slowly', one at a time
@@ -695,11 +695,10 @@ public class MapDescriptor {
     // FIXME downsize image when memory full
     // FIXME LRU removal
     // FIXME do not load if memory full
-    // FIXME report when list changes
 
-    func get_maps(clat: Double, clong: Double, radius: Double) -> [MapDescriptor] {
+    func get_maps(clat: Double, clong: Double, radius: Double) -> [MapDescriptor]? {
             
-        var ret: [MapDescriptor] = []
+        var new_list: [MapDescriptor] = []
         
         for i in 0..<maps.count {
             let map = maps[i]
@@ -718,10 +717,33 @@ public class MapDescriptor {
             }
             if map.img != nil {
                 // FIXME send always, caller will have to check imgstatus
-                ret.append(map)
+                new_list.append(map)
             }
         }
-        return ret
+        
+        // smaller maps go to last and are painted on top of the others
+        new_list.sortInPlace({ $0.sortprio > $1.sortprio } )
+
+        var changed = false
+        
+        if current_map_list.count != new_list.count {
+            changed = true
+        } else {
+            for i in 0..<new_list.count {
+                if new_list[i].name != current_map_list[i].name {
+                    // replacement, or reordering
+                    changed = true
+                    break
+                }
+            }
+        }
+
+        if changed {
+            current_map_list = new_list
+            return new_list
+        }
+            
+        return nil
     }
     
     func latitude() -> Double

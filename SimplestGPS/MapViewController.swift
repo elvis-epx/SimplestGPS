@@ -284,57 +284,18 @@ import UIKit
             // only recalculate map list when we are not in a hurry
             last_map_update = now
 
-            var provisional_list: [MapDescriptor] = []
-            
-            for map in GPSModel2.model().get_maps(Double(clat),
+            let new_list = GPSModel2.model().get_maps(Double(clat),
                                                   clong: Double(clong),
-                                                  radius: Double(zoom_m_diagonal)) {
-                                                    
-                    // FIXME send empty/missing maps, paint w/ colors
-                    // FIXME detect when map changes or is removed/empty, rebuild
-                    // FIXME prioritize images nearer the center
-                    // FIXME delay get_map_image to later?
-                    // FIXME map_image_peek call?
-                    // FIXME abolish provisional list, use map list from model()
-                    // FIXME add missing fields to model() struct (bounds*, mid*, center*)
-                    // FIXME get 'changed' status from model instead of finding here.
-                    
-                    if (map.img != nil) {
-                        provisional_list.append(map)
-                        if debug {
-                            NSLog("Map lat %f..%f, long %f..%f",
-                            map.lat0, map.lat1, map.long0, map.long1)
-                        }
-                    } else {
-                        if debug {
-                            NSLog("Map not available")
-                        }
-                    }
-            }
-            
-            // smaller images should be blitted last since they are probably more detailed maps of the area
-            provisional_list.sortInPlace({ $0.sortprio > $1.sortprio } )
-
-            // FIXME get 'changed' status from model instead of finding here.
-            if current_maps.count != provisional_list.count {
-                // obviously changed
+                                                  radius: Double(zoom_m_diagonal))
+            if new_list != nil {
                 map_list_changed = true
-                current_maps = provisional_list
-                
-            } else {
-                for i in 0..<provisional_list.count {
-                    if provisional_list[i].name != current_maps[i].name {
-                        // replacement, or reordering
-                        map_list_changed = true
-                        current_maps = provisional_list
-                        break
-                    }
-                }
+                current_maps = new_list!
             }
         }
         
         for i in 0..<current_maps.count {
             let map = current_maps[i]
+            
             (current_maps[i].centerx, current_maps[i].centery) =
                 to_raster(
                     CGFloat(map.midlat), long: CGFloat(map.midlong),

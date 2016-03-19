@@ -63,12 +63,14 @@ class MapCanvasView: UIView
     }
 
     func send_img(list: [MapDescriptor], changed: Bool) {
+        // FIXME detect change in map state (map.imgstatus) that does NOT change the list
         if changed || list.count != image_views.count {
             // NSLog("Rebuilding image stack")
 
             // FIXME optimize case when maps are only removed, not added
             // FIXME balance-line maps, instead of complete replacement
             // FIXME make image_views and image_anims associative arrays
+            // FIXME handle case when map is loaded, replace by map w/o replacing View
             
             for (_, image) in image_views {
                 image.hidden = true
