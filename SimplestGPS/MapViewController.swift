@@ -284,16 +284,24 @@ import UIKit
             // only recalculate map list when we are not in a hurry
             last_map_update = now
 
-            let new_list = GPSModel2.model().get_maps(Double(clat),
+            if mode == MODE_COMPASS || mode == MODE_HEADING {
+                if current_maps.count > 0 {
+                    current_maps = [:]
+                    map_list_changed = true
+                    GPSModel2.model().get_maps_force_refresh()
+                }
+            } else {
+                let new_list = GPSModel2.model().get_maps(Double(clat),
                                                   clong: Double(clong),
                                                   radius: Double(zoom_m_diagonal))
-            if new_list != nil {
-                map_list_changed = true
-                current_maps = new_list!
+                if new_list != nil {
+                    map_list_changed = true
+                    current_maps = new_list!
+                }
             }
         }
         
-        for (name, map) in current_maps {
+        for (_, map) in current_maps {
             (map.centerx, map.centery) = to_raster(
                     CGFloat(map.midlat), long: CGFloat(map.midlong),
                     clat: clat, clong: clong,

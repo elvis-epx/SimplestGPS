@@ -696,6 +696,10 @@ public class MapDescriptor {
     // FIXME LRU removal
     // FIXME do not load if memory full
     // FIXME remove map if completely blocked by another
+    
+    func get_maps_force_refresh() {
+        current_map_list = [:]
+    }
 
     func get_maps(clat: Double, clong: Double, radius: Double) -> [String:MapDescriptor]? {
             
