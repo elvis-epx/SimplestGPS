@@ -51,7 +51,7 @@ public struct MapDescriptor {
     var tgt_dist = true
     
     // in seconds of latitude degree across the screen height
-    var zoom_factor: CGFloat = 900
+    var zoom_factor: CGFloat = 30
     let zoom_min: CGFloat = 30
     let zoom_step: CGFloat = 1.25
     let zoom_max: CGFloat = 3600
@@ -155,15 +155,17 @@ public struct MapDescriptor {
         if scrw.isNaN {
             return;
         }
-        let calc_zoom = gpslat.isNaN
+        // let calc_zoom = gpslat.isNaN
         gpslat = CGFloat(GPSModel2.model().latitude())
         gpslong = CGFloat(GPSModel2.model().longitude())
         
         recenter()
+        /*
         if calc_zoom {
             calculate_zoom(false) // does repaint()
             return
         }
+         */
         repaint(false, gesture: false)
     }
     

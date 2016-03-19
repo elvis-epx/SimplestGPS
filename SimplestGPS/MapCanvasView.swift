@@ -69,6 +69,7 @@ class MapCanvasView: UIView
             for (_, image) in image_views {
                 image.hidden = true
                 image.removeFromSuperview()
+                image.image = nil
             }
             image_views = []
             image_anims = []
