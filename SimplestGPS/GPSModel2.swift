@@ -34,6 +34,7 @@ public class MapDescriptor {
     var boundsy: CGFloat = 0 // manipulated by Controller
     var centerx: CGFloat = 0 // manipulated by Controller
     var centery: CGFloat = 0 // manipulated by Controller
+    var memory_footprint = 0
     
     init(img: UIImage, file: NSURL, name: String, priority: Double, latNW: Double, longNW: Double, latheight: Double, longwidth: Double)
     {
@@ -68,13 +69,20 @@ public class MapDescriptor {
     var metric: Int = 1;
     var editing: Int = -1
     
+    var memory_in_use = 0
+    static let INITIAL_MEMORY_LIMIT = 1000000000
+    var memory_limit = INITIAL_MEMORY_LIMIT
+    var loader_timer: NSTimer? = nil
+    var loader_queue: [MapDescriptor] = []
+    var loader_busy: Bool = false
+    
     var maps: [MapDescriptor] = [];
     var current_map_list: [String:MapDescriptor] = [:]
     var notloaded: UIImage
     var loading: UIImage
     var cantload: UIImage
     var oom: UIImage
-    var image_changed_t: Bool = false
+    var image_changed_by_thread: Bool = false
     
     var memoryWarningObserver : NSObjectProtocol!
     var prefsObserver : NSObjectProtocol!
@@ -723,20 +731,17 @@ public class MapDescriptor {
     }
 
     // FIXME store distance calculated by map_inside, and inlcusion status, to prioritize maps
-    // FIXME gauge memory usage
-    // FIXME detect limit in memory usage
     // FIXME downsize image when memory full
     // FIXME LRU removal
-    // FIXME do not load if memory full
     
     func get_maps_force_refresh() {
         current_map_list = [:]
-        image_changed_t = true
+        image_changed_by_thread = true
     }
 
     func get_maps(clat: Double, clong: Double, radius: Double) -> ([String:MapDescriptor]?, Bool) {
-        let image_changed = self.image_changed_t
-        self.image_changed_t = false
+        var image_changed = self.image_changed_by_thread
+        self.image_changed_by_thread = false
         
         var new_list: [String:MapDescriptor] = [:]
         
@@ -746,24 +751,15 @@ public class MapDescriptor {
         for i in (0..<maps.count).reverse() {
             let map = maps[i]
             let ins = GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
-                                    lat_circle: clat, long_circle: clong, radius: radius)
+                                           lat_circle: clat, long_circle: clong, radius: radius)
             if ins > 0 {
-                if map.img === notloaded {
-                    map.img = loading
-                    dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
-                        if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
-                            dispatch_async(dispatch_get_main_queue()) {
-                                map.img = img
-                                self.image_changed_t = true
-                                NSLog("Image %@ loaded", map.name)
-                            }
-                        } else {
-                            dispatch_async(dispatch_get_main_queue()) {
-                                map.img = self.cantload
-                                self.image_changed_t = true
-                                NSLog("Image %@ NOT LOADED", map.name)
-                            }
+                if map.img === notloaded || map.img === oom {
+                    if self.loader_queue.filter({return map.name == $0.name}).count <= 0 {
+                        if map.img !== oom {
+                            map.img = loading
+                            image_changed = true
                         }
+                        self.loader_queue.append(map)
                     }
                 }
                 new_list[map.name] = map
@@ -797,12 +793,53 @@ public class MapDescriptor {
         return (nil, image_changed)
     }
     
+    func loader_serve_queue()
+    {
+        if self.loader_queue.count <= 0 || self.loader_busy {
+            return
+        }
+
+        self.loader_busy = true
+        let map = self.loader_queue.removeAtIndex(0)
+
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
+            NSLog("Current memory usage: %d of %d", self.memory_in_use, self.memory_limit)
+            if (self.memory_in_use + map.memory_footprint) > self.memory_limit {
+                NSLog("Image %@ not loaded due to memory pressure", map.name)
+                dispatch_async(dispatch_get_main_queue()) {
+                    if map.img != self.oom {
+                        map.img = self.oom
+                        self.image_changed_by_thread = true
+                    }
+                }
+            } else {
+                if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        map.img = img
+                        self.update_memory_footprint(map)
+                        self.image_changed_by_thread = true
+                        NSLog("Image %@ loaded", map.name)
+                    }
+                } else {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        map.img = self.cantload
+                        self.image_changed_by_thread = true
+                        NSLog("Image %@ NOT LOADED", map.name)
+                    }
+                }
+            }
+            dispatch_async(dispatch_get_main_queue()) {
+                self.loader_busy = false
+            }
+        }
+    }
+    
     func latitude() -> Double
     {
         return self.curloc != nil ? (self.curloc!.coordinate.latitude) : Double.NaN
     }
 
-    func longitude() -> Double  
+    func longitude() -> Double
     {
         return self.curloc != nil ? (self.curloc!.coordinate.longitude) : Double.NaN
     }
@@ -1284,12 +1321,18 @@ public class MapDescriptor {
                                     self.prefs_changed()
                                 }
         )
+        
+        loader_timer = NSTimer(timeInterval: 0.33, target: self,
+                         selector: #selector(GPSModel2.loader_serve_queue),
+                         userInfo: nil, repeats: true)
+        NSRunLoop.currentRunLoop().addTimer(loader_timer!, forMode: NSRunLoopCommonModes)
     }
     
     deinit {
         let notifications = NSNotificationCenter.defaultCenter()
         notifications.removeObserver(memoryWarningObserver, name: UIApplicationDidReceiveMemoryWarningNotification, object: nil)
         notifications.removeObserver(prefsObserver, name: NSUserDefaultsDidChangeNotification, object: nil)
+        loader_timer!.invalidate()
     }
     
     func prefs_changed()
@@ -1299,12 +1342,29 @@ public class MapDescriptor {
     }
     
     func memory_low() {
-        NSLog("Memory low, purging images")
-        // FIXME do it better, set state
-        for i in 0..<maps.count {
-            maps[i].img = notloaded
+        if self.memory_limit == GPSModel2.INITIAL_MEMORY_LIMIT {
+            self.memory_limit = self.memory_in_use / 10 * 8
         }
-        self.image_changed_t = true
+        NSLog("Memory low, setting limit to %d", self.memory_limit)
+        for i in 0..<maps.count {
+            let img = maps[i].img
+            if img != loading && img != cantload && img != oom && img != notloaded {
+                maps[i].img = oom
+                remove_memory_footprint(maps[i])
+            }
+        }
+        self.image_changed_by_thread = true
+    }
+    
+    func update_memory_footprint(map: MapDescriptor) {
+        map.memory_footprint = Int(map.img.size.width * map.img.size.height * 4)
+        self.memory_in_use += map.memory_footprint
+        NSLog("Memory+ in use for images: %d", self.memory_in_use)
+    }
+    
+    func remove_memory_footprint(map: MapDescriptor) {
+        self.memory_in_use -= map.memory_footprint
+        NSLog("Memory- in use for images: %d", self.memory_in_use)
     }
 
     static let singleton = GPSModel2();
