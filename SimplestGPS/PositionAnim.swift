@@ -20,7 +20,7 @@ class PositionAnim
     var last_angle: CGFloat
     var last_distance: CGFloat
     let SETTLE_TIME = CGFloat(0.5)
-    var block: (() -> Void)?
+    var block: Optional<() -> Void> = nil
     
     init(name: String, view: UIView, size: CGRect) {
         self.name = name
@@ -36,7 +36,7 @@ class PositionAnim
         self.last_distance = 0
     }
     
-    func set_rel(target: CGPoint, block: () -> Void)
+    func set_rel(target: CGPoint, block: Optional<() -> Void>)
     {
         self.target = target
         self.block = block

@@ -21,6 +21,7 @@ class CompassAnim
     var view: UIView
     var fast: Bool
     var opacity: Int
+    var block: Optional<() -> Void> = nil
 
     let MIN_SPEED = CGFloat(0.5) // degrees/second
     let MAX_SPEED = CGFloat(180.0) // degrees/seconds
@@ -40,8 +41,10 @@ class CompassAnim
         opacity = 10000
     }
     
-    func set(target: CGFloat)
+    func set(target: CGFloat, block: Optional<() -> Void>)
     {
+        self.block = block
+
         lost = target != target
         if lost {
             return
@@ -68,6 +71,11 @@ class CompassAnim
     
     func tick(pdx: CGFloat) -> (CGFloat, Bool)
     {
+        if self.block != nil {
+            block!();
+            self.block = nil
+        }
+        
         if !self.lost && target == current && opacity == 10000 {
             // nothing to do
             return (current % 360.0, false)

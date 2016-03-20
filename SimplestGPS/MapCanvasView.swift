@@ -202,7 +202,7 @@ class MapCanvasView: UIView
 
         for i in 0..<target_views.count {
             if i < self.target_count {
-                target_anims[i].set_rel(CGPoint(x: list[i].0, y: list[i].1), block: {})
+                target_anims[i].set_rel(CGPoint(x: list[i].0, y: list[i].1), block: nil)
             } else {
                 target_anims[i].set_rel(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN), block: {
                     self.target_views[i].hidden = true

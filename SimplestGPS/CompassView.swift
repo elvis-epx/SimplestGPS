@@ -94,11 +94,11 @@ class CompassView: UIView {
         // heading_opt can be NaN, in this case the animation will keep rotating endlessly
         
         if !absolute {
-            back_anim!.set(-heading)
-            needle_anim!.set(0)
+            back_anim!.set(-heading, block: nil)
+            needle_anim!.set(0, block: nil)
         } else {
-            needle_anim!.set(heading)
-            back_anim!.set(0.0)
+            needle_anim!.set(heading, block: nil)
+            back_anim!.set(0.0, block: nil)
         }
         if ref_change {
             needle_anim!.bigchange()
@@ -126,10 +126,9 @@ class CompassView: UIView {
                 tgtheading -= heading
                 // NSLog("New relative heading for %d: %f", current_target, tgtheading)
             }
-            tgtneedle_anim!.set(tgtheading)
+            tgtneedle_anim!.set(tgtheading, block: nil)
         }
         
-        var dirty = false
         while tgtminis.count < targets.count {
             let child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             let mini = TargetMiniNeedleView(frame: child_frame)
@@ -144,14 +143,10 @@ class CompassView: UIView {
             tgtminis2.append(mini2)
             tgtminis_anim.append(mini_anim)
             tgtminis2_anim.append(mini2_anim)
+            mini.hidden = true
+            mini2.hidden = true
             self.addSubview(mini)
             self.addSubview(mini2)
-            dirty = true
-        }
-        
-        // FIXME remove after block addition
-        if dirty {
-            return
         }
         
         for i in 0..<tgtminis.count {
@@ -164,11 +159,13 @@ class CompassView: UIView {
                     tgtheading -= heading
                 }
                 // FIXME move to block in anim
-                tgtminis[i].hidden = i == current_target || tgt_dist
-                tgtminis2[i].hidden = i == current_target || !tgt_dist
                 tgtminis2[i].labels(targets[i].name, distance: targets[i].distance)
-                tgtminis_anim[i].set(tgtheading)
-                tgtminis2_anim[i].set(tgtheading)
+                tgtminis_anim[i].set(tgtheading, block: {
+                    self.tgtminis[i].hidden = i == current_target || tgt_dist
+                })
+                tgtminis2_anim[i].set(tgtheading, block: {
+                    self.tgtminis2[i].hidden = i == current_target || !tgt_dist
+                })
                 if ref_change {
                     tgtminis_anim[i].bigchange()
                     tgtminis2_anim[i].bigchange()
