@@ -89,10 +89,14 @@ class MapCanvasView: UIView
                     // this works because two maps already on-screen will never exchange priorities
                     // priorities need only to be checked when a new map is added to screen
                     var below = accuracy_view!
-                    for (_, view) in image_views {
+                    var above: UIView? = nil
+                    for (cname, view) in image_views {
                         if view.1.priority < map.priority {
                             // found a view on screen whose priority is better than ours
                             below = view.0
+                            // NSLog("    inserted below %@", cname)
+                        } else {
+                            above = view.0
                         }
                     }
 
@@ -101,8 +105,14 @@ class MapCanvasView: UIView
                     image_views[name] = (image, map)
                     image_anims[name] = anim
                     image.hidden = true
-                    
-                    self.insertSubview(image, belowSubview: below)
+
+                    // FIXME this algorithm not always ok
+
+                    if above != nil {
+                        self.insertSubview(image, aboveSubview: above!)
+                    } else {
+                        self.insertSubview(image, belowSubview: below)
+                    }
                 }
             }
         }

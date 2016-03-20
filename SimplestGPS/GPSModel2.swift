@@ -35,6 +35,8 @@ public class MapDescriptor {
     var centerx: CGFloat = 0 // manipulated by Controller
     var centery: CGFloat = 0 // manipulated by Controller
     var memory_footprint = 0
+    var insertion = 0
+    var distance = 0.0
     
     init(img: UIImage, file: NSURL, name: String, priority: Double, latNW: Double, longNW: Double, latheight: Double, longwidth: Double)
     {
@@ -295,7 +297,7 @@ public class MapDescriptor {
     }
     
     class func map_inside(maplata: Double, maplatb: Double, maplonga: Double, maplongb: Double,
-                          lat_circle: Double, long_circle: Double, radius: Double) -> Int
+                          lat_circle: Double, long_circle: Double, radius: Double) -> (Int, Double)
     {
         let _maplata = min(maplata, maplatb)
         let _maplatb = max(maplata, maplatb)
@@ -316,14 +318,17 @@ public class MapDescriptor {
         // Find the closest point to the circle within the rectangle
         let closest_long = clamp(_longa, mini: _maplonga, maxi: _maplongb);
         let closest_lat = clamp(_lata, mini: _maplata, maxi: _maplatb);
-        let d = harvesine(closest_lat, lat2: _lata, long1: closest_long, long2: _longa)
-            
-        if d > radius {
+        let db = harvesine(closest_lat, lat2: _lata, long1: closest_long, long2: _longa)
+        // also find the distance from circle center to map center, for prioritization purposes
+        let dc = harvesine((_maplata + _maplatb) / 2, lat2: _lata,
+                           long1: (_maplonga + _maplongb) / 2, long2: _longa)
+        
+        if db > radius {
             // no intersection
-            return 0
-        } else if d > 0 {
+            return (0, dc)
+        } else if db > 0 {
             // intersects but not completely enclosed by map
-            return 1
+            return (1, dc)
         }
         
         // is the circle completely enclosed by map?
@@ -338,10 +343,10 @@ public class MapDescriptor {
         if lat0_circle >= _maplata && lat1_circle <= _maplatb
                 && long0_circle >= _maplonga && long1_circle <= _maplongb {
             // box enclosed in map
-            return 2
+            return (2, dc)
         }
         
-        return 1
+        return (1, dc)
     }
     
     class func do_format_heading(n: Double) -> String
@@ -730,58 +735,111 @@ public class MapDescriptor {
         return value;
     }
 
-    // FIXME store distance calculated by map_inside, and inlcusion status, to prioritize maps
     // FIXME downsize image when memory full
-    // FIXME LRU removal
     
     func get_maps_force_refresh() {
         current_map_list = [:]
         image_changed_by_thread = true
     }
-
+    
     func get_maps(clat: Double, clong: Double, radius: Double) -> ([String:MapDescriptor]?, Bool) {
         var image_changed = self.image_changed_by_thread
         self.image_changed_by_thread = false
         
         var new_list: [String:MapDescriptor] = [:]
         
-        // 'maps' ordered by priority (last map = more priority)
-        // satrt by higher priority maps (if one encloses the screen circle, call it a day.)
-
-        for i in (0..<maps.count).reverse() {
-            let map = maps[i]
-            let ins = GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
-                                           lat_circle: clat, long_circle: clong, radius: radius)
-            if ins > 0 {
-                if map.img === notloaded || map.img === oom {
-                    if self.loader_queue.filter({return map.name == $0.name}).count <= 0 {
-                        if map.img !== oom {
-                            // if image was oom once, let it look oom until memory can be found
-                            map.img = loading
-                            image_changed = true
-                        }
-                        self.loader_queue.append(map)
-                    }
-                }
-                new_list[map.name] = map
-                if ins > 1 && map.img !== notloaded && map.img !== loading
-                        && map.img !== oom && map.img !== cantload {
-                    // map fills the screen completely
-                    break
-                }
-            } else {
-                if self.memory_in_use > (self.memory_limit / 10 * 6) {
-                    // Try to free memory before it becomes a problem
-                    // Naïve strategy: release maps not in use right now
-                    if map.img !== notloaded && map.img !== loading && map.img !== oom && map.img !== cantload {
-                        NSLog("Image evicted from memory: %@", map.name)
-                        maps[i].img = notloaded
-                        remove_memory_footprint(maps[i])
-                    }
+        // calculate intersection with screen circle and proximity to screen center
+        
+        for map in maps {
+            let (ins, d) = GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0,
+                                                maplongb: map.long1, lat_circle: clat,
+                                                long_circle: clong, radius: radius)
+            map.insertion = ins
+            map.distance = d
+        }
+        
+        // Try to free memory before it becomes a problem
+        // Naïve strategy: release maps not in use right now
+        
+        for map in maps {
+            if self.memory_in_use < (self.memory_limit / 10 * 6) {
+                // enough
+                break
+            }
+            if map.insertion <= 0 {
+                if map.memory_footprint > 0 {
+                    NSLog("Unused evicted from memory: %@", map.name)
+                    remove_memory_footprint(map, img: notloaded)
                 }
             }
         }
         
+        // sorting helps the culling algorithm
+        
+        let maps_sorted = maps.sort({
+            if $0.priority == $1.priority {
+                return $0.distance < $1.distance
+            }
+            return $0.priority < $1.priority
+        })
+
+        if self.memory_in_use > self.memory_limit {
+            // memory full: all unused maps already removed
+            // try to remove lowest-priority after a gap
+            var gap = false
+            for map in maps_sorted {
+                if map.memory_footprint <= 0 {
+                    gap = true
+                } else if gap && map.memory_footprint > 0 {
+                    NSLog("Gap image evicted from memory: %@", map.name)
+                    remove_memory_footprint(map, img: oom)
+                    image_changed = true
+                }
+            }
+        }
+
+        if self.memory_in_use > self.memory_limit {
+            // memory full: all unused maps already removed
+            // try to remove lowest-priority
+            for map in maps_sorted.reverse() {
+                if map.memory_footprint > 0 {
+                    NSLog("Lowest prio image evicted from memory: %@", map.name)
+                    remove_memory_footprint(map, img: oom)
+                    image_changed = true
+                    break
+                }
+            }
+        }
+
+        // 'maps' ordered by priority (last map = more priority)
+        // satrt by higher priority maps (if one encloses the screen circle, call it a day.)
+        
+        for map in maps_sorted {
+            if map.insertion > 0 {
+                // NSLog("Image %@ distance %f", map.name, map.distance)
+                if map.img === notloaded || map.img === oom {
+                    if self.memory_in_use > self.memory_limit {
+                        NSLog("Image %@ not loaded due to memory pressure", map.name)
+                    } else {
+                        if self.loader_queue.filter({return map.name == $0.name}).count <= 0 {
+                            if map.img !== oom {
+                                // if image was oom once, let it look oom until memory can be found
+                                map.img = loading
+                                image_changed = true
+                            }
+                            self.loader_queue.append(map)
+                        }
+                    }
+                }
+                new_list[map.name] = map
+                if map.insertion > 1 && map.img !== notloaded && map.img !== loading
+                    && map.img !== oom && map.img !== cantload {
+                    // culling: map fills the screen completely
+                    break
+                }
+            }
+        }
+
         var changed = false
         
         if current_map_list.count != new_list.count {
@@ -815,8 +873,8 @@ public class MapDescriptor {
 
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
             NSLog("Current memory usage: %d of %d", self.memory_in_use, self.memory_limit)
-            if (self.memory_in_use + map.memory_footprint) > self.memory_limit {
-                NSLog("Image %@ not loaded due to memory pressure", map.name)
+            if self.memory_in_use > self.memory_limit {
+                NSLog("Image %@ not loaded due to memory pressure (thread)", map.name)
                 dispatch_async(dispatch_get_main_queue()) {
                     if map.img != self.oom {
                         map.img = self.oom
@@ -826,8 +884,7 @@ public class MapDescriptor {
             } else {
                 if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
                     dispatch_async(dispatch_get_main_queue()) {
-                        map.img = img
-                        self.update_memory_footprint(map)
+                        self.update_memory_footprint(map, img: img)
                         self.image_changed_by_thread = true
                         NSLog("Image %@ loaded", map.name)
                     }
@@ -1304,7 +1361,7 @@ public class MapDescriptor {
                 
                 let map = MapDescriptor(img: notloaded,
                                     file: url,
-                                    name: url.absoluteString,
+                                    name: url.lastPathComponent!,
                                     priority: coords.latheight,
                                     latNW: coords.lat,
                                     longNW: coords.long,
@@ -1313,9 +1370,6 @@ public class MapDescriptor {
                 maps.append(map)
             }
         }
-        
-        // smaller maps go to last and are painted on top of the others
-        maps.sortInPlace({ $0.priority > $1.priority } )
         
         let notifications = NSNotificationCenter.defaultCenter()
         memoryWarningObserver = notifications.addObserverForName(UIApplicationDidReceiveMemoryWarningNotification,
@@ -1354,28 +1408,30 @@ public class MapDescriptor {
     
     func memory_low() {
         if self.memory_limit == GPSModel2.INITIAL_MEMORY_LIMIT {
+            // FIXME sometimes it goes too low because memory_low() is asynchronous
             self.memory_limit = self.memory_in_use / 10 * 8
         }
         NSLog("Memory low, setting limit to %d", self.memory_limit)
         for i in 0..<maps.count {
-            let img = maps[i].img
-            if img != loading && img != cantload && img != oom && img != notloaded {
-                maps[i].img = oom
-                remove_memory_footprint(maps[i])
+            if maps[i].memory_footprint > 0 {
+                remove_memory_footprint(maps[i], img: oom)
             }
         }
         self.image_changed_by_thread = true
     }
     
-    func update_memory_footprint(map: MapDescriptor) {
+    func update_memory_footprint(map: MapDescriptor, img: UIImage) {
+        map.img = img
         map.memory_footprint = Int(map.img.size.width * map.img.size.height * 4)
         self.memory_in_use += map.memory_footprint
-        NSLog("Memory+ in use for images: %d", self.memory_in_use)
+        NSLog("Memory+ in use: %d", self.memory_in_use)
     }
     
-    func remove_memory_footprint(map: MapDescriptor) {
+    func remove_memory_footprint(map: MapDescriptor, img: UIImage) {
         self.memory_in_use -= map.memory_footprint
-        NSLog("Memory- in use for images: %d", self.memory_in_use)
+        map.memory_footprint = 0
+        map.img = img
+        NSLog("Memory- in use: %d", self.memory_in_use)
     }
 
     static let singleton = GPSModel2();
