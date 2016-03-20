@@ -70,7 +70,7 @@ public class MapDescriptor {
     var editing: Int = -1
     
     var memory_in_use = 0
-    static let INITIAL_MEMORY_LIMIT = 1000000000
+    static let INITIAL_MEMORY_LIMIT = 300000000
     var memory_limit = INITIAL_MEMORY_LIMIT
     var loader_timer: NSTimer? = nil
     var loader_queue: [MapDescriptor] = []
@@ -747,7 +747,7 @@ public class MapDescriptor {
         
         // 'maps' ordered by priority (last map = more priority)
         // satrt by higher priority maps (if one encloses the screen circle, call it a day.)
-        
+
         for i in (0..<maps.count).reverse() {
             let map = maps[i]
             let ins = GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
@@ -756,6 +756,7 @@ public class MapDescriptor {
                 if map.img === notloaded || map.img === oom {
                     if self.loader_queue.filter({return map.name == $0.name}).count <= 0 {
                         if map.img !== oom {
+                            // if image was oom once, let it look oom until memory can be found
                             map.img = loading
                             image_changed = true
                         }
@@ -767,6 +768,16 @@ public class MapDescriptor {
                         && map.img !== oom && map.img !== cantload {
                     // map fills the screen completely
                     break
+                }
+            } else {
+                if self.memory_in_use > (self.memory_limit / 10 * 6) {
+                    // Try to free memory before it becomes a problem
+                    // Naïve strategy: release maps not in use right now
+                    if map.img !== notloaded && map.img !== loading && map.img !== oom && map.img !== cantload {
+                        NSLog("Image evicted from memory: %@", map.name)
+                        maps[i].img = notloaded
+                        remove_memory_footprint(maps[i])
+                    }
                 }
             }
         }
