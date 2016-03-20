@@ -149,6 +149,7 @@ class CompassView: UIView {
             dirty = true
         }
         
+        // FIXME remove after block addition
         if dirty {
             return
         }
@@ -162,6 +163,7 @@ class CompassView: UIView {
                 if !absolute {
                     tgtheading -= heading
                 }
+                // FIXME move to block in anim
                 tgtminis[i].hidden = i == current_target || tgt_dist
                 tgtminis2[i].hidden = i == current_target || !tgt_dist
                 tgtminis2[i].labels(targets[i].name, distance: targets[i].distance)

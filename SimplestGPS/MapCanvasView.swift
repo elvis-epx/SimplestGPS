@@ -62,9 +62,9 @@ class MapCanvasView: UIView
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
-    func send_img(list: [String:MapDescriptor], changed: Bool) {
+    func send_img(list: [String:MapDescriptor], changed: Bool, image_changed: Bool) -> Bool {
         if accuracy_view == nil {
-            return;
+            return false
         }
         
         // FIXME detect change in map state (map.imgstatus) that does NOT change the list
@@ -110,22 +110,24 @@ class MapCanvasView: UIView
                     self.insertSubview(image, belowSubview: below)
                 }
             }
-            
-            // dirty; return to settle layout
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue()) {
-                self.send_img(list, changed: false)
-            }
-            return
         }
-
+        
         /* update coordinates (controller changed the descriptor .1 in-place) */
         for (name, view) in image_views {
             image_anims[name]!.set_rel(CGPoint(x: view.1.centerx, y: view.1.centery), block: {
+                if image_changed {
+                    if view.0.image != view.1.img {
+                        NSLog("Replaced image for %@", name)
+                        view.0.image = view.1.img
+                    }
+                }
                 view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
                 view.0.hidden = (self.mode == self.MODE_COMPASS
                                 || self.mode == self.MODE_HEADING)
             })
         }
+        
+        return true
     }
     
     func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat)
@@ -139,8 +141,6 @@ class MapCanvasView: UIView
             accuracy_view!.backgroundColor = UIColor.yellowColor()
             self.addSubview(accuracy_view!)
             accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, size: self.frame)
-            // dirty; return to settle layout
-            return
         }
         
         if location_view == nil {
@@ -149,8 +149,6 @@ class MapCanvasView: UIView
             location_view!.alpha = 1
             self.addSubview(location_view!)
             location_anim = PositionAnim(name: "location", view: location_view!, size: self.frame)
-            // dirty; return to settle layout
-            return
         }
 
         if compass == nil {
@@ -158,8 +156,6 @@ class MapCanvasView: UIView
             let compass_frame = CGRect(x: 0, y: slack / 2, width: self.frame.width, height: self.frame.width)
             compass = CompassView.init(frame: compass_frame)
             self.addSubview(compass!)
-            // dirty; return to settle layout
-            return
         }
 
         accuracy_anim!.set_rel(pointrel, block: {

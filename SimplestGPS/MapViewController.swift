@@ -111,7 +111,7 @@ import UIKit
         NSLog("     map will appear")
         super.viewWillAppear(animated)
         GPSModel2.model().addObs(self)
-        update_timer = NSTimer(timeInterval: 0.5, target: self,
+        update_timer = NSTimer(timeInterval: 0.33, target: self,
                                selector: #selector(MapViewController.update),
                         userInfo: nil, repeats: true)
         NSRunLoop.currentRunLoop().addTimer(update_timer!, forMode: NSRunLoopCommonModes)
@@ -283,13 +283,14 @@ import UIKit
         let accuracy_px = scrw * CGFloat(GPSModel2.model().horizontal_accuracy()) / scale_m
         
         var map_list_changed = false
+        var image_changed = false
         
         let now = NSDate().timeIntervalSince1970
         if last_map_update == 0 {
             last_map_update = now - 0.5
         }
         
-        if !gesture && (now - last_map_update) > 1.0 {
+        if !gesture && (now - last_map_update) > 0.5 {
             // only recalculate map list when we are not in a hurry
             last_map_update = now
 
@@ -300,9 +301,10 @@ import UIKit
                     GPSModel2.model().get_maps_force_refresh()
                 }
             } else {
-                let new_list = GPSModel2.model().get_maps(Double(clat),
+                let (new_list, new_image_changed) = GPSModel2.model().get_maps(Double(clat),
                                                   clong: Double(clong),
                                                   radius: Double(zoom_m_diagonal))
+                image_changed = new_image_changed
                 if new_list != nil {
                     map_list_changed = true
                     current_maps = new_list!
@@ -321,7 +323,9 @@ import UIKit
             map.boundsy = CGFloat(scrh * CGFloat(map.latheight) / zoom_height)
         }
         
-        canvas.send_img(current_maps, changed: map_list_changed)
+        if !canvas.send_img(current_maps, changed: map_list_changed, image_changed: image_changed) {
+            GPSModel2.model().get_maps_force_refresh()
+        }
 
         /*
         if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {

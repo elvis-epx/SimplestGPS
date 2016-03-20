@@ -18,14 +18,8 @@ import CoreLocation
 
 // could not be struct because we want this to passed around by reference
 public class MapDescriptor {
-    static let IMAGE_NIL = 0
-    static let IMAGE_LOADING = 1
-    static let IMAGE_LOADED = 2
-    static let IMAGE_FAILED = 3
-    
     let file: NSURL
-    var img: UIImage? = nil
-    var imgstatus: Int = IMAGE_NIL
+    var img: UIImage
     let name: String
     let priority: Double
     let lat0: Double
@@ -41,8 +35,9 @@ public class MapDescriptor {
     var centerx: CGFloat = 0 // manipulated by Controller
     var centery: CGFloat = 0 // manipulated by Controller
     
-    init(file: NSURL, name: String, priority: Double, latNW: Double, longNW: Double, latheight: Double, longwidth: Double)
+    init(img: UIImage, file: NSURL, name: String, priority: Double, latNW: Double, longNW: Double, latheight: Double, longwidth: Double)
     {
+        self.img = img
         self.file = file
         self.name = name
         self.priority = priority
@@ -75,6 +70,10 @@ public class MapDescriptor {
     
     var maps: [MapDescriptor] = [];
     var current_map_list: [String:MapDescriptor] = [:]
+    var notloaded: UIImage
+    var loading: UIImage
+    var cantload: UIImage
+    var image_changed_t: Bool = false
     
     var memoryWarningObserver : NSObjectProtocol!
     var prefsObserver : NSObjectProtocol!
@@ -734,10 +733,13 @@ public class MapDescriptor {
     
     func get_maps_force_refresh() {
         current_map_list = [:]
+        image_changed_t = true
     }
 
-    func get_maps(clat: Double, clong: Double, radius: Double) -> [String:MapDescriptor]? {
-            
+    func get_maps(clat: Double, clong: Double, radius: Double) -> ([String:MapDescriptor]?, Bool) {
+        let image_changed = self.image_changed_t
+        self.image_changed_t = false
+        
         var new_list: [String:MapDescriptor] = [:]
         
         // 'maps' ordered by priority (last map = more priority)
@@ -748,23 +750,28 @@ public class MapDescriptor {
             let ins = GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0, maplongb: map.long1,
                                     lat_circle: clat, long_circle: clong, radius: radius)
             if ins > 0 {
-                if map.imgstatus == MapDescriptor.IMAGE_NIL {
-                    if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
-                        map.img = img
-                        map.imgstatus = MapDescriptor.IMAGE_LOADED
-                        NSLog("Image %@ loaded", map.name)
-                    } else {
-                        NSLog("Image %@ NOT LOADED", map.name)
-                        map.imgstatus = MapDescriptor.IMAGE_FAILED
+                if map.img === notloaded {
+                    map.img = loading
+                    dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
+                        // FIXME notify that image changed
+                        if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
+                            map.img = img
+                            NSLog("Image %@ loaded", map.name)
+                        } else {
+                            map.img = self.cantload
+                            NSLog("Image %@ NOT LOADED", map.name)
+                        }
+                        dispatch_async(dispatch_get_main_queue()) {
+                            NSLog("Annotated image change")
+                            self.image_changed_t = true
+                        }
                     }
                 }
-                if map.img != nil {
-                    // FIXME send always, caller will have to check imgstatus
-                    new_list[map.name] = map
-                    if ins > 1 {
-                        // map encloses the screen circle completely
-                        break
-                    }
+                new_list[map.name] = map
+                if ins > 1 {
+                    // map encloses the screen circle completely
+                    // FIXME high priority but unloaded map
+                    break
                 }
             }
         }
@@ -785,10 +792,10 @@ public class MapDescriptor {
 
         if changed {
             current_map_list = new_list
-            return new_list
+            return (new_list, image_changed)
         }
             
-        return nil
+        return (nil, image_changed)
     }
     
     func latitude() -> Double
@@ -1187,6 +1194,9 @@ public class MapDescriptor {
     
     override init()
     {
+        notloaded = GPSModel2.simple_image(UIColor(colorLiteralRed: 0.33, green: 0.33, blue: 0, alpha: 1))
+        loading = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 0.5, blue: 0, alpha: 1))
+        cantload = GPSModel2.simple_image(UIColor(colorLiteralRed: 0.5, green: 0, blue: 0, alpha: 1))
         super.init()
         
         let prefs = NSUserDefaults.standardUserDefaults();
@@ -1244,7 +1254,8 @@ public class MapDescriptor {
                     NSLog("   compensated to %f %f", lat, long)
                 }
                 
-                let map = MapDescriptor(file: url,
+                let map = MapDescriptor(img: notloaded,
+                                    file: url,
                                     name: url.absoluteString,
                                     priority: coords.latheight,
                                     latNW: coords.lat,
@@ -1291,9 +1302,9 @@ public class MapDescriptor {
         NSLog("Memory low, purging images")
         // FIXME do it better, set state
         for i in 0..<maps.count {
-            maps[i].img = nil
-            maps[i].imgstatus = MapDescriptor.IMAGE_NIL
+            maps[i].img = notloaded
         }
+        self.image_changed_t = true
     }
 
     static let singleton = GPSModel2();
@@ -1386,4 +1397,15 @@ public class MapDescriptor {
         lman!.startUpdatingLocation()
     }
     
+    class func simple_image(color: UIColor) -> UIImage
+    {
+        let rect = CGRect(x: 0.0, y: 0.0, width: 50.0, height: 50.0)
+        UIGraphicsBeginImageContext(rect.size)
+        let context = UIGraphicsGetCurrentContext();
+        CGContextSetFillColorWithColor(context, color.CGColor)
+        CGContextFillRect(context, rect)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
  }
