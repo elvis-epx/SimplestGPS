@@ -88,7 +88,6 @@ class MapCanvasView: UIView
                     // find where the new view fits on stack
                     // this works because two maps already on-screen will never exchange priorities
                     // priorities need only to be checked when a new map is added to screen
-                    // FIXME change position as image is loaded
                     var below = accuracy_view!
                     for (_, view) in image_views {
                         if view.1.priority < map.priority {

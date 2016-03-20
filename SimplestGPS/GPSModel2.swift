@@ -723,7 +723,6 @@ public class MapDescriptor {
     }
 
     // FIXME store distance calculated by map_inside, and inlcusion status, to prioritize maps
-    // FIXME load 'slowly', one at a time
     // FIXME gauge memory usage
     // FIXME detect limit in memory usage
     // FIXME downsize image when memory full
@@ -753,15 +752,17 @@ public class MapDescriptor {
                     map.img = loading
                     dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
                         if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
-                            map.img = img
-                            NSLog("Image %@ loaded", map.name)
+                            dispatch_async(dispatch_get_main_queue()) {
+                                map.img = img
+                                self.image_changed_t = true
+                                NSLog("Image %@ loaded", map.name)
+                            }
                         } else {
-                            map.img = self.cantload
-                            NSLog("Image %@ NOT LOADED", map.name)
-                        }
-                        dispatch_async(dispatch_get_main_queue()) {
-                            NSLog("Annotated image change")
-                            self.image_changed_t = true
+                            dispatch_async(dispatch_get_main_queue()) {
+                                map.img = self.cantload
+                                self.image_changed_t = true
+                                NSLog("Image %@ NOT LOADED", map.name)
+                            }
                         }
                     }
                 }
