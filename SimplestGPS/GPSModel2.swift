@@ -82,7 +82,7 @@ public class MapDescriptor {
     
     var ram_inuse = 0
     var max_ram_inuse = 0
-    static let INITIAL_RAM_LIMIT = 500000000 // FIXME put 250mb
+    static let INITIAL_RAM_LIMIT = 250000000
     var ram_limit = INITIAL_RAM_LIMIT
     
     var loader_timer: NSTimer? = nil
@@ -93,6 +93,7 @@ public class MapDescriptor {
     var current_map_list: [String:MapDescriptor] = [:]
     var i_notloaded: UIImage
     var i_loading: UIImage
+    var i_loading_res: UIImage
     var i_cantload: UIImage
     var i_oom: UIImage
     
@@ -754,21 +755,16 @@ public class MapDescriptor {
     func get_maps(clat: Double, clong: Double, radius: Double) -> [String:MapDescriptor]?
     {
         var new_list: [String:MapDescriptor] = [:]
-        var memory_tally = 0
         
         // calculate intersection with screen circle and proximity to screen center
         
-        // FIXME remove
         for map in maps {
             let (ins, d) = GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0,
                                                 maplongb: map.long1, lat_circle: clat,
                                                 long_circle: clong, radius: radius)
             map.insertion = ins
             map.distance = d
-            memory_tally += map.ram_size
         }
-        // FIXME memory_in_use lost sync
-        NSLog("FIXME remove Memory accounting: %d %d", ram_inuse, memory_tally)
         
         // Try to free memory before it becomes a problem
         // Naïve strategy: release maps not in use right now
@@ -826,8 +822,8 @@ public class MapDescriptor {
                 // NSLog("Image %@ distance %f", map.name, map.distance)
                 if is_img_unloaded(map) {
                     if !ram_within_hard_limits(map) {
+                        NSLog("Image %@ not loaded due to memory pressure", map.name)
                         if !is_img_unloaded_oom(map) {
-                            NSLog("Image %@ not loaded due to memory pressure", map.name)
                             img_unload_oom(map)
                         }
                     } else {
@@ -844,6 +840,16 @@ public class MapDescriptor {
                 }
             }
         }
+
+        /*
+        var memory_tally = 0
+        for map in maps {
+            if is_img_loaded(map) {
+                memory_tally += map.ram_size
+            }
+        }
+        NSLog("memory accounting: %d %d", ram_inuse, memory_tally)
+         */
 
         var changed = false
         
@@ -884,6 +890,7 @@ public class MapDescriptor {
         self.loader_busy = true
 
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
+            
             
             if !self.ram_within_hard_limits(map) {
                 NSLog("Image %@ not loaded due to memory pressure (thread)", map.name)
@@ -1309,9 +1316,10 @@ public class MapDescriptor {
     override init()
     {
         i_notloaded = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 1.0, blue: 0, alpha: 0.33))
-        i_loading = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 0.6, blue: 0, alpha: 0.33))
-        i_cantload = GPSModel2.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 0, alpha: 0.33))
-        i_oom = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 0, blue: 1.0, alpha: 0.33))
+        i_oom = GPSModel2.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 0.0, alpha: 0.33))
+        i_loading = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 0.0, blue: 1.0, alpha: 0.33))
+        i_loading_res = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 1.0, blue: 1.0, alpha: 0.33))
+        i_cantload = GPSModel2.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 1.0, alpha: 0.33))
         super.init()
         
         let prefs = NSUserDefaults.standardUserDefaults();
@@ -1417,8 +1425,7 @@ public class MapDescriptor {
     }
     
     func memory_low() {
-        // FIXME sometimes it goes too low because memory_low() is asynchronous
-        NSLog("########## Memory low")
+        NSLog("################################################# Memory low")
         for i in 0..<maps.count {
             if is_img_loaded(maps[i]) {
                 img_unload_oom(maps[i])
@@ -1454,6 +1461,12 @@ public class MapDescriptor {
     func is_img_loaded(map: MapDescriptor) -> Bool {
         return map.imgstatus == MapDescriptor.LOADED
     }
+
+    // tells if image size has already been tallied up in RAM control
+    func has_img_reserved_ram(map: MapDescriptor) -> Bool {
+        return map.imgstatus == MapDescriptor.LOADED || map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM
+    }
+    
 
     func img_loading(map: MapDescriptor) {
         if map.imgstatus == MapDescriptor.LOADED || map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM {
@@ -1527,7 +1540,9 @@ public class MapDescriptor {
     func ram_within_hard_limits(newobj: MapDescriptor?) -> Bool {
         var additional = 0
         if newobj != nil {
-            additional = newobj!.ram_size
+            if !has_img_reserved_ram(newobj!) {
+                additional = newobj!.ram_size
+            }
         }
         return self.ram_limit > (self.ram_inuse + additional)
     }

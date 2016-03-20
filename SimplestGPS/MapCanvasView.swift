@@ -72,7 +72,7 @@ class MapCanvasView: UIView
             // check current image views that are no longer necessary and remove them
             for (name, image) in image_views {
                 if list[name] == nil {
-                    NSLog("        map view %@", name)
+                    NSLog("        removing %@", name)
                     image.0.hidden = true
                     image.0.removeFromSuperview()
                     image.0.image = nil
@@ -84,7 +84,7 @@ class MapCanvasView: UIView
             // create image views that are requested but don't exist
             for (name, map) in list {
                 if image_views[name] == nil {
-                    NSLog("        adding map %@", name)
+                    NSLog("        adding %@", name)
                     
                     // find where the new view fits on stack
                     // this works because two maps already on-screen will never exchange priorities
@@ -127,7 +127,7 @@ class MapCanvasView: UIView
         for (name, view) in image_views {
             image_anims[name]!.set_rel(CGPoint(x: view.1.centerx, y: view.1.centery), block: {
                 if view.0.image !== view.1.img {
-                    NSLog("    view: replaced img %@", name)
+                    NSLog("    view: replaced %@", name)
                     view.0.image = view.1.img
                 }
                 view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
