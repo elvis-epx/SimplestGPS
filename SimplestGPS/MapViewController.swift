@@ -283,7 +283,6 @@ import UIKit
         let accuracy_px = scrw * CGFloat(GPSModel2.model().horizontal_accuracy()) / scale_m
         
         var map_list_changed = false
-        var image_changed = false
         
         let now = NSDate().timeIntervalSince1970
         if last_map_update == 0 {
@@ -301,10 +300,9 @@ import UIKit
                     GPSModel2.model().get_maps_force_refresh()
                 }
             } else {
-                let (new_list, new_image_changed) = GPSModel2.model().get_maps(Double(clat),
+                let new_list = GPSModel2.model().get_maps(Double(clat),
                                                   clong: Double(clong),
                                                   radius: Double(zoom_m_diagonal))
-                image_changed = new_image_changed
                 if new_list != nil {
                     map_list_changed = true
                     current_maps = new_list!
@@ -323,7 +321,7 @@ import UIKit
             map.boundsy = CGFloat(scrh * CGFloat(map.latheight) / zoom_height)
         }
         
-        if !canvas.send_img(current_maps, changed: map_list_changed, image_changed: image_changed) {
+        if !canvas.send_img(current_maps, changed: map_list_changed) {
             GPSModel2.model().get_maps_force_refresh()
         }
 

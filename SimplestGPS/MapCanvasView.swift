@@ -62,17 +62,17 @@ class MapCanvasView: UIView
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
-    func send_img(list: [String:MapDescriptor], changed: Bool, image_changed: Bool) -> Bool {
+    func send_img(list: [String:MapDescriptor], changed: Bool) -> Bool {
         if accuracy_view == nil {
             return false
         }
         
         if changed {
-            NSLog("Map list changed, %d elements", list.count)
+            NSLog("    view: map list changed, %d elements", list.count)
             // check current image views that are no longer necessary and remove them
             for (name, image) in image_views {
                 if list[name] == nil {
-                    NSLog("Removing map view %@", name)
+                    NSLog("        map view %@", name)
                     image.0.hidden = true
                     image.0.removeFromSuperview()
                     image.0.image = nil
@@ -84,7 +84,7 @@ class MapCanvasView: UIView
             // create image views that are requested but don't exist
             for (name, map) in list {
                 if image_views[name] == nil {
-                    NSLog("Adding map view %@", name)
+                    NSLog("        adding map %@", name)
                     
                     // find where the new view fits on stack
                     // this works because two maps already on-screen will never exchange priorities
@@ -109,7 +109,7 @@ class MapCanvasView: UIView
                         }
                     }
 
-                    NSLog("    inserted below %@", bname)
+                    NSLog("            inserted below %@", bname)
                     let image = UIImageView(image: map.img)
                     let anim = PositionAnim(name: "img", view: image, size: self.frame)
                     image_views[name] = (image, map)
@@ -126,11 +126,9 @@ class MapCanvasView: UIView
         /* update coordinates (controller changed the descriptor .1 in-place) */
         for (name, view) in image_views {
             image_anims[name]!.set_rel(CGPoint(x: view.1.centerx, y: view.1.centery), block: {
-                if image_changed {
-                    if view.0.image != view.1.img {
-                        NSLog("Replaced image for %@", name)
-                        view.0.image = view.1.img
-                    }
+                if view.0.image !== view.1.img {
+                    NSLog("    view: replaced img %@", name)
+                    view.0.image = view.1.img
                 }
                 view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
                 view.0.hidden = (self.mode == self.MODE_COMPASS
