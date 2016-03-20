@@ -73,6 +73,7 @@ public class MapDescriptor {
     var notloaded: UIImage
     var loading: UIImage
     var cantload: UIImage
+    var oom: UIImage
     var image_changed_t: Bool = false
     
     var memoryWarningObserver : NSObjectProtocol!
@@ -722,14 +723,12 @@ public class MapDescriptor {
     }
 
     // FIXME store distance calculated by map_inside, and inlcusion status, to prioritize maps
-    // FIXME load in thread
     // FIXME load 'slowly', one at a time
     // FIXME gauge memory usage
     // FIXME detect limit in memory usage
     // FIXME downsize image when memory full
     // FIXME LRU removal
     // FIXME do not load if memory full
-    // FIXME remove map if completely blocked by another
     
     func get_maps_force_refresh() {
         current_map_list = [:]
@@ -753,7 +752,6 @@ public class MapDescriptor {
                 if map.img === notloaded {
                     map.img = loading
                     dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
-                        // FIXME notify that image changed
                         if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
                             map.img = img
                             NSLog("Image %@ loaded", map.name)
@@ -768,9 +766,9 @@ public class MapDescriptor {
                     }
                 }
                 new_list[map.name] = map
-                if ins > 1 {
-                    // map encloses the screen circle completely
-                    // FIXME high priority but unloaded map
+                if ins > 1 && map.img !== notloaded && map.img !== loading
+                        && map.img !== oom && map.img !== cantload {
+                    // map fills the screen completely
                     break
                 }
             }
@@ -1194,9 +1192,10 @@ public class MapDescriptor {
     
     override init()
     {
-        notloaded = GPSModel2.simple_image(UIColor(colorLiteralRed: 0.33, green: 0.33, blue: 0, alpha: 1))
-        loading = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 0.5, blue: 0, alpha: 1))
-        cantload = GPSModel2.simple_image(UIColor(colorLiteralRed: 0.5, green: 0, blue: 0, alpha: 1))
+        notloaded = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 1.0, blue: 0, alpha: 0.33))
+        loading = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 0.6, blue: 0, alpha: 0.33))
+        cantload = GPSModel2.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 0, alpha: 0.33))
+        oom = GPSModel2.simple_image(UIColor(colorLiteralRed: 0, green: 0, blue: 1.0, alpha: 0.33))
         super.init()
         
         let prefs = NSUserDefaults.standardUserDefaults();

@@ -67,8 +67,6 @@ class MapCanvasView: UIView
             return false
         }
         
-        // FIXME detect change in map state (map.imgstatus) that does NOT change the list
-        // FIXME handle case when map is loaded, replace by map w/o replacing View
         if changed {
             NSLog("Map list changed, %d elements", list.count)
             // check current image views that are no longer necessary and remove them
@@ -99,8 +97,6 @@ class MapCanvasView: UIView
                         }
                     }
 
-                    // FIXME empty views colored for non-images (loading, memory full, etc)
-                
                     let image = UIImageView(image: map.img)
                     let anim = PositionAnim(name: "img", view: image, size: self.frame)
                     image_views[name] = (image, map)

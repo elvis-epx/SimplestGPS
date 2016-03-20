@@ -158,7 +158,6 @@ class CompassView: UIView {
                 if !absolute {
                     tgtheading -= heading
                 }
-                // FIXME move to block in anim
                 tgtminis2[i].labels(targets[i].name, distance: targets[i].distance)
                 tgtminis_anim[i].set(tgtheading, block: {
                     self.tgtminis[i].hidden = i == current_target || tgt_dist
