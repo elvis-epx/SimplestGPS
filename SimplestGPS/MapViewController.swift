@@ -302,7 +302,8 @@ import UIKit
             } else {
                 let new_list = GPSModel2.model().get_maps(Double(clat),
                                                   clong: Double(clong),
-                                                  radius: Double(zoom_m_diagonal))
+                                                  radius: Double(zoom_m_diagonal),
+                                                  latheight: Double(zoom_height))
                 if new_list != nil {
                     map_list_changed = true
                     current_maps = new_list!

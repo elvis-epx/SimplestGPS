@@ -41,8 +41,10 @@ public class MapDescriptor {
     var boundsy: CGFloat = 0 // manipulated by Controller
     var centerx: CGFloat = 0 // manipulated by Controller
     var centery: CGFloat = 0 // manipulated by Controller
-    var ram_size = 0
+    var max_ram_size = 0
+    var cur_ram_size = 0
     var imgstatus = MapDescriptor.NOTLOADED
+    var shrunk = false
     var insertion = 0
     var distance = 0.0
     
@@ -85,10 +87,12 @@ public class MapDescriptor {
     static let INITIAL_RAM_LIMIT = 250000000
     var ram_limit = INITIAL_RAM_LIMIT
     
-    var loader_timer: NSTimer? = nil
-    var loader_queue: MapDescriptor? = nil
+    var task_timer: NSTimer? = nil
+    var loader_queue: (MapDescriptor, Bool)? = nil
     var loader_busy: Bool = false
-    
+    var shrink_queue: (MapDescriptor, CGSize)? = nil
+    var shrink_busy: Bool = false
+
     var maps: [MapDescriptor] = [];
     var current_map_list: [String:MapDescriptor] = [:]
     var i_notloaded: UIImage
@@ -752,8 +756,12 @@ public class MapDescriptor {
         current_map_list = [:]
     }
     
-    func get_maps(clat: Double, clong: Double, radius: Double) -> [String:MapDescriptor]?
+    func get_maps(clat: Double, clong: Double, radius: Double, latheight: Double) -> [String:MapDescriptor]?
     {
+        // NOTE: we use a radius instead of a box to test if a map belongs to the screen,
+        // because in HEADING modes the map rotates, so the map x screen overlap must be
+        // valid for every heading
+        
         var new_list: [String:MapDescriptor] = [:]
         
         // calculate intersection with screen circle and proximity to screen center
@@ -788,6 +796,43 @@ public class MapDescriptor {
             return $0.priority < $1.priority
         })
 
+        if !self.ram_within_safe_limits() {
+            for map in maps_sorted.reverse() {
+                if map.insertion > 0 && is_img_loaded(map) && shrink_queue == nil {
+                    // example: map is 6000 px height, 15' height = 400 px / minute
+                    // if screen zoomed out to 60' height, 60 x 400 = 24000 pixels
+                    // but screen has only ~2000 pixels height
+                    let hpixels = Double(map.img.size.height) / map.latheight * latheight
+                    if hpixels > 2100 {
+                        // still in the example, 2000 / 24000 = 1:12 reduction
+                        // image becomes 500x500, which is enough to cover 1/4 x 1/4 of
+                        // the screen with enough sharpness
+                        NSLog("Shrinking image %@", map.name)
+                        let factor = CGFloat(1920 / hpixels)
+                        shrink_queue = (map, CGSize(width: map.img.size.width * factor,
+                            height: map.img.size.height * factor))
+                        // FIXME what if user zooms in?
+                        // FIXME annotate shrunk images
+                        // FIXME reinflate more important images
+                    }
+                }
+            }
+        } else {
+            for map in maps_sorted {
+                if map.shrunk && map.insertion > 0 && is_img_loaded(map) {
+                    let hpixels = Double(map.img.size.height) / map.latheight * latheight
+                    if hpixels < 1500 {
+                        // lacking in resolution; reload without removing current from screen
+                        if self.loader_queue == nil {
+                            self.loader_queue = (map, true)
+                        }
+                        break
+                    }
+                }
+            }
+            
+        }
+    
         if !ram_within_hard_limits(nil) {
             // memory full: all unused maps already removed
             // try to remove lowest-priority after a gap
@@ -829,7 +874,7 @@ public class MapDescriptor {
                     } else {
                         if self.loader_queue == nil {
                             img_loading(map)
-                            self.loader_queue = map
+                            self.loader_queue = (map, false)
                         }
                     }
                 }
@@ -873,15 +918,21 @@ public class MapDescriptor {
         return nil
     }
     
+    func task_serve()
+    {
+        loader_serve_queue()
+        shrink_serve_queue()
+    }
+    
     func loader_serve_queue()
     {
         if self.loader_queue == nil || self.loader_busy {
             return
         }
 
-        let map = self.loader_queue!
+        let (map, is_reload) = self.loader_queue!
         
-        if is_img_loaded(map) {
+        if !is_reload && is_img_loaded(map) {
             NSLog("ERROR -------- img tried to load already loaded %@", map.name)
             self.loader_queue = nil
             return
@@ -893,12 +944,14 @@ public class MapDescriptor {
             if !self.ram_within_hard_limits(map) {
                 NSLog("Image %@ not loaded due to memory pressure (thread)", map.name)
                 dispatch_async(dispatch_get_main_queue()) {
-                    if self.loader_queue == nil {
-                        // request was cancelled: remove map from LOADING state,
-                        // otherwise it will be stuck (loading maps are not retried)
-                        self.img_cancel_loading(map)
-                    } else {
-                        self.img_unload_oom(map)
+                    if !is_reload {
+                        if self.loader_queue == nil {
+                            // request was cancelled: remove map from LOADING state,
+                            // otherwise it will be stuck (loading maps are not retried)
+                            self.img_cancel_loading(map)
+                        } else {
+                            self.img_unload_oom(map)
+                        }
                     }
                     self.loader_queue = nil
                     self.loader_busy = false
@@ -907,19 +960,30 @@ public class MapDescriptor {
                 if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
                     dispatch_async(dispatch_get_main_queue()) {
                         if self.loader_queue == nil {
-                            self.img_cancel_loading(map)
+                            if is_reload {
+                                // simply disregard
+                            } else {
+                                self.img_cancel_loading(map)
+                            }
                         } else {
-                            self.img_loaded(map, img: img)
+                            map.shrunk = false
+                            if is_reload {
+                                self.img_reloaded(map, img: img)
+                            } else {
+                                self.img_loaded(map, img: img)
+                            }
                         }
                         self.loader_queue = nil
                         self.loader_busy = false
                     }
                 } else {
                     dispatch_async(dispatch_get_main_queue()) {
-                        if self.loader_queue == nil {
-                            self.img_cancel_loading(map)
-                        } else {
-                            self.img_cantload(map)
+                        if !is_reload {
+                            if self.loader_queue == nil {
+                                self.img_cancel_loading(map)
+                            } else {
+                                self.img_cantload(map)
+                            }
                         }
                         self.loader_queue = nil
                         self.loader_busy = false
@@ -928,6 +992,40 @@ public class MapDescriptor {
             }
         }
     }
+
+    func shrink_serve_queue()
+    {
+        if self.shrink_queue == nil || self.shrink_busy {
+            return
+        }
+        
+        let (map, newsize) = self.shrink_queue!
+        
+        if !is_img_loaded(map) {
+            NSLog("ERROR -------- tried to shrink not loaded %@", map.name)
+            self.shrink_queue = nil
+            return
+        }
+        
+        self.shrink_busy = true
+        
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
+            let newimg = GPSModel2.imgresize(map.img, newsize: newsize)
+            dispatch_async(dispatch_get_main_queue()) {
+                if self.shrink_queue == nil {
+                    // disregard result
+                } else if !self.is_img_loaded(map) {
+                    // disregard result
+                } else {
+                    map.shrunk = true
+                    self.img_shrunk(map, img: newimg)
+                }
+                self.shrink_queue = nil
+                self.shrink_busy = false
+            }
+        }
+    }
+
     
     func latitude() -> Double
     {
@@ -1415,17 +1513,17 @@ public class MapDescriptor {
                                 }
         )
         
-        loader_timer = NSTimer(timeInterval: 0.33, target: self,
-                         selector: #selector(GPSModel2.loader_serve_queue),
+        task_timer = NSTimer(timeInterval: 0.16, target: self,
+                         selector: #selector(GPSModel2.task_serve),
                          userInfo: nil, repeats: true)
-        NSRunLoop.currentRunLoop().addTimer(loader_timer!, forMode: NSRunLoopCommonModes)
+        NSRunLoop.currentRunLoop().addTimer(task_timer!, forMode: NSRunLoopCommonModes)
     }
     
     deinit {
         let notifications = NSNotificationCenter.defaultCenter()
         notifications.removeObserver(memoryWarningObserver, name: UIApplicationDidReceiveMemoryWarningNotification, object: nil)
         notifications.removeObserver(prefsObserver, name: NSUserDefaultsDidChangeNotification, object: nil)
-        loader_timer!.invalidate()
+        task_timer!.invalidate()
     }
     
     func prefs_changed()
@@ -1479,11 +1577,13 @@ public class MapDescriptor {
     func img_loading(map: MapDescriptor) {
         if map.imgstatus == MapDescriptor.LOADED || map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM {
             NSLog("Warning: img_loading called for loaded or loading image %@", map.name)
-            release_ram(map.ram_size)
+            release_ram(map.cur_ram_size)
         }
-        if map.ram_size > 0 {
+        if map.max_ram_size > 0 {
             // size is known
-            commit_ram(map.ram_size)
+            // always considers the full-res version
+            map.cur_ram_size = map.max_ram_size
+            commit_ram(map.cur_ram_size)
             map.imgstatus = MapDescriptor.LOADING_RESERVED_RAM
             NSLog("%@ -> LOADING_RESERVED_RAM", map.name)
         } else {
@@ -1496,7 +1596,7 @@ public class MapDescriptor {
     func img_cancel_loading(map: MapDescriptor)
     {
         if map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM {
-            release_ram(map.ram_size)
+            release_ram(map.cur_ram_size)
             map.imgstatus = MapDescriptor.NOTLOADED
             NSLog("%@ LOADING_RESERVED_RAM -> NOTLOADED", map.name)
             
@@ -1513,25 +1613,54 @@ public class MapDescriptor {
     func img_loaded(map: MapDescriptor, img: UIImage) {
         if map.imgstatus == MapDescriptor.LOADED {
             NSLog("Warning: img_loaded called for already loaded img %@", map.name)
-            release_ram(map.ram_size)
+            release_ram(map.cur_ram_size)
         }
         
         // calculate aprox. size
-        map.ram_size = Int(img.size.width * img.size.height * 4)
+        // NOTE: this assumes that img_loaded() is always called with full-res img
+        map.max_ram_size = Int(img.size.width * img.size.height * 4)
+        map.cur_ram_size = map.max_ram_size
         
         if map.imgstatus != MapDescriptor.LOADING_RESERVED_RAM {
             NSLog("%@ -> committing memory", map.name)
-            commit_ram(map.ram_size)
+            commit_ram(map.cur_ram_size)
         }
         map.imgstatus = MapDescriptor.LOADED
         map.img = img
         NSLog("%@ -> LOADED", map.name)
     }
 
+    func img_shrunk(map: MapDescriptor, img: UIImage) {
+        if map.imgstatus != MapDescriptor.LOADED {
+            NSLog("Warning: img_shrunk called for not loaded img %@", map.name)
+            return
+        }
+        let new_size = Int(img.size.width * img.size.height * 4)
+        NSLog("shrunk %d bytes for img %@", map.cur_ram_size - new_size, map.name)
+        release_ram(map.cur_ram_size)
+        map.cur_ram_size = new_size
+        commit_ram(map.cur_ram_size)
+        map.img = img
+    }
+
+    func img_reloaded(map: MapDescriptor, img: UIImage) {
+        if map.imgstatus != MapDescriptor.LOADED {
+            NSLog("Warning: img_reloaded called for non-loaded img %@", map.name)
+            return
+        }
+        
+        let new_size = Int(img.size.width * img.size.height * 4)
+        NSLog("blown up %d bytes for img %@", new_size - map.cur_ram_size, map.name)
+        release_ram(map.cur_ram_size)
+        map.cur_ram_size = new_size
+        commit_ram(map.cur_ram_size)
+        map.img = img
+    }
+    
     func img_unload(map: MapDescriptor) {
         if map.imgstatus == MapDescriptor.LOADED || map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM {
             NSLog("%@ -> releasing memory on unload", map.name)
-            release_ram(map.ram_size)
+            release_ram(map.cur_ram_size)
         }
         map.imgstatus = MapDescriptor.NOTLOADED
         map.img = i_notloaded
@@ -1541,7 +1670,7 @@ public class MapDescriptor {
     func img_unload_oom(map: MapDescriptor) {
         if map.imgstatus == MapDescriptor.LOADED || map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM {
             NSLog("%@ -> releasing memory on unload oom", map.name)
-            release_ram(map.ram_size)
+            release_ram(map.cur_ram_size)
         }
         map.imgstatus = MapDescriptor.NOTLOADED_OOM
         map.img = i_oom
@@ -1551,7 +1680,7 @@ public class MapDescriptor {
     func img_cantload(map: MapDescriptor) {
         if map.imgstatus == MapDescriptor.LOADED || map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM {
             NSLog("%@ -> releasing memory on cantload", map.name)
-            release_ram(map.ram_size)
+            release_ram(map.cur_ram_size)
         }
         map.imgstatus = MapDescriptor.CANTLOAD
         map.img = i_cantload
@@ -1566,7 +1695,9 @@ public class MapDescriptor {
         var additional = 0
         if newobj != nil {
             if !has_img_reserved_ram(newobj!) {
-                additional = newobj!.ram_size
+                // make sure we don't count the future img impact when it was
+                // already reserved by img_loading()
+                additional = newobj!.max_ram_size
             }
         }
         return self.ram_limit > (self.ram_inuse + additional)
@@ -1672,5 +1803,15 @@ public class MapDescriptor {
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return image
+    }
+    
+    class func imgresize(img: UIImage, newsize: CGSize) -> UIImage
+    {
+        UIGraphicsBeginImageContextWithOptions(newsize, true, 1.0)
+        img.drawInRect(CGRect(x: 0, y: 0,
+            width: newsize.width, height: newsize.height))
+        let newimg = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext()
+        return newimg
     }
  }
