@@ -125,12 +125,18 @@ public class MapDescriptor {
             model.release_ram(self.cur_ram)
             self.img = model.i_oom
         }
+        // X
+        sm[State.SHRINKING]![State.NOT_LOADED] = { _ in
+            NSLog("%@ -> releasing shrinking memory on unload", name)
+            model.release_ram(self.cur_ram)
+            self.img = model.i_notloaded
+        }
         
         // I
         sm[State.NEVER_LOADED]![State.LOADING_1ST] = { _ in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue load %@", name)
-                self.state = State.NEVER_LOADED_OOM
+                self.state = State.NEVER_LOADED
                 return
             }
             self.img = model.i_loading
@@ -185,7 +191,7 @@ public class MapDescriptor {
         sm[State.SHRUNK]![State.NOT_LOADED] = { _ in
             NSLog("%@ -> releasing shrunk memory on unload", name)
             model.release_ram(self.cur_ram)
-            self.img = model.i_oom
+            self.img = model.i_notloaded
         }
         // O
         sm[State.NOT_LOADED_OOM]![State.LOADING_2ND] = { _ in
@@ -274,19 +280,19 @@ public class MapDescriptor {
                   statename[oldstate.rawValue], statename[newstate.rawValue])
             return
         }
-        NSLog("Map %@ trans %@ -> %@", name, statename[state.rawValue], statename[newstate.rawValue])
+        NSLog("Map %@ trans %@ -> %@", name, statename[oldstate.rawValue], statename[newstate.rawValue])
         state = newstate
         sm[oldstate]![newstate]!(arg)
     }
     
     /* Convenience methods for clients */
     func please_oom() {
-        if state == State.NEVER_LOADED || state == State.LOADING_1ST {
+        if state == State.NEVER_LOADED || state == State.LOADING_1ST
+                || state == State.NEVER_LOADED_OOM {
             trans(State.NEVER_LOADED_OOM, arg: nil)
-        } else if is_loaded() || state == State.LOADING_2ND {
+        } else if is_loaded() || state == State.LOADING_2ND
+                || state == State.NOT_LOADED_OOM || state == State.NOT_LOADED {
             trans(State.NOT_LOADED_OOM, arg: nil)
-        } else if state == State.NEVER_LOADED_OOM || state == State.NOT_LOADED_OOM {
-            // ignore
         } else {
             NSLog("Warning ####### please_oom called for invalid state %@ %@",
                   statename[state.rawValue], name)
@@ -318,7 +324,7 @@ public class MapDescriptor {
         if model.shrink_busy() {
             return false
         } else if state == State.SHRINKING {
-            // ignore       }
+            // ignore
         } else if state != State.SHRUNK && state != State.LOADED {
             NSLog("Warning ####### please_shrink called for invalid state %@ %@",
                   statename[state.rawValue], name)
@@ -349,15 +355,11 @@ public class MapDescriptor {
         return true
     }
     
-    func is_unloaded() -> Bool {
+    func is_unloaded_but_is_loadable() -> Bool {
         return state == State.NEVER_LOADED || state == State.NOT_LOADED ||
             state == State.NEVER_LOADED_OOM || state == State.NOT_LOADED_OOM
     }
-    
-    func is_unloaded_oom() -> Bool {
-        return state == State.NEVER_LOADED_OOM || state == State.NOT_LOADED_OOM
-    }
-    
+        
     func is_loaded() -> Bool {
         return state == State.LOADED || state == State.SHRINKING || state == State.SHRUNK
     }
@@ -664,7 +666,7 @@ public class MapDescriptor {
         for map in maps_sorted {
             if map.insertion > 0 {
                 // NSLog("Image %@ distance %f", map.name, map.distance)
-                if map.is_unloaded() {
+                if map.is_unloaded_but_is_loadable() {
                     if !ram_within_hard_limits(map) {
                         NSLog("Image %@ not loaded due to memory pressure", map.name)
                         map.please_oom()
