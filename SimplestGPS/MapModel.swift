@@ -42,6 +42,7 @@ public class MapDescriptor {
     let longwidth: Double
     let midlat: Double
     let midlong: Double
+    var density: Double
     var boundsx: CGFloat = 0 // manipulated by Controller
     var boundsy: CGFloat = 0 // manipulated by Controller
     var centerx: CGFloat = 0 // manipulated by Controller
@@ -72,6 +73,7 @@ public class MapDescriptor {
         self.long1 = longNW + longwidth
         self.midlat = lat0 - latheight / 2
         self.midlong = long0 + longwidth / 2
+        self.density = 0
         
         sm[State.NEVER_LOADED] = [:]
         sm[State.NEVER_LOADED_OOM] = [:]
@@ -133,14 +135,15 @@ public class MapDescriptor {
         }
         
         // I
-        sm[State.NEVER_LOADED]![State.LOADING_1ST] = { _ in
+        sm[State.NEVER_LOADED]![State.LOADING_1ST] = { screenh in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue load %@", name)
                 self.state = State.NEVER_LOADED
                 return
             }
+            let l = screenh as! Double
             self.img = model.i_loading
-            self.load({ model.dequeue_load() })
+            self.Load(l, cb: { model.dequeue_load() })
         }
         
         // I2
@@ -148,14 +151,15 @@ public class MapDescriptor {
             self.img = model.i_notloaded
         }
         // J
-        sm[State.NEVER_LOADED_OOM]![State.LOADING_1ST] = { _ in
+        sm[State.NEVER_LOADED_OOM]![State.LOADING_1ST] = { screenh in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue load %@", name)
                 self.state = State.NEVER_LOADED_OOM
                 return
             }
             self.img = model.i_loading
-            self.load({ model.dequeue_load() })
+            let l = screenh as! Double
+            self.Load(l, cb: { model.dequeue_load() })
         }
         
         // no K
@@ -171,7 +175,7 @@ public class MapDescriptor {
         }
         
         // N
-        sm[State.NOT_LOADED]![State.LOADING_2ND] = { _ in
+        sm[State.NOT_LOADED]![State.LOADING_2ND] = { screenh in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue load %@", name)
                 self.state = State.NOT_LOADED
@@ -180,7 +184,8 @@ public class MapDescriptor {
             self.cur_ram = self.max_ram
             model.commit_ram(self.cur_ram)
             self.img = model.i_loading_res
-            self.load({ model.dequeue_load() })
+            let l = screenh as! Double
+            self.Load(l, cb: { model.dequeue_load() })
         }
         // N2
         sm[State.LOADING_2ND]![State.NOT_LOADED] = { _ in
@@ -194,7 +199,7 @@ public class MapDescriptor {
             self.img = model.i_notloaded
         }
         // O
-        sm[State.NOT_LOADED_OOM]![State.LOADING_2ND] = { _ in
+        sm[State.NOT_LOADED_OOM]![State.LOADING_2ND] = { screenh in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue load %@", name)
                 self.state = State.NOT_LOADED_OOM
@@ -203,7 +208,8 @@ public class MapDescriptor {
             self.cur_ram = self.max_ram
             model.commit_ram(self.cur_ram)
             self.img = model.i_loading_res
-            self.load({ model.dequeue_load() })
+            let l = screenh as! Double
+            self.Load(l, cb: { model.dequeue_load() })
         }
         
         // P
@@ -241,9 +247,26 @@ public class MapDescriptor {
             model.commit_ram(self.cur_ram)
             self.img = imgc
         }
-        
+        // SA
+        sm[State.LOADING_1ST]![State.SHRUNK] = { img in
+            let imgc = img as! UIImage
+            let new_size = Int(imgc.size.width * imgc.size.height * 4)
+            self.cur_ram = new_size
+            model.commit_ram(self.cur_ram)
+            self.img = imgc
+        }
+        // SB
+        sm[State.LOADING_2ND]![State.SHRUNK] = { img in
+            let imgc = img as! UIImage
+            let new_size = Int(imgc.size.width * imgc.size.height * 4)
+            model.release_ram(self.cur_ram)
+            self.cur_ram = new_size
+            model.commit_ram(self.cur_ram)
+            self.img = imgc
+        }
+    
         // S (blow-up)
-        sm[State.SHRUNK]![State.LOADING_2ND] = { _ in
+        sm[State.SHRUNK]![State.LOADING_2ND] = { screenh in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue blowup %@", name)
                 self.state = State.SHRUNK
@@ -254,7 +277,8 @@ public class MapDescriptor {
             model.release_ram(self.cur_ram)
             self.cur_ram = new_size
             model.commit_ram(self.cur_ram)
-            self.load({ model.dequeue_load() })
+            let l = screenh as! Double
+            self.Load(l, cb: { model.dequeue_load() })
         }
         
         // T
@@ -262,7 +286,6 @@ public class MapDescriptor {
             // calculate aprox. size
             // NOTE: this assumes that img_loaded() is always called with full-res img
             let imgc = img as! UIImage
-            self.max_ram = Int(imgc.size.width * imgc.size.height * 4)
             self.cur_ram = self.max_ram
             model.commit_ram(self.cur_ram)
             self.img = imgc
@@ -299,16 +322,18 @@ public class MapDescriptor {
         }
     }
     
-    func please_load() -> Bool {
+    func please_load(screenh: Double) -> Bool {
         if model.loader_busy() {
             return false
         }
         
+        let nscreenh = NSNumber(double: screenh)
+        
         if state == State.NEVER_LOADED || state == State.NEVER_LOADED_OOM {
-            trans(State.LOADING_1ST, arg: nil)
+            trans(State.LOADING_1ST, arg: nscreenh)
             return true
         } else if state == State.NOT_LOADED || state == State.NOT_LOADED_OOM || state == State.SHRUNK {
-            trans(State.LOADING_2ND, arg: nil)
+            trans(State.LOADING_2ND, arg: nscreenh)
             return true
         } else if state == State.LOADING_1ST || state == State.LOADING_2ND {
             // ignore
@@ -343,7 +368,7 @@ public class MapDescriptor {
         trans(State.NOT_LOADED, arg: nil)
     }
     
-    func please_blowup() -> Bool {
+    func please_blowup(screenh: Double) -> Bool {
         if model.loader_busy() {
             return false
         } else if state != State.SHRUNK {
@@ -351,7 +376,7 @@ public class MapDescriptor {
                   statename[state.rawValue], name)
             return false
         }
-        trans(State.LOADING_2ND, arg: nil)
+        trans(State.LOADING_2ND, arg: NSNumber(double: screenh))
         return true
     }
     
@@ -405,17 +430,43 @@ public class MapDescriptor {
         }
     }
     
-    func load(cb: () -> ())
+    func Load(screenh: Double, cb: () -> ())
     {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
-            if let img = UIImage(data: NSData(contentsOfURL: self.file)!) {
-                dispatch_async(dispatch_get_main_queue()) {
-                    if self.state != State.LOADING_1ST && self.state != State.LOADING_2ND {
-                        NSLog("Warning ########### %@ load disregarded", self.name)
-                    } else {
-                        self.trans(State.LOADED, arg: img)
+            if let rawimg = UIImage(data: NSData(contentsOfURL: self.file)!) {
+                
+                // update image statistics
+                self.max_ram = Int(rawimg.size.width * rawimg.size.height * 4)
+                self.density = Double(rawimg.size.height) / self.latheight
+                
+                // determine if image should be shrunk right away
+                let hpixels = self.density * screenh
+                if hpixels > 2250 {
+                    // image too big: shrink
+                    NSLog("  shrinking=on-load %@", self.name)
+                    let factor = CGFloat(1920 / hpixels)
+                    let newsize = CGSize(width: rawimg.size.width * factor,
+                                         height: rawimg.size.height * factor)
+                    let shrunkimg = MapDescriptor.imgresize(rawimg, newsize: newsize)
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        if self.state != State.LOADING_1ST && self.state != State.LOADING_2ND {
+                            NSLog("Warning ########### %@ load+shrink disregarded", self.name)
+                        } else {
+                            self.trans(State.SHRUNK, arg: shrunkimg)
+                        }
+                        cb()
                     }
-                    cb()
+                } else {
+                    // using raw image
+                    dispatch_async(dispatch_get_main_queue()) {
+                        if self.state != State.LOADING_1ST && self.state != State.LOADING_2ND {
+                            NSLog("Warning ########### %@ load disregarded", self.name)
+                        } else {
+                            self.trans(State.LOADED, arg: rawimg)
+                        }
+                        cb()
+                    }
                 }
             } else {
                 dispatch_async(dispatch_get_main_queue()) {
@@ -554,7 +605,7 @@ public class MapDescriptor {
         current_map_list = [:]
     }
     
-    func get_maps(clat: Double, clong: Double, radius: Double, latheight: Double) -> [String:MapDescriptor]?
+    func get_maps(clat: Double, clong: Double, radius: Double, screenh: Double) -> [String:MapDescriptor]?
     {
         // NOTE: we use a radius instead of a box to test if a map belongs to the screen,
         // because in HEADING modes the map rotates, so the map x screen overlap must be
@@ -602,15 +653,15 @@ public class MapDescriptor {
                     // example: map is 6000 px height, 15' height = 400 px / minute
                     // if screen zoomed out to 60' height, 60 x 400 = 24000 pixels
                     // but screen has only ~2000 pixels height
-                    let hpixels = Double(map.img.size.height) / map.latheight * latheight
-                    if hpixels > 2100 {
+                    let hpixels = map.density * screenh
+                    if hpixels > 2250 {
                         // still in the example, 2000 / 24000 = 1:12 reduction
                         // image becomes 500x500, which is enough to cover 1/4 x 1/4 of
                         // the screen with enough sharpness
                         NSLog("Shrinking image %@", map.name)
                         let factor = CGFloat(1920 / hpixels)
                         if !map.please_shrink(CGSize(width: map.img.size.width * factor,
-                            height: map.img.size.height * factor)) {
+                                height: map.img.size.height * factor)) {
                             break
                         }
                     }
@@ -623,10 +674,10 @@ public class MapDescriptor {
             
             for map in maps_sorted {
                 if map.insertion > 0 && map.is_loaded() && map.is_shrunk() {
-                    let hpixels = Double(map.img.size.height) / map.latheight * latheight
+                    let hpixels = map.density * screenh
                     if hpixels < 1500 {
                         // lacking in resolution; reload without removing current from screen
-                        if !map.please_blowup() {
+                        if !map.please_blowup(screenh) {
                             break
                         }
                     }
@@ -671,7 +722,7 @@ public class MapDescriptor {
                         NSLog("Image %@ not loaded due to memory pressure", map.name)
                         map.please_oom()
                     } else {
-                        map.please_load()
+                        map.please_load(screenh)
                     }
                 }
                 new_list[map.name] = map

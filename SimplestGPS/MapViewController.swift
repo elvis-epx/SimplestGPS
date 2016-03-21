@@ -296,7 +296,7 @@ import UIKit
                 let new_list = MapModel.model().get_maps(Double(clat),
                                                   clong: Double(clong),
                                                   radius: Double(zoom_m_diagonal),
-                                                  latheight: Double(zoom_height))
+                                                  screenh: Double(zoom_height))
                 if new_list != nil {
                     map_list_changed = true
                     current_maps = new_list!
