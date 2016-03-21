@@ -797,6 +797,8 @@ public class MapDescriptor {
         })
 
         if !self.ram_within_safe_limits() {
+            // See if we can shrink some image, based on screen resolution
+            
             for map in maps_sorted.reverse() {
                 if map.insertion > 0 && is_img_loaded(map) && shrink_queue == nil {
                     // example: map is 6000 px height, 15' height = 400 px / minute
@@ -818,6 +820,8 @@ public class MapDescriptor {
                 }
             }
         } else {
+            // Memory is available, blow up highest-priority images if shrunk
+            
             for map in maps_sorted {
                 if map.shrunk && map.insertion > 0 && is_img_loaded(map) {
                     let hpixels = Double(map.img.size.height) / map.latheight * latheight
