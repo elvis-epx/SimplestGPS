@@ -86,7 +86,7 @@ public class MapDescriptor {
     var ram_limit = INITIAL_RAM_LIMIT
     
     var loader_timer: NSTimer? = nil
-    var loader_queue: [String:MapDescriptor] = [:]
+    var loader_queue: MapDescriptor? = nil
     var loader_busy: Bool = false
     
     var maps: [MapDescriptor] = [];
@@ -827,9 +827,9 @@ public class MapDescriptor {
                             img_unload_oom(map)
                         }
                     } else {
-                        if self.loader_queue[map.name] == nil {
+                        if self.loader_queue == nil {
                             img_loading(map)
-                            self.loader_queue[map.name] = map
+                            self.loader_queue = map
                         }
                     }
                 }
@@ -875,43 +875,53 @@ public class MapDescriptor {
     
     func loader_serve_queue()
     {
-        if self.loader_queue.count <= 0 || self.loader_busy {
+        if self.loader_queue == nil || self.loader_busy {
             return
         }
 
-        let map = self.loader_queue[self.loader_queue.keys.first!]!
+        let map = self.loader_queue!
         
         if is_img_loaded(map) {
-            NSLog("ERROR -------- img tried to load twice %@", map.name)
-            self.loader_queue.removeValueForKey(map.name)
+            NSLog("ERROR -------- img tried to load already loaded %@", map.name)
+            self.loader_queue = nil
             return
         }
 
         self.loader_busy = true
 
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
-            
-            
             if !self.ram_within_hard_limits(map) {
                 NSLog("Image %@ not loaded due to memory pressure (thread)", map.name)
                 dispatch_async(dispatch_get_main_queue()) {
-                    // discount memory that may have been reserved by get_maps() if the
-                    // image size was already known
-                    self.img_unload_oom(map)
-                    self.loader_queue.removeValueForKey(map.name)
+                    if self.loader_queue == nil {
+                        // request was cancelled: remove map from LOADING state,
+                        // otherwise it will be stuck (loading maps are not retried)
+                        self.img_cancel_loading(map)
+                    } else {
+                        self.img_unload_oom(map)
+                    }
+                    self.loader_queue = nil
                     self.loader_busy = false
                 }
             } else {
                 if let img = UIImage(data: NSData(contentsOfURL: map.file)!) {
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.img_loaded(map, img: img)
-                        self.loader_queue.removeValueForKey(map.name)
+                        if self.loader_queue == nil {
+                            self.img_cancel_loading(map)
+                        } else {
+                            self.img_loaded(map, img: img)
+                        }
+                        self.loader_queue = nil
                         self.loader_busy = false
                     }
                 } else {
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.img_cantload(map)
-                        self.loader_queue.removeValueForKey(map.name)
+                        if self.loader_queue == nil {
+                            self.img_cancel_loading(map)
+                        } else {
+                            self.img_cantload(map)
+                        }
+                        self.loader_queue = nil
                         self.loader_busy = false
                     }
                 }
@@ -1434,7 +1444,6 @@ public class MapDescriptor {
         // reset limits after purge so the current usage is low
         // and won't interfere with max_ram_inuse calculation
         
-        self.loader_queue = [:]
         self.ram_limit = self.max_ram_inuse / 10 * 8
         self.max_ram_inuse = self.ram_limit
     }
@@ -1466,7 +1475,6 @@ public class MapDescriptor {
     func has_img_reserved_ram(map: MapDescriptor) -> Bool {
         return map.imgstatus == MapDescriptor.LOADED || map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM
     }
-    
 
     func img_loading(map: MapDescriptor) {
         if map.imgstatus == MapDescriptor.LOADED || map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM {
@@ -1483,6 +1491,23 @@ public class MapDescriptor {
             NSLog("%@ -> LOADING_1ST_TIME", map.name)
         }
         map.img = i_loading
+    }
+    
+    func img_cancel_loading(map: MapDescriptor)
+    {
+        if map.imgstatus == MapDescriptor.LOADING_RESERVED_RAM {
+            release_ram(map.ram_size)
+            map.imgstatus = MapDescriptor.NOTLOADED
+            NSLog("%@ LOADING_RESERVED_RAM -> NOTLOADED", map.name)
+            
+        } else if map.imgstatus == MapDescriptor.LOADING_1ST_TIME {
+            map.imgstatus = MapDescriptor.NOTLOADED
+            NSLog("%@ LOADING_1ST_TIME -> NOTLOADED", map.name)
+
+        } else {
+            NSLog("Warning: img_cancel_loading called for not-loading image %@", map.name)
+        }
+        map.img = i_notloaded
     }
 
     func img_loaded(map: MapDescriptor, img: UIImage) {

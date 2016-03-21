@@ -116,8 +116,6 @@ class MapCanvasView: UIView
                     image_anims[name] = anim
                     image.hidden = true
 
-                    // FIXME this algorithm not always ok
-
                     self.insertSubview(image, belowSubview: below)
                 }
             }
