@@ -11,6 +11,11 @@ import UIKit
 
 class MapCanvasView: UIView
 {
+    /* All maps and location points belong to this subview. Since they are
+       all rotated together when map follows GPS heading, we just need to
+       set the transform of this container view */
+    var map_plane: UIView? = nil
+    
     var image_views: [String: (UIImageView, MapDescriptor)] = [:]
     var image_anims: [String: PositionAnim] = [:]
     
@@ -61,9 +66,37 @@ class MapCanvasView: UIView
         updater!.frameInterval = 1
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
     }
+    
+    func init3() {
+        /* must be big enough to fit the screen even when rotated to any angle */
+        map_plane = UIView.init(frame: CGRect(x: -(self.frame.height * 2 - self.frame.width) / 2,
+            y: -self.frame.height / 2,
+            width: self.frame.height * 2,
+            height: self.frame.height * 2))
+        map_plane!.alpha = 1.0
+        map_plane!.backgroundColor = UIColor.clearColor()
+        self.addSubview(map_plane!)
+
+        accuracy_view = UIView.init(frame: CGRect(x: 0, y: 0, width: 2, height: 2))
+        accuracy_view!.alpha = 0.2
+        accuracy_view!.backgroundColor = UIColor.yellowColor()
+        map_plane!.addSubview(accuracy_view!)
+        accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, size: map_plane!.frame)
+    
+        location_view = UIView.init(frame: CGRect(x: 0, y: 0, width: 16, height: 16))
+        location_view!.layer.cornerRadius = 8
+        location_view!.alpha = 1
+        map_plane!.addSubview(location_view!)
+        location_anim = PositionAnim(name: "location", view: location_view!, size: map_plane!.frame)
+
+        let slack = self.frame.height - self.frame.width
+        let compass_frame = CGRect(x: 0, y: slack / 2, width: self.frame.width, height: self.frame.width)
+        compass = CompassView.init(frame: compass_frame)
+        self.addSubview(compass!)
+    }
 
     func send_img(list: [String:MapDescriptor], changed: Bool) -> Bool {
-        if accuracy_view == nil {
+        if map_plane == nil {
             return false
         }
         
@@ -93,13 +126,13 @@ class MapCanvasView: UIView
                     // find another view with higher priority and lowest position in stack
                     
                     var below = accuracy_view!
-                    var below_pos = self.subviews.count
+                    var below_pos = map_plane!.subviews.count
                     var bname = "root"
                     
                     for (cname, view) in image_views {
                         if view.1.priority < map.priority {
                             for i in 0..<below_pos {
-                                if self.subviews[i] === view.0 {
+                                if map_plane!.subviews[i] === view.0 {
                                     below_pos = i
                                     below = view.0
                                     bname = cname
@@ -111,12 +144,12 @@ class MapCanvasView: UIView
 
                     NSLog("            inserted below %@", bname)
                     let image = UIImageView(image: map.img)
-                    let anim = PositionAnim(name: "img", view: image, size: self.frame)
+                    let anim = PositionAnim(name: "img", view: image, size: map_plane!.frame)
                     image_views[name] = (image, map)
                     image_anims[name] = anim
                     image.hidden = true
 
-                    self.insertSubview(image, belowSubview: below)
+                    map_plane!.insertSubview(image, belowSubview: below)
                 }
             }
         }
@@ -141,30 +174,18 @@ class MapCanvasView: UIView
     {
         /* Point is relative: 0 ,0 = middle of screen */
         let pointrel = CGPoint(x: xrel, y: yrel)
-        
-        if accuracy_view == nil {
-            accuracy_view = UIView.init(frame: CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2))
-            accuracy_view!.alpha = 0.2
-            accuracy_view!.backgroundColor = UIColor.yellowColor()
-            self.addSubview(accuracy_view!)
-            accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, size: self.frame)
+
+        if map_plane == nil {
+            init3()
         }
         
-        if location_view == nil {
-            location_view = UIView.init(frame: CGRect(x: 0, y: 0, width: 16, height: 16))
-            location_view!.layer.cornerRadius = 8
-            location_view!.alpha = 1
-            self.addSubview(location_view!)
-            location_anim = PositionAnim(name: "location", view: location_view!, size: self.frame)
-        }
-
-        if compass == nil {
-            let slack = self.frame.height - self.frame.width
-            let compass_frame = CGRect(x: 0, y: slack / 2, width: self.frame.width, height: self.frame.width)
-            compass = CompassView.init(frame: compass_frame)
-            self.addSubview(compass!)
-        }
-
+        /* We put commands in a block that is passed to animation,
+           because it is best to run them at the same time that animation
+           calculates element position. Otherwise, the element could 
+           be unhidden, or change size, or color, and show in a completely
+           wrong position/rotation because animation did not have a chance
+           to set it.
+         */
         accuracy_anim!.set_rel(pointrel, block: {
             self.accuracy_view!.layer.cornerRadius = accuracy
             self.accuracy_view!.bounds = CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2)
@@ -180,7 +201,7 @@ class MapCanvasView: UIView
 
     func send_targets_rel(list: [(CGFloat, CGFloat)])
     {
-        if compass == nil {
+        if map_plane == nil {
             return
         }
         
@@ -196,9 +217,9 @@ class MapCanvasView: UIView
             target.layer.cornerRadius = 8
             target.alpha = 1
             target.hidden = true
-            self.insertSubview(target, belowSubview: compass!)
+            map_plane?.addSubview(target)
             target_views.append(target)
-            let anim = PositionAnim(name: "tgt", view: target, size: self.frame)
+            let anim = PositionAnim(name: "tgt", view: target, size: map_plane!.frame)
             target_anims.append(anim)
         }
 
@@ -238,18 +259,14 @@ class MapCanvasView: UIView
 
         self.mode = mode
         
-        if compass == nil {
-            return;
-        }
-        
-        compass!.hidden = (mode == MODE_MAPONLY)
+        compass?.hidden = (mode == MODE_MAPONLY)
 
         if mode == MODE_MAPONLY {
             // nothing to do with compass
             return
         }
         
-        compass!.send_data(mode == MODE_COMPASS || mode == MODE_HEADING,
+        compass?.send_data(mode == MODE_COMPASS || mode == MODE_HEADING,
                             absolute: mode == MODE_COMPASS || mode == MODE_MAPCOMPASS,
                            transparent: mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING,
                            heading: heading, altitude: altitude, speed: speed,
@@ -279,25 +296,28 @@ class MapCanvasView: UIView
             last_update_blink = this_update
         }
 
-        if compass != nil {
-            let dx = CGFloat(this_update - last_update)
+        if map_plane != nil {
+            let dt = CGFloat(this_update - last_update)
             
-            let (new_heading, _) = compass!.anim(dx)
+            let (new_heading, _) = compass!.anim(dt)
             // NSLog("Animated heading: %f", new_heading)
             if mode == MODE_MAPHEADING {
                 _current_heading = new_heading * CGFloat(M_PI / 180.0)
             } else {
                 _current_heading = 0
             }
+            
+            /* All maps ando points rotate together because all belong to this view */
+            map_plane?.transform = CGAffineTransformMakeRotation(_current_heading)
 
             for i in 0..<target_count {
-                target_anims[i].tick(dx, angle: _current_heading, immediate: immediate)
+                target_anims[i].tick(dt, immediate: immediate)
             }
             for (_, anim) in image_anims {
-                anim.tick(dx, angle: _current_heading, immediate: immediate)
+                anim.tick(dt, immediate: immediate)
             }
-            accuracy_anim?.tick(dx, angle: _current_heading, immediate: immediate)
-            location_anim?.tick(dx, angle: _current_heading, immediate: immediate)
+            accuracy_anim!.tick(dt, immediate: immediate)
+            location_anim!.tick(dt, immediate: immediate)
 
             immediate = false
         }

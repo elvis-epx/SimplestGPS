@@ -16,8 +16,8 @@ class PositionAnim
     var current: CGPoint
     var name: String
     var view: UIView
-    var size: CGRect
-    var last_angle: CGFloat
+    var offx = CGFloat(0)
+    var offy = CGFloat(0)
     var last_distance: CGFloat
     let SETTLE_TIME = CGFloat(0.5)
     var block: Optional<() -> Void> = nil
@@ -30,9 +30,11 @@ class PositionAnim
         self.target = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
         self.current = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
 
-        self.size = size
+        // 0,0 relative point
+        self.offx = size.width / 2
+        self.offy = size.height / 2
+        
         self.view = view
-        self.last_angle = 0
         self.last_distance = 0
     }
     
@@ -48,7 +50,7 @@ class PositionAnim
         }
     }
     
-    func tick(pdt: CGFloat, angle: CGFloat, immediate: Bool) -> Bool
+    func tick(pdt: CGFloat, immediate: Bool) -> Bool
     {
         if self.block != nil {
             block!();
@@ -59,19 +61,10 @@ class PositionAnim
             // nothing to do (pathologic case)
             return false
         }
-        
-        /* Assumes that angle is animated by CompassAnim and already changes smoothly */
-        let changed_angle = angle != last_angle
-        if changed_angle {
-            view.transform = CGAffineTransformMakeRotation(angle)
-            last_angle = angle
-        }
-    
+            
         if target.x.isNaN || target == current {
             // nothing to do (typical case)
-            if !changed_angle {
-                return false
-            }
+            return false
             
         } else if immediate || self.current.x.isNaN || (self.vspeed.dx == 0 && self.vspeed.dy == 0) {
             // goes immediately to place
@@ -101,12 +94,9 @@ class PositionAnim
         
         // NSLog("%@ %f %f", name, current.x, current.y)
         
-        // convert to polar and rotate
-        let vector_abs = hypot(current.x, current.y)
-        let vector_angle = atan2(current.y, current.x) + angle
-        // convert back to cartesian and offset to middle of screen
-        let x = self.size.width / 2 + vector_abs * cos(vector_angle)
-        let y = self.size.height / 2 + vector_abs * sin(vector_angle)
+        // offset to middle of screen
+        let x = offx + current.x
+        let y = offy + current.y
 
         let current_rot = CGPoint(x: x, y: y)
         view.center = current_rot

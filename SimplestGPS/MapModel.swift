@@ -60,6 +60,8 @@ public class MapDescriptor {
     }
 }
 
+// FIXME image state machine around `imgstatus`
+
 @objc class MapModel: NSObject {
     var ram_inuse = 0
     var max_ram_inuse = 0
