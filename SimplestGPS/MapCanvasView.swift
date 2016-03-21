@@ -232,9 +232,9 @@ class MapCanvasView: UIView
             if i < self.target_count {
                 target_anims[i].set_rel(CGPoint(x: list[i].0, y: list[i].1), block: nil)
             } else {
-                target_anims[i].set_rel(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN), block: {
-                    self.target_views[i].hidden = true
-                })
+                target_anims[i].set_rel(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN), block: nil)
+                // hide immediately because animation might be already stopped in NaN
+                self.target_views[i].hidden = true
             }
         }
     }
