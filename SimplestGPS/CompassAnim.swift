@@ -69,7 +69,7 @@ class CompassAnim
         self.fast = true
     }
     
-    func tick(pdx: CGFloat) -> (CGFloat, Bool)
+    func tick(pdt: CGFloat) -> (CGFloat, Bool)
     {
         if self.block != nil {
             block!();
@@ -81,25 +81,25 @@ class CompassAnim
             return (current % 360.0, false)
         }
 
-        var dx = pdx
-        if dx > 1.0 {
+        var dt = pdt
+        if dt > 1.0 {
             // we were probably at background
-            dx = 0.000001
+            dt = 0.000001
         }
         
         if self.lost {
             // oscilate opacity
             if (opacity % 2) == 0 {
                 // raising
-                opacity += (2 * (Int(OPACITY_LOST * dx) / 2))
+                opacity += (2 * (Int(OPACITY_LOST * dt) / 2))
             } else {
                 // falling
-                opacity -= (2 * (Int(OPACITY_LOST * dx) / 2))
+                opacity -= (2 * (Int(OPACITY_LOST * dt) / 2))
             }
             opacity = min(9999, max(0, opacity))
         } else {
             // restore opacity
-            opacity += Int(OPACITY_OK * dx)
+            opacity += Int(OPACITY_OK * dt)
             opacity = min(10000, opacity)
         }
         
@@ -117,8 +117,8 @@ class CompassAnim
             }
             let acceleration = force2 / mass * (force > 0 ? 1 : -1)
     
-            speed -= speed * drag * dx
-            speed += acceleration * dx
+            speed -= speed * drag * dt
+            speed += acceleration * dt
             speed = max(speed, -MAX_SPEED)
             speed = min(speed, MAX_SPEED)
             
@@ -132,7 +132,7 @@ class CompassAnim
                 effective_speed = MIN_SPEED
             }
         
-            current += effective_speed * dx
+            current += effective_speed * dt
            
             /*
             NSLog("%@: Force %f eforce %f accel %f spd %f cur %f -> %f",
