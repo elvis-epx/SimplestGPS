@@ -149,17 +149,10 @@ import UIKit
         if scrw.isNaN {
             return;
         }
-        // let calc_zoom = gpslat.isNaN
         gpslat = CGFloat(GPSModel2.model().latitude())
         gpslong = CGFloat(GPSModel2.model().longitude())
         
         recenter()
-        /*
-        if calc_zoom {
-            calculate_zoom(false) // does repaint()
-            return
-        }
-         */
         repaint(false, gesture: false)
     }
     
@@ -326,20 +319,14 @@ import UIKit
             GPSModel2.model().get_maps_force_refresh()
         }
 
-        /*
-        if GPSModel2.inside(gpslat, long: gpslong, lat_circle: clat, long_circle: clong, radius: zoom_m_diagonal) {
-            // point relative 0,0 = screen center
-        */
-            let (xrel, yrel) = to_raster(gpslat, long: gpslong, clat: clat, clong: clong,
+        // point relative 0,0 = screen center
+        let (xrel, yrel) = to_raster(gpslat, long: gpslong, clat: clat, clong: clong,
                                              lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                              longitude_proportion: longitude_latitude_proportion)
-            canvas.send_pos_rel(xrel, yrel: yrel, accuracy: CGFloat(accuracy_px))
+        canvas.send_pos_rel(xrel, yrel: yrel, accuracy: CGFloat(accuracy_px))
+
         /*
-            NSLog("My position %f %f translated to rel %f,%f", clat, clong, xrel, yrel)
-        } else {
-            canvas.send_pos_rel(CGFloat.NaN, yrel: CGFloat.NaN, accuracy: 0)
-            NSLog("My position %f %f not in space", clat, clong)
-        }
+        NSLog("My position %f %f translated to rel %f,%f", clat, clong, xrel, yrel)
         */
         
         var targets: [(CGFloat, CGFloat)] = []

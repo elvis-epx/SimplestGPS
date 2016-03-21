@@ -135,8 +135,7 @@ class CompassAnim
             current += effective_speed * dx
            
             /*
-            if self.name == "tgtneedle" {
-                NSLog("%@: Force %f eforce %f accel %f spd %f cur %f -> %f",
+            NSLog("%@: Force %f eforce %f accel %f spd %f cur %f -> %f",
                       name, force, force2, acceleration, speed, current, target)
             }
             */
