@@ -42,7 +42,8 @@ public class MapDescriptor {
     let longwidth: Double
     let midlat: Double
     let midlong: Double
-    var density: Double
+    var max_density: Double
+    var cur_density: Double
     var boundsx: CGFloat = 0 // manipulated by Controller
     var boundsy: CGFloat = 0 // manipulated by Controller
     var centerx: CGFloat = 0 // manipulated by Controller
@@ -73,7 +74,8 @@ public class MapDescriptor {
         self.long1 = longNW + longwidth
         self.midlat = lat0 - latheight / 2
         self.midlong = long0 + longwidth / 2
-        self.density = 0
+        self.cur_density = 0
+        self.max_density = 0
         
         sm[State.NEVER_LOADED] = [:]
         sm[State.NEVER_LOADED_OOM] = [:]
@@ -345,7 +347,8 @@ public class MapDescriptor {
         return false
     }
     
-    func please_shrink(size: CGSize) -> Bool {
+    func please_shrink(factor: Double) -> Bool {
+        
         if model.shrink_busy() {
             return false
         } else if state == State.SHRINKING {
@@ -355,6 +358,10 @@ public class MapDescriptor {
                   statename[state.rawValue], name)
             return false
         }
+        
+        let size = CGSize(width: img.size.width * CGFloat(factor),
+                          height: img.size.height * CGFloat(factor))
+        
         trans(State.SHRINKING, arg: NSValue(CGSize: size))
         return true
     }
@@ -418,11 +425,14 @@ public class MapDescriptor {
     func shrink(newsize: CGSize, cb: () -> ())
     {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
+            NSLog("Shrinking image current density %f", self.cur_density)
             let newimg = MapDescriptor.imgresize(self.img, newsize: newsize)
             dispatch_async(dispatch_get_main_queue()) {
                 if self.state != State.SHRINKING {
                     NSLog("Warning ########### %@ shrink disregarded", self.name)
                 } else {
+                    self.cur_density = Double(newsize.height) / self.latheight
+                    NSLog("        final density %f", self.cur_density)
                     self.trans(State.SHRUNK, arg: newimg)
                 }
                 cb()
@@ -433,21 +443,25 @@ public class MapDescriptor {
     func Load(screenh: Double, cb: () -> ())
     {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
-            if let rawimg = UIImage(data: NSData(contentsOfURL: self.file)!) {
-                
+            let rawimg = UIImage(data: NSData(contentsOfURL: self.file)!)
+            
+            if rawimg != nil && rawimg!.size.height > 0 && rawimg!.size.width > 0 {
                 // update image statistics
-                self.max_ram = Int(rawimg.size.width * rawimg.size.height * 4)
-                self.density = Double(rawimg.size.height) / self.latheight
+                self.max_ram = Int(rawimg!.size.width * rawimg!.size.height * 4)
+                self.max_density = Double(rawimg!.size.height) / self.latheight
                 
                 // determine if image should be shrunk right away
-                let hpixels = self.density * screenh
+                let hpixels = self.max_density * screenh
                 if hpixels > 2250 {
                     // image too big: shrink
-                    NSLog("  shrinking=on-load %@", self.name)
                     let factor = CGFloat(1920 / hpixels)
-                    let newsize = CGSize(width: rawimg.size.width * factor,
-                                         height: rawimg.size.height * factor)
-                    let shrunkimg = MapDescriptor.imgresize(rawimg, newsize: newsize)
+                    let newsize = CGSize(width: rawimg!.size.width * factor,
+                                         height: rawimg!.size.height * factor)
+                    NSLog("  shrinking-on-load orig density %f screenh %f hpixels %f factor %f",
+                          self.max_density, screenh, hpixels, factor)
+                    let shrunkimg = MapDescriptor.imgresize(rawimg!, newsize: newsize)
+                    self.cur_density = Double(shrunkimg.size.height) / self.latheight
+                    NSLog("        final density %f", self.cur_density)
                     
                     dispatch_async(dispatch_get_main_queue()) {
                         if self.state != State.LOADING_1ST && self.state != State.LOADING_2ND {
@@ -459,6 +473,7 @@ public class MapDescriptor {
                     }
                 } else {
                     // using raw image
+                    self.cur_density = self.max_density
                     dispatch_async(dispatch_get_main_queue()) {
                         if self.state != State.LOADING_1ST && self.state != State.LOADING_2ND {
                             NSLog("Warning ########### %@ load disregarded", self.name)
@@ -653,15 +668,15 @@ public class MapDescriptor {
                     // example: map is 6000 px height, 15' height = 400 px / minute
                     // if screen zoomed out to 60' height, 60 x 400 = 24000 pixels
                     // but screen has only ~2000 pixels height
-                    let hpixels = map.density * screenh
+                    let hpixels = map.cur_density * screenh
                     if hpixels > 2250 {
                         // still in the example, 2000 / 24000 = 1:12 reduction
                         // image becomes 500x500, which is enough to cover 1/4 x 1/4 of
                         // the screen with enough sharpness
-                        NSLog("Shrinking image %@", map.name)
-                        let factor = CGFloat(1920 / hpixels)
-                        if !map.please_shrink(CGSize(width: map.img.size.width * factor,
-                                height: map.img.size.height * factor)) {
+                        NSLog("Shrinking image %@ current density %f screenh %f hpixels %f",
+                              map.name, map.cur_density, screenh, hpixels)
+                        let factor = 1920.0 / hpixels
+                        if !map.please_shrink(factor) {
                             break
                         }
                     }
@@ -674,9 +689,11 @@ public class MapDescriptor {
             
             for map in maps_sorted {
                 if map.insertion > 0 && map.is_loaded() && map.is_shrunk() {
-                    let hpixels = map.density * screenh
+                    let hpixels = map.cur_density * screenh
                     if hpixels < 1500 {
-                        // lacking in resolution; reload without removing current from screen
+                        NSLog("Blowing up image %@ current density %f screenh %f hpixels %f",
+                              map.name, map.cur_density, screenh, hpixels)
+                        // found wanting in resolution; reload without remove from screen
                         if !map.please_blowup(screenh) {
                             break
                         }
