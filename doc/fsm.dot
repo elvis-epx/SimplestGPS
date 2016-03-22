@@ -1,0 +1,28 @@
+digraph {
+        graph [rankdir=LR, pad=".75", ranksep="0.75", nodesep="0.75"];
+
+	begin
+	NOT_LOADED
+	LOADING
+	LOADED
+	CANT_LOAD
+	SHRINKING
+	NOT_LOADED_OOM
+
+	begin -> NOT_LOADED
+	NOT_LOADED -> NOT_LOADED_OOM [label="Cleanup (A)"]
+	NOT_LOADED -> LOADING [label="Loading (L)"]
+	LOADED -> LOADING [label="Reloading (L)"]
+	NOT_LOADED_OOM -> LOADING [label="Loading (L)"]
+	LOADING -> LOADED [label="Commit (C)"]
+	LOADING -> CANT_LOAD [label="Fail (F)"]
+	LOADING -> NOT_LOADED_OOM [label="Cleanup (A)"]
+	LOADING -> NOT_LOADED [label="Cleanup (B)"]
+	LOADED -> SHRINKING [label="Shrink (S)"]
+	SHRINKING -> LOADED [label="Commit (C)"] 
+	SHRINKING -> NOT_LOADED_OOM [label="Cleanup (A)"]
+	SHRINKING -> NOT_LOADED [label="Cleanup (B)"]
+	LOADED -> NOT_LOADED_OOM [label="Cleanup (A)"]
+	LOADED -> NOT_LOADED [label="Cleanup(A)"]
+	NOT_LOADED_OOM -> NOT_LOADED_OOM [label="Null (N)"]
+}
