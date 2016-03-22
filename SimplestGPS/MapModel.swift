@@ -78,53 +78,47 @@ public class MapDescriptor {
         sm[State.CANTLOAD] = [:]
         sm[State.NOTLOADED_OOM] = [:]
         
-        // AD
+        // Cleanup (A)
         sm[State.NOTLOADED]![State.NOTLOADED_OOM] = { _ in
             model.update_ram(self, n: 0)
             self.img = model.i_oom
             return true
         }
         
-        // CF
         sm[State.LOADING]![State.NOTLOADED_OOM] =
             sm[State.NOTLOADED]![State.NOTLOADED_OOM]
         
-        // Z
         sm[State.SHRINKING]![State.NOTLOADED_OOM] =
             sm[State.LOADING]![State.NOTLOADED_OOM]
         
-        // GH
         sm[State.LOADED]![State.NOTLOADED_OOM] =
             sm[State.LOADING]![State.NOTLOADED_OOM]
         
-        // I2N2
         sm[State.LOADING]![State.NOTLOADED] = { _ in
             model.update_ram(self, n: 0)
             self.img = model.i_notloaded
             return true
         }
         
-        // PH2
         sm[State.LOADED]![State.NOTLOADED] =
             sm[State.LOADING]![State.NOTLOADED]
         
-        // X
         sm[State.SHRINKING]![State.NOTLOADED] =
             sm[State.LOADING]![State.NOTLOADED]
         
-        // LM
+        // Fail (F)
         sm[State.LOADING]![State.CANTLOAD] = { _ in
             model.update_ram(self, n: 0)
             self.img = model.i_cantload
             return true
         }
         
-        // BE
+        // Null
         sm[State.NOTLOADED_OOM]![State.NOTLOADED_OOM] = { _ in
             return true
         }
         
-        // IN
+        // Loading (L)
         sm[State.NOTLOADED]![State.LOADING] = { screenh in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue load %@", name)
@@ -140,15 +134,14 @@ public class MapDescriptor {
             return true
         }
         
-        // S (blow-up)
+        // blowup
         sm[State.LOADED]![State.LOADING] =
             sm[State.NOTLOADED]![State.LOADING]
         
-        // JO
         sm[State.NOTLOADED_OOM]![State.LOADING] =
             sm[State.NOTLOADED]![State.LOADING]
         
-        // TUSaSb
+        // Commit (C)
         sm[State.LOADING]![State.LOADED] = { img in
             model.update_ram(self, n: 0)
             let imgc = img as! UIImage
@@ -159,13 +152,12 @@ public class MapDescriptor {
             return true
         }
         
-        // Q
         sm[State.SHRINKING]![State.LOADED] =
             sm[State.LOADING]![State.LOADED]
         
         // CANTLOAD is a final state
         
-        // VR
+        // Shrink (S)
         sm[State.LOADED]![State.SHRINKING] = { size in
             if !model.queue_shrink() {
                 NSLog("ERROR ######## could not queue shrink %@", name)
