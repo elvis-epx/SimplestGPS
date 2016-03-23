@@ -1,5 +1,5 @@
 digraph {
-        graph [rankdir=LR, pad=".75", ranksep="0.75", nodesep="0.75"];
+        graph [rankdir=LR, pad="0.5", ranksep="0.5", nodesep="0.5", ratio="0.3"];
 
 	begin
 	NOT_LOADED
