@@ -27,7 +27,7 @@ class CompassBGView: UIView {
         
         CGContextSetStrokeColorWithColor(ctx, UIColor.redColor().CGColor)
         CGContextSetLineWidth(ctx, 0)
-        let fc = UIColor.init(colorLiteralRed: 0, green: 0, blue: 0, alpha: 0.5)
+        let fc = UIColor.init(colorLiteralRed: 0, green: 0, blue: 0, alpha: 0.36)
         CGContextSetFillColorWithColor(ctx, fc.CGColor)
         
         CGContextAddArc(ctx, center.x, center.y, radius, CGFloat(2 * M_PI), 0, 1)
