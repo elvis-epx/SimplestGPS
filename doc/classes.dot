@@ -1,0 +1,40 @@
+digraph {
+        graph [rankdir=LR, pad="0.3", ranksep="0.3", nodesep="0.5"];
+
+	GPSAppDelegate2
+	MapModel
+	MapViewController
+	MapCanvasView
+	PositionAnim
+	CompassView
+	CompassAnim
+	BareCompassView
+	TargetMiniNeedleView
+	TargetMiniInfoView
+	NeedleView
+	CompassBGView
+	GPSModel2
+	TargetCell2
+	TargetsViewController2
+	TargetViewController2
+
+	GPSAppDelegate2 -> MapViewController [label="Start"]
+
+	MapModel -> MapViewController [label="Maps"]
+	GPSModel2 -> MapViewController [label="Location"]
+	GPSModel2 -> TargetsViewController2 [label="Get/set targets",dir=both]
+	GPSModel2 -> TargetViewController2 [label="Get/set target",dir=both]
+	MapViewController -> MapCanvasView [label="Controls"]
+	MapCanvasView -> CompassView [label="Subview"]
+	CompassView -> CompassBGView [label="Subview"]
+	CompassView -> BareCompassView [label="Subview"]
+	CompassView -> NeedleView [label="Subview"]
+	CompassView -> TargetMiniNeedleView [label="Subview"]
+	CompassView -> TargetMiniInfoView [label="Subview"]
+	CompassAnim -> CompassView [label="Animates"]
+	PositionAnim -> MapCanvasView [label="Animates"]
+
+	MapViewController -> TargetsViewController2 [label="Segue"]
+	TargetsViewController2 -> TargetCell2 [label="Table cells"]
+	TargetsViewController2 -> TargetViewController2 [label="Segue"]
+}
