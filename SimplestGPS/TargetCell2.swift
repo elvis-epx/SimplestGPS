@@ -11,10 +11,6 @@ import UIKit
 
 @objc class TargetCell2: UITableViewCell {
     @IBOutlet weak var name: UILabel?
-    @IBOutlet weak var distance: UILabel?
-    @IBOutlet weak var heading: UILabel?
-    @IBOutlet weak var heading_delta: UILabel?
-    @IBOutlet weak var altitude: UILabel?
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
