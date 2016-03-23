@@ -160,112 +160,100 @@ import CoreLocation
         return ret;
     }
     
+    // make sure that longitude is in range -180 <= x < +180
+    class func handle_cross_180(c: CGFloat) -> CGFloat
+    {
+        var x = c
+        while x < -180 {
+            // 181W -> 179E
+            x += 360
+        }
+        while x >= 180 {
+            // 181E -> 179W
+            x -= 360
+        }
+        return x
+    }
+    class func handle_cross_180f(x: Double) -> Double
+    {
+        return Double(handle_cross_180(CGFloat(x)))
+    }
     
-    // make sure that longitude is in range -180 <= x < +180
-    class func normalize_longitude(x: Double) -> Double
+    // Makes a - b taking into consideration the international date line
+    class func longitude_minus(a: CGFloat, minus: CGFloat) -> CGFloat
     {
-        if x < -180 {
-            // 181W -> 179E
-            return 360 - x
-        } else if x >= 180 {
-            // 181E -> 179W
-            return x - 360
-        }
-        return x
+        let c = a - minus
+        // a difference above 180 degrees can be handled in the same
+        // fashion as an absolute longitude (proof: make minus = 0)
+        return handle_cross_180(c)
     }
-
-    // make sure that longitude is in range -180 <= x < +180
-    class func normalize_longitude_cgfloat(x: CGFloat) -> CGFloat
+    
+    class func longitude_minusf(a: Double, minus: Double) -> Double
     {
-        if x < -180 {
-            // 181W -> 179E
-            return 360 - x
-        } else if x >= 180 {
-            // 181E -> 179W
-            return x - 360
-        }
-        return x
-    }
-
-    // test whether a longitude range is nearer to meridian 180 than meridian 0
-    class func nearer_180(a: Double, b: Double) -> Bool
-    {
-        // note: this test assumes that range is < 180 degrees
-        return (abs(a) + abs(b)) >= 180
-    }
-
-    class func nearer_180_cgfloat(a: CGFloat, b: CGFloat) -> Bool
-    {
-        return (abs(a) + abs(b)) >= 180
-    }
-
-    // converts longitude, so values across +180/-180 line are directly comparable
-    // It actually moves the 180 "problem" to the meridian 0 (longitude line becomes 359..0..1)
-    // so this function should be used only when the range of interest does NOT cross 0
-    class func offset_180(x: Double) -> Double
-    {
-        if x < 0 {
-            return x + 360
-        }
-        return x
-    }
-
-    class func offset_180_cgfloat(x: CGFloat) -> CGFloat
-    {
-        if x < 0 {
-            return x + 360
-        }
-        return x
+        return Double(longitude_minus(CGFloat(a), minus: CGFloat(minus)))
     }
 
     // checks whether a coordinate is inside a circle
     class func inside(lat: Double, long: Double, lat_circle: Double, long_circle: Double, radius: Double) -> Bool
     {
-        let _lat = lat
-        var _long = normalize_longitude(long)
-
-        let _lata = lat_circle
-        var _longa = normalize_longitude(long_circle)
-        
-        if nearer_180(_long, b: _longa) {
-            _long = offset_180(_long)
-            _longa = offset_180(_longa)
-        }
-
-        return harvesine(_lat, lat2: _lata, long1: _long, long2: _longa) <= radius
+        return harvesine(lat, lat2: lat_circle, long1: long, long2: long_circle) <= radius
     }
 
-    class func clamp(value: Double, mini: Double, maxi: Double) -> Double
+    // helper function for map_inside()
+    class func clamp_lat(x: Double, a: Double, b: Double) -> Double
     {
-        return max(mini, min(maxi, value))
+        let (mini, maxi) = (min(a, b), max(a, b))
+        return max(mini, min(maxi, x))
+    }
+
+    // helper function for map_inside()
+    class func clamp_long(x: Double, a: Double, b: Double) -> Double
+    {
+        // convert longitudes to relative coordinates (as if a = 0)
+        let db = longitude_minusf(b, minus: a)
+        let da = 0.0
+        let dx = longitude_minusf(x, minus: a)
+        
+        let dres = clamp_lat(dx, a: da, b: db)
+        
+        // convert back to absolute longitude
+        return handle_cross_180f(dres + a)
     }
     
-    class func map_inside(maplata: Double, maplatb: Double, maplonga: Double, maplongb: Double,
-                          lat_circle: Double, long_circle: Double, radius: Double) -> (Int, Double)
+    class func contains_latitude(a: Double, b: Double, c: Double, d: Double) -> Bool {
+        let (_a, _b) = (min(a, b), max(a, b))
+        let (_c, _d) = (min(c, d), max(c, d))
+        return _a >= _c && _b <= _d
+    }
+
+    class func contains_longitude(a: Double, b: Double, c: Double, d: Double) -> Bool {
+        // convert longitudes to abstract coords relative to a
+        let da = 0.0
+        let db = longitude_minusf(b, minus: a)
+        let dc = longitude_minusf(c, minus: a)
+        let dd = longitude_minusf(d, minus: a)
+        
+        return contains_latitude(da, b: db, c: dc, d: dd)
+    }
+    
+    class func map_inside(maplata: Double, maplatmid: Double, maplatb: Double,
+                          maplonga: Double, maplongmid: Double, maplongb: Double,
+                          lat_circle: Double, long_circle: Double, radius: Double)
+                    -> (Int, Double)
     {
-        let _maplata = min(maplata, maplatb)
-        let _maplatb = max(maplata, maplatb)
-        var _maplonga = normalize_longitude(maplonga)
-        var _maplongb = normalize_longitude(maplongb)
-        let _lata = lat_circle
-        var _longa = normalize_longitude(long_circle)
-        
-        if nearer_180(_longa, b: _maplonga) || nearer_180(_longa, b: _maplongb) {
-            _longa = offset_180(_longa)
-            _maplonga = offset_180(_maplonga)
-            _maplongb = offset_180(_maplongb)
-        }
-        
-        (_maplonga, _maplongb) = (min(_maplonga, _maplongb), max(_maplonga, _maplongb))
-        
+
         // from http://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
         // Find the closest point to the circle within the rectangle
-        let closest_long = clamp(_longa, mini: _maplonga, maxi: _maplongb);
-        let closest_lat = clamp(_lata, mini: _maplata, maxi: _maplatb);
-        let db = harvesine(closest_lat, lat2: _lata, long1: closest_long, long2: _longa)
+        
+        let closest_long = clamp_long(long_circle, a: maplonga, b: maplongb);
+        let closest_lat = clamp_lat(lat_circle, a: maplata, b: maplatb);
+        let db = harvesine(closest_lat, lat2: lat_circle,
+                           long1: closest_long, long2: long_circle)
+        
         // also find the distance from circle center to map center, for prioritization purposes
-        let dc = harvesine((_maplata + _maplatb) / 2, lat2: _lata,
-                           long1: (_maplonga + _maplongb) / 2, long2: _longa)
+        
+        let dc = harvesine(maplatmid, lat2: lat_circle,
+                           long1: maplongmid, long2: long_circle)
         
         if db > radius {
             // no intersection
@@ -278,14 +266,14 @@ import CoreLocation
         // is the circle completely enclosed by map?
         // convert circle to a box
         let radius_lat = radius / 1853.0 / 60.0
-        let radius_long = radius_lat / longitude_proportion(_lata)
-        let lat0_circle = _lata - radius_lat
-        let lat1_circle = _lata + radius_lat
-        let long0_circle = _longa - radius_long
-        let long1_circle = _longa + radius_long
+        let radius_long = radius_lat / longitude_proportion(lat_circle)
+        let lat0_circle = lat_circle - radius_lat
+        let lat1_circle = lat_circle + radius_lat
+        let long0_circle = handle_cross_180f(long_circle - radius_long)
+        let long1_circle = handle_cross_180f(long_circle + radius_long)
         
-        if lat0_circle >= _maplata && lat1_circle <= _maplatb
-                && long0_circle >= _maplonga && long1_circle <= _maplongb {
+        if contains_latitude(lat0_circle, b: lat1_circle, c: maplata, d: maplatb) &&
+            contains_longitude(long0_circle, b: long1_circle, c: maplonga, d: maplongb) {
             // box enclosed in map
             return (2, dc)
         }

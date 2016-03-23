@@ -207,15 +207,11 @@ import UIKit
                          longitude_proportion: CGFloat)
         -> (CGFloat, CGFloat)
     {
-        var _long = GPSModel2.normalize_longitude_cgfloat(long)
-        var _clong = GPSModel2.normalize_longitude_cgfloat(clong)
-        if GPSModel2.nearer_180_cgfloat(_long, b: _clong) {
-            _long = GPSModel2.offset_180_cgfloat(_long)
-            _clong = GPSModel2.offset_180_cgfloat(_clong)
-        }
         // find distance from center point, in pixels
         let dlat = scrh * -(lat - clat) / lat_height
-        let dlong = scrh * longitude_proportion * (_long - _clong) / lat_height
+        let dlong = scrh * longitude_proportion
+                    * GPSModel2.longitude_minus(long, minus: clong)
+                    / lat_height
         return (dlong, dlat)
     }
     
@@ -457,8 +453,7 @@ import UIKit
             center_lat = min(max_latitude, center_lat)
             center_lat = max(-max_latitude, center_lat)
             
-            // handle cross of 180W meridian, normalize longitude
-            center_long = GPSModel2.normalize_longitude_cgfloat(center_long)
+            center_long = GPSModel2.handle_cross_180(center_long)
             
             recenter()
             repaint(true, gesture: true)

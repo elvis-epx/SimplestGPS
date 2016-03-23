@@ -60,14 +60,14 @@ public class MapDescriptor {
         self.name = name
         self.priority = priority
         self.lat0 = latNW
-        self.long0 = longNW
+        self.long0 = GPSModel2.handle_cross_180f(longNW)
         self.latheight = latheight
         self.longwidth = longwidth
         
         self.lat1 = latNW - latheight
-        self.long1 = longNW + longwidth
-        self.midlat = lat0 - latheight / 2
-        self.midlong = long0 + longwidth / 2
+        self.long1 = GPSModel2.handle_cross_180f(longNW + longwidth)
+        self.midlat = latNW - latheight / 2
+        self.midlong = GPSModel2.handle_cross_180f(longNW + longwidth / 2)
         self.cur_density = 0
         self.max_density = 0
         
@@ -496,9 +496,10 @@ public class MapDescriptor {
         // calculate intersection with screen circle and proximity to screen center
         
         for map in maps {
-            let (ins, d) = GPSModel2.map_inside(map.lat0, maplatb: map.lat1, maplonga: map.long0,
-                                                maplongb: map.long1, lat_circle: clat,
-                                                long_circle: clong, radius: radius)
+            let (ins, d) = GPSModel2.map_inside(
+                    map.lat0, maplatmid: map.midlat, maplatb: map.lat1,
+                    maplonga: map.long0, maplongmid: map.midlong, maplongb: map.long1,
+                    lat_circle: clat, long_circle: clong, radius: radius)
             map.insertion = ins
             map.distance = d
         }
