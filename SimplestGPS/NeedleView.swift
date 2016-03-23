@@ -19,7 +19,9 @@ class NeedleView: UIView {
 
     init(frame: CGRect, color: UIColor) {        
         self.color = color
-        super.init(frame: frame)
+        let s = CGSize(width: frame.width / 6, height: frame.height)
+        let p = CGPoint(x: frame.width / 2 - s.width / 2, y: 0)
+        super.init(frame: CGRect(origin: p, size: s))
         self.backgroundColor = UIColor.clearColor()
     }
     
@@ -33,7 +35,7 @@ class NeedleView: UIView {
         if ctx == nil {
             return
         }
-        let radius = self.bounds.size.width * 0.75 / 2
+        let radius = self.bounds.size.height * 0.75 / 2
         let off = radius * 0.055
         let center = CGPointMake(self.bounds.size.width / 2,
                                  self.bounds.size.height / 2)
