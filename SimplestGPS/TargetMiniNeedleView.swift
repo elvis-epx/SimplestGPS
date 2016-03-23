@@ -13,7 +13,9 @@ class TargetMiniNeedleView: UIView
 {
     override init(frame: CGRect)
     {
-        super.init(frame: frame)
+        let s = CGSize(width: frame.width / 13, height: frame.width / 25)
+        let p = CGPoint(x: frame.width / 2 - s.width / 2, y: frame.width / 17)
+        super.init(frame: CGRect(origin: p, size: s))
         self.backgroundColor = UIColor.clearColor()
     }
     
@@ -28,15 +30,15 @@ class TargetMiniNeedleView: UIView
             return
         }
         
-        let radius = self.bounds.size.width * 0.80 / 2
-        let off = radius * 0.08
+        let a = (self.bounds.size.width - 1) / 2
+        let b = (self.bounds.size.height - 1) / 2
         let x = self.bounds.size.width / 2
         let y = self.bounds.size.height / 2
 
-        let x0 = x - off
-        let y0 = y - radius - off
-        let x1 = x + off
-        let y1 = y - radius
+        let x0 = x - a
+        let x1 = x + a
+        let y0 = y - b
+        let y1 = y + b
         let xm = x
 
         CGContextSetStrokeColorWithColor(ctx, UIColor.greenColor().CGColor)

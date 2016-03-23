@@ -376,7 +376,6 @@ public class MapDescriptor {
     var current_map_list: [String:MapDescriptor] = [:]
     var i_notloaded: UIImage
     var i_loading: UIImage
-    var i_loading_res: UIImage
     var i_cantload: UIImage
     var i_oom: UIImage
     
@@ -657,7 +656,6 @@ public class MapDescriptor {
         i_notloaded = MapModel.simple_image(UIColor(colorLiteralRed: 0, green: 1.0, blue: 0, alpha: 0.33))
         i_oom = MapModel.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 0.0, alpha: 0.33))
         i_loading = MapModel.simple_image(UIColor(colorLiteralRed: 0, green: 0.0, blue: 1.0, alpha: 0.33))
-        i_loading_res = MapModel.simple_image(UIColor(colorLiteralRed: 0, green: 1.0, blue: 1.0, alpha: 0.33))
         i_cantload = MapModel.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 1.0, alpha: 0.33))
         super.init()
         

@@ -56,9 +56,11 @@ class CompassView: UIView {
         tgtname!.selectable = false
         tgtname!.userInteractionEnabled = false
         
-        back_anim = CompassAnim(name: "compass", view: back!, mass: 0.4, drag: 4.0)
-        needle_anim = CompassAnim(name: "needle", view: needle!, mass: 0.25, drag: 4.0)
-        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle!, mass: 0.3, drag: 4.0)
+        // relative coordinates (subviews see self.origin as 0,0)
+        let pivot = CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2)
+        back_anim = CompassAnim(name: "compass", view: back!, pivot: pivot, mass: 0.4, drag: 4.0)
+        needle_anim = CompassAnim(name: "needle", view: needle!, pivot: pivot, mass: 0.25, drag: 4.0)
+        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle!, pivot: pivot, mass: 0.3, drag: 4.0)
         
         self.backgroundColor = UIColor.clearColor()
         self.addSubview(bg!)
@@ -131,15 +133,17 @@ class CompassView: UIView {
             tgtneedle_anim!.set(tgtheading, block: nil)
         }
         
+        let pivot = CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2)
+        
         while tgtminis.count < targets.count {
             let child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
             let mini = TargetMiniNeedleView(frame: child_frame)
             let mini2 = TargetMiniInfoView(frame: child_frame)
             let mini_anim = CompassAnim(name: "minitgtneedle",
-                                        view: mini, mass: 0.36,
+                                        view: mini, pivot: pivot, mass: 0.36,
                                         drag: 3.5 + CGFloat(drand48()) * 2)
             let mini2_anim = CompassAnim(name: "minitgtneedle2",
-                                         view: mini2, mass: 0.36,
+                                         view: mini2, pivot: pivot, mass: 0.36,
                                          drag: 3.5 + CGFloat(drand48()) * 2)
             tgtminis.append(mini)
             tgtminis2.append(mini2)
