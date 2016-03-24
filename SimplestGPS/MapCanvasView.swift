@@ -55,26 +55,27 @@ class MapCanvasView: UIView
     var _current_heading = CGFloat(0.0)
     
     override init(frame: CGRect) {
-        super.init(frame: frame)
-        self.init2()
+        fatalError("init(coder:) has not been implemented")
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        self.init2()
-    }
-    
-    func init2() {
+
         self.mode = MODE_MAPONLY;
         self.backgroundColor = UIColor.blackColor()
         self.opaque = true
         
+        // at this point, frame is not stable yet
+        dispatch_async(dispatch_get_main_queue()) {
+            self.init2()
+        }
+    }
+    
+    func init2() {
         updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.anim))
         updater!.frameInterval = 1
         updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
-    }
-    
-    func init3() {
+
         /* must be big enough to fit the screen even when rotated to any angle */
         map_plane = UIView.init(frame: CGRect(
             x: -(self.frame.height * 2 - self.frame.width) / 2,
@@ -105,6 +106,7 @@ class MapCanvasView: UIView
 
     func send_img(list: [String:MapDescriptor], changed: Bool) -> Bool {
         if map_plane == nil {
+            // init2() not called yet
             return false
         }
         
@@ -181,12 +183,13 @@ class MapCanvasView: UIView
     
     func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat)
     {
+        if map_plane == nil {
+            // init2() not called yet
+            return
+        }
+        
         /* Point is relative: 0 ,0 = middle of screen */
         let pointrel = CGPoint(x: xrel, y: yrel)
-
-        if map_plane == nil {
-            init3()
-        }
         
         /* We put commands in a block that is passed to animation,
            because it is best to run them at the same time that animation
@@ -211,6 +214,7 @@ class MapCanvasView: UIView
     func send_targets_rel(list: [(CGFloat, CGFloat)])
     {
         if map_plane == nil {
+            // init2() not called yet
             return
         }
         
@@ -258,19 +262,24 @@ class MapCanvasView: UIView
                       targets: [(heading: CGFloat, name: String, distance: String)],
                       tgt_dist: Bool)
     {
-        map_plane?.hidden = !(mode == MODE_MAPONLY || mode == MODE_MAPCOMPASS
+        if map_plane == nil {
+            // init2() not called yet
+            return
+        }
+        
+        map_plane!.hidden = !(mode == MODE_MAPONLY || mode == MODE_MAPCOMPASS
                                     || mode == MODE_MAPHEADING)
         
         self.mode = mode
         
-        compass?.hidden = (mode == MODE_MAPONLY)
+        compass!.hidden = (mode == MODE_MAPONLY)
 
         if mode == MODE_MAPONLY {
             // nothing to do with compass
             return
         }
         
-        compass?.send_data(mode == MODE_COMPASS || mode == MODE_HEADING,
+        compass!.send_data(mode == MODE_COMPASS || mode == MODE_HEADING,
                             absolute: mode == MODE_COMPASS || mode == MODE_MAPCOMPASS,
                            transparent: mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING,
                            heading: heading, altitude: altitude, speed: speed,
@@ -280,6 +289,9 @@ class MapCanvasView: UIView
     
     func anim(sender: CADisplayLink)
     {
+        // this is called only when CADisplayLink is active, which happens only
+        // on init2()
+        
         let this_update = sender.timestamp
         
         if last_update_blink.isNaN || last_update.isNaN {
@@ -289,9 +301,9 @@ class MapCanvasView: UIView
         
         if (this_update - last_update_blink) > 0.33333 {
             if blink_status {
-                location_view?.backgroundColor = UIColor.redColor()
+                location_view!.backgroundColor = UIColor.redColor()
             } else {
-                location_view?.backgroundColor = UIColor.yellowColor()
+                location_view!.backgroundColor = UIColor.yellowColor()
             }
             for i in 0..<target_count {
                 target_views[i].hidden = blink_status || mode == MODE_COMPASS
@@ -301,37 +313,35 @@ class MapCanvasView: UIView
             last_update_blink = this_update
         }
 
-        if map_plane != nil {
-            let dt = CGFloat(this_update - last_update)
+        let dt = CGFloat(this_update - last_update)
             
-            let (new_heading, _) = compass!.anim(dt)
-            // NSLog("Animated heading: %f", new_heading)
-            if mode == MODE_MAPHEADING {
-                _current_heading = new_heading * CGFloat(M_PI / 180.0)
-            } else {
-                _current_heading = 0
-            }
-            
-            /* All maps ando points rotate together because all belong to this view */
-            map_plane?.transform = CGAffineTransformMakeRotation(_current_heading)
-
-            for i in 0..<target_count {
-                target_anims[i].tick(dt, immediate: immediate)
-            }
-            for (_, anim) in image_anims {
-                anim.tick(dt, immediate: immediate)
-            }
-            accuracy_anim!.tick(dt, immediate: immediate)
-            location_anim!.tick(dt, immediate: immediate)
-
-            immediate = false
+        let (new_heading, _) = compass!.anim(dt)
+        // NSLog("Animated heading: %f", new_heading)
+        if mode == MODE_MAPHEADING {
+            _current_heading = new_heading * CGFloat(M_PI / 180.0)
+        } else {
+            _current_heading = 0
         }
+            
+        /* All maps ando points rotate together because all belong to this view */
+        map_plane!.transform = CGAffineTransformMakeRotation(_current_heading)
+
+        for i in 0..<target_count {
+            target_anims[i].tick(dt, immediate: immediate)
+        }
+        for (_, anim) in image_anims {
+            anim.tick(dt, immediate: immediate)
+        }
+        accuracy_anim!.tick(dt, immediate: immediate)
+        location_anim!.tick(dt, immediate: immediate)
+
+        immediate = false
         
         last_update = this_update
     }
     
     func current_heading() -> CGFloat
     {
-        return _current_heading;
+        return _current_heading
     }
 }
