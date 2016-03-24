@@ -264,13 +264,8 @@ import CoreLocation
         }
         
         // is the circle completely enclosed by map?
-        // convert circle to a box
-        let radius_lat = radius / 1853.0 / 60.0
-        let radius_long = radius_lat / longitude_proportion(lat_circle)
-        let lat0_circle = lat_circle - radius_lat
-        let lat1_circle = lat_circle + radius_lat
-        let long0_circle = handle_cross_180f(long_circle - radius_long)
-        let long1_circle = handle_cross_180f(long_circle + radius_long)
+        let (lat0_circle, lat1_circle, long0_circle, long1_circle) =
+            GPSModel2.enclosing_box(lat_circle, clong: long_circle, radius: radius)
         
         if contains_latitude(lat0_circle, b: lat1_circle, c: maplata, d: maplatb) &&
             contains_longitude(long0_circle, b: long1_circle, c: maplonga, d: maplongb) {
@@ -279,6 +274,18 @@ import CoreLocation
         }
         
         return (1, dc)
+    }
+    
+    class func enclosing_box(clat: Double, clong: Double, radius: Double)
+                    -> (Double, Double, Double, Double) {
+        let radius_lat = radius / 1853.0 / 60.0
+        let radius_long = radius_lat / longitude_proportion(clat)
+        let lat0_circle = clat - radius_lat
+        let lat1_circle = clat + radius_lat
+        let long0_circle = handle_cross_180f(clong - radius_long)
+        let long1_circle = handle_cross_180f(clong + radius_long)
+        
+        return (lat0_circle, lat1_circle, long0_circle, long1_circle)
     }
     
     class func do_format_heading(n: Double) -> String
