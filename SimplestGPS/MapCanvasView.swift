@@ -13,21 +13,27 @@ class MapCanvasView: UIView
 {
     /* All maps and location points belong to this subview. Since they are
        all rotated together when map follows GPS heading, we just need to
-       set the transform of this container view */
+       set the transform of this container view. Also, they are all hidden
+       altogether in compass-only modes 
+    */
     var map_plane: UIView? = nil
     
     var image_views: [String: (UIImageView, MapDescriptor)] = [:]
     var image_anims: [String: PositionAnim] = [:]
     
+    // location points of targets painted on the map
     var target_views: [UIView] = []
     var target_anims: [PositionAnim] = []
 
+    // location point painted over the map
     var location_view: UIView? = nil
     var location_anim: PositionAnim? = nil
-
+    
+    // accuracy circle painted beneath the location point
     var accuracy_view: UIView? = nil
     var accuracy_anim: PositionAnim? = nil
     
+    // compass
     var compass: CompassView? = nil
     
     var updater: CADisplayLink? = nil
@@ -60,7 +66,8 @@ class MapCanvasView: UIView
     
     func init2() {
         self.mode = MODE_MAPONLY;
-        self.backgroundColor = UIColor.grayColor() // congruent with mode = 0
+        self.backgroundColor = UIColor.blackColor()
+        self.opaque = true
         
         updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.anim))
         updater!.frameInterval = 1
@@ -69,12 +76,13 @@ class MapCanvasView: UIView
     
     func init3() {
         /* must be big enough to fit the screen even when rotated to any angle */
-        map_plane = UIView.init(frame: CGRect(x: -(self.frame.height * 2 - self.frame.width) / 2,
+        map_plane = UIView.init(frame: CGRect(
+            x: -(self.frame.height * 2 - self.frame.width) / 2,
             y: -self.frame.height / 2,
             width: self.frame.height * 2,
             height: self.frame.height * 2))
-        map_plane!.alpha = 1.0
-        map_plane!.backgroundColor = UIColor.clearColor()
+        map_plane!.opaque = true
+        map_plane!.backgroundColor = UIColor.darkGrayColor()
         self.addSubview(map_plane!)
 
         accuracy_view = UIView.init(frame: CGRect(x: 0, y: 0, width: 2, height: 2))
@@ -148,6 +156,7 @@ class MapCanvasView: UIView
                     image_views[name] = (image, map)
                     image_anims[name] = anim
                     image.hidden = true
+                    image.opaque = true
 
                     map_plane!.insertSubview(image, belowSubview: below)
                 }
@@ -217,7 +226,7 @@ class MapCanvasView: UIView
             target.layer.cornerRadius = 8
             target.alpha = 1
             target.hidden = true
-            map_plane?.addSubview(target)
+            map_plane!.addSubview(target)
             target_views.append(target)
             let anim = PositionAnim(name: "tgt", view: target, size: map_plane!.frame)
             target_anims.append(anim)
@@ -249,14 +258,9 @@ class MapCanvasView: UIView
                       targets: [(heading: CGFloat, name: String, distance: String)],
                       tgt_dist: Bool)
     {
-        if mode != self.mode {
-            if mode == MODE_MAPONLY || mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING {
-                self.backgroundColor = UIColor.grayColor()
-            } else {
-                self.backgroundColor = UIColor.blackColor()
-            }
-        }
-
+        map_plane?.hidden = !(mode == MODE_MAPONLY || mode == MODE_MAPCOMPASS
+                                    || mode == MODE_MAPHEADING)
+        
         self.mode = mode
         
         compass?.hidden = (mode == MODE_MAPONLY)
@@ -290,7 +294,8 @@ class MapCanvasView: UIView
                 location_view?.backgroundColor = UIColor.yellowColor()
             }
             for i in 0..<target_count {
-                target_views[i].hidden = blink_status || mode == MODE_COMPASS || mode == MODE_HEADING
+                target_views[i].hidden = blink_status || mode == MODE_COMPASS
+                                            || mode == MODE_HEADING
             }
             blink_status = !blink_status
             last_update_blink = this_update
