@@ -11,37 +11,29 @@ import Foundation
 import UIKit
 
 class CompassView: UIView {
-    var bg: CompassBGView? = nil
+    let bg: CompassBGView
 
-    var back: BareCompassView? = nil
-    var back_anim: CompassAnim? = nil
+    let back: BareCompassView
+    let back_anim: CompassAnim
 
-    var needle: NeedleView? = nil
-    var needle_anim: CompassAnim? = nil
+    let needle: NeedleView
+    let needle_anim: CompassAnim
     
-    var tgtneedle: NeedleView? = nil
-    var tgtneedle_anim: CompassAnim? = nil
+    let tgtneedle: NeedleView
+    let tgtneedle_anim: CompassAnim
 
     var tgtminis: [TargetMiniNeedleView] = []
     var tgtminis_anim: [CompassAnim] = []
     var tgtminis2: [TargetMiniInfoView] = []
     var tgtminis2_anim: [CompassAnim] = []
 
-    var tgtdistance: UITextView? = nil
-    var tgtname: UITextView? = nil
+    let tgtdistance: UITextView
+    let tgtname: UITextView
     
     var last_target = -1
     var last_absolute = false
     
     override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func init2() {
         let child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
         bg = CompassBGView(frame: child_frame)
         needle = NeedleView(frame: child_frame, color: UIColor.redColor())
@@ -49,34 +41,40 @@ class CompassView: UIView {
         back = BareCompassView(frame: child_frame)
         tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.65, width: frame.width, height: frame.height * 0.1))
         tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.57, width: frame.width, height: frame.height * 0.1))
-        tgtdistance!.editable = false
-        tgtdistance!.selectable = false
-        tgtdistance!.userInteractionEnabled = false
-        tgtname!.editable = false
-        tgtname!.selectable = false
-        tgtname!.userInteractionEnabled = false
-        
+        tgtdistance.editable = false
+        tgtdistance.selectable = false
+        tgtdistance.userInteractionEnabled = false
+        tgtname.editable = false
+        tgtname.selectable = false
+        tgtname.userInteractionEnabled = false
+
         // relative coordinates (subviews see self.origin as 0,0)
-        let pivot = CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2)
-        back_anim = CompassAnim(name: "compass", view: back!, pivot: pivot, mass: 0.4, drag: 4.0)
-        needle_anim = CompassAnim(name: "needle", view: needle!, pivot: pivot, mass: 0.25, drag: 4.0)
-        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle!, pivot: pivot, mass: 0.3, drag: 4.0)
+        let pivot = CGPoint(x: frame.width / 2, y: frame.height / 2)
+        back_anim = CompassAnim(name: "compass", view: back, pivot: pivot, mass: 0.4, drag: 4.0)
+        needle_anim = CompassAnim(name: "needle", view: needle, pivot: pivot, mass: 0.25, drag: 4.0)
+        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle, pivot: pivot, mass: 0.3, drag: 4.0)
         
+        super.init(frame: frame)
+
         self.backgroundColor = UIColor.clearColor()
-        self.addSubview(bg!)
-        self.addSubview(needle!)
-        self.addSubview(tgtneedle!)
-        self.addSubview(back!)
+        self.addSubview(bg)
+        self.addSubview(needle)
+        self.addSubview(tgtneedle)
+        self.addSubview(back)
         
-        tgtdistance!.backgroundColor = UIColor.clearColor()
-        tgtdistance!.font = UIFont.systemFontOfSize(frame.width / 15)
-        tgtdistance!.textAlignment = .Center
-        self.addSubview(tgtdistance!)
+        tgtdistance.backgroundColor = UIColor.clearColor()
+        tgtdistance.font = UIFont.systemFontOfSize(frame.width / 15)
+        tgtdistance.textAlignment = .Center
+        self.addSubview(tgtdistance)
         
-        tgtname!.backgroundColor = UIColor.clearColor()
-        tgtname!.font = UIFont.systemFontOfSize(frame.width / 20)
-        tgtname!.textAlignment = .Center
-        self.addSubview(tgtname!)
+        tgtname.backgroundColor = UIColor.clearColor()
+        tgtname.font = UIFont.systemFontOfSize(frame.width / 20)
+        tgtname.textAlignment = .Center
+        self.addSubview(tgtname)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     func send_data(compassonly: Bool,
@@ -86,10 +84,6 @@ class CompassView: UIView {
                       targets: [(heading: CGFloat, name: String, distance: String)],
                       tgt_dist: Bool)
     {
-        if bg == nil {
-            init2()
-        }
-        
         let target_change = current_target != last_target
         let ref_change = absolute != last_absolute
         last_absolute = absolute
@@ -98,39 +92,39 @@ class CompassView: UIView {
         // heading_opt can be NaN, in this case the animation will keep rotating endlessly
         
         if !absolute {
-            back_anim!.set(-heading, block: nil)
-            needle_anim!.set(0, block: nil)
+            back_anim.set(-heading, block: nil)
+            needle_anim.set(0, block: nil)
         } else {
-            needle_anim!.set(heading, block: nil)
-            back_anim!.set(0.0, block: nil)
+            needle_anim.set(heading, block: nil)
+            back_anim.set(0.0, block: nil)
         }
         if ref_change {
-            needle_anim!.bigchange()
-            back_anim!.bigchange()
+            needle_anim.bigchange()
+            back_anim.bigchange()
         }
         if ref_change || target_change {
-            tgtneedle_anim!.bigchange()
+            tgtneedle_anim.bigchange()
         }
         
         if current_target < 0 {
-            tgtdistance!.textColor = UIColor.redColor()
+            tgtdistance.textColor = UIColor.redColor()
             // tgtname.textColor = UIColor.redColor()
-            tgtdistance!.text = speed
-            tgtname!.text = ""
-            tgtneedle!.hidden = true
+            tgtdistance.text = speed
+            tgtname.text = ""
+            tgtneedle.hidden = true
         } else {
-            tgtdistance!.textColor = UIColor.cyanColor()
-            tgtname!.textColor = UIColor.cyanColor()
-            tgtname!.text = targets[current_target].name
-            tgtdistance!.text = targets[current_target].distance
+            tgtdistance.textColor = UIColor.cyanColor()
+            tgtname.textColor = UIColor.cyanColor()
+            tgtname.text = targets[current_target].name
+            tgtdistance.text = targets[current_target].distance
             
-            tgtneedle!.hidden = false
+            tgtneedle.hidden = false
             var tgtheading = targets[current_target].heading
             if !absolute {
                 tgtheading -= heading
                 // NSLog("New relative heading for %d: %f", current_target, tgtheading)
             }
-            tgtneedle_anim!.set(tgtheading, block: nil)
+            tgtneedle_anim.set(tgtheading, block: nil)
         }
         
         let pivot = CGPoint(x: self.bounds.width / 2, y: self.bounds.height / 2)
@@ -181,13 +175,9 @@ class CompassView: UIView {
     
     func anim(dx: CGFloat) -> (CGFloat, Bool)
     {
-        if bg == nil {
-            return (0.0, false)
-        }
-        
-        let ret = back_anim!.tick(dx)
-        needle_anim!.tick(dx)
-        tgtneedle_anim!.tick(dx)
+        let ret = back_anim.tick(dx)
+        needle_anim.tick(dx)
+        tgtneedle_anim.tick(dx)
         for i in 0..<tgtminis_anim.count {
             tgtminis_anim[i].tick(dx)
             tgtminis2_anim[i].tick(dx)

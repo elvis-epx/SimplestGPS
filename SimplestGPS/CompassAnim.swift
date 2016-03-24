@@ -22,7 +22,8 @@ class CompassAnim
     var fast: Bool
     var opacity: Int
     var block: Optional<() -> Void> = nil
-    let xlate: CGPoint
+    let pivot: CGPoint
+    var xlate: CGPoint?
 
     let MIN_SPEED = CGFloat(0.5) // degrees/second
     let MAX_SPEED = CGFloat(180.0) // degrees/seconds
@@ -39,7 +40,7 @@ class CompassAnim
         self.lost = false
         self.fast = false
         self.view = view
-        self.xlate = CGPoint(x: pivot.x - view.center.x, y: pivot.y - view.center.y)
+        self.pivot = pivot
         opacity = 10000
     }
     
@@ -146,9 +147,12 @@ class CompassAnim
         NSLog("%@: opacity %d", name, opacity)
         */
         
-        var transform = CGAffineTransformMakeTranslation(xlate.x, xlate.y)
+        if (xlate == nil) {
+            self.xlate = CGPoint(x: pivot.x - view.center.x, y: pivot.y - view.center.y)
+        }
+        var transform = CGAffineTransformMakeTranslation(xlate!.x, xlate!.y)
         transform = CGAffineTransformRotate(transform, current * CGFloat(M_PI / 180.0))
-        transform = CGAffineTransformTranslate(transform, -xlate.x, -xlate.y)
+        transform = CGAffineTransformTranslate(transform, -xlate!.x, -xlate!.y)
         
         view.transform = transform
         view.alpha = CGFloat(opacity) / 10000.0
