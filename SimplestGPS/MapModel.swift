@@ -29,16 +29,14 @@ public class MapDescriptor {
     var img: UIImage
     let name: String
     let priority: Double
-    let lat0: Double
-    let lat1: Double
-    let long0: Double
-    let long1: Double
-    let latheight: Double
-    let longwidth: Double
-    let midlat: Double
-    let midlong: Double
-    var max_density: Double
-    var cur_density: Double
+    let olat0: Double
+    let olat1: Double
+    let olong0: Double
+    let olong1: Double
+    let olatheight: Double
+    let olongwidth: Double
+    let omidlat: Double
+    let omidlong: Double
     var boundsx: CGFloat = 0 // manipulated by Controller
     var boundsy: CGFloat = 0 // manipulated by Controller
     var centerx: CGFloat = 0 // manipulated by Controller
@@ -50,7 +48,19 @@ public class MapDescriptor {
     var distance = 0.0
     var sm: [State:[State:ClosureType]] = [:]
     let model: MapModel
-    
+
+    var oheight: CGFloat = 0
+    var owidth: CGFloat = 0
+    var cur_crop = CGRect(x: 0, y: 0, width: 0, height: 0)
+    var curlat0: Double = 0
+    var curlat1: Double = 0
+    var curlong0: Double = 0
+    var curlong1: Double = 0
+    var curlatheight: Double = 0
+    var curlongwidth: Double = 0
+    var curmidlat: Double = 0
+    var curmidlong: Double = 0
+
     init(model: MapModel, file: NSURL, name: String, priority: Double, latNW: Double,
          longNW: Double, latheight: Double, longwidth: Double)
     {
@@ -59,17 +69,15 @@ public class MapDescriptor {
         self.file = file
         self.name = name
         self.priority = priority
-        self.lat0 = latNW
-        self.long0 = GPSModel2.handle_cross_180f(longNW)
-        self.latheight = latheight
-        self.longwidth = longwidth
+        self.olat0 = latNW
+        self.olong0 = GPSModel2.handle_cross_180f(longNW)
+        self.olatheight = latheight
+        self.olongwidth = longwidth
         
-        self.lat1 = latNW - latheight
-        self.long1 = GPSModel2.handle_cross_180f(longNW + longwidth)
-        self.midlat = latNW - latheight / 2
-        self.midlong = GPSModel2.handle_cross_180f(longNW + longwidth / 2)
-        self.cur_density = 0
-        self.max_density = 0
+        self.olat1 = latNW - latheight
+        self.olong1 = GPSModel2.handle_cross_180f(longNW + longwidth)
+        self.omidlat = latNW - latheight / 2
+        self.omidlong = GPSModel2.handle_cross_180f(longNW + longwidth / 2)
         
         sm[State.NOTLOADED] = [:]
         sm[State.LOADING] = [:]
@@ -119,7 +127,7 @@ public class MapDescriptor {
         }
         
         // Loading (L)
-        sm[State.NOTLOADED]![State.LOADING] = { screenh in
+        sm[State.NOTLOADED]![State.LOADING] = { info in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue load %@", name)
                 return false
@@ -129,8 +137,14 @@ public class MapDescriptor {
                 // make this transition usable in others
                 self.img = model.i_loading
             }
-            let l = screenh as! Double
-            self.Load(l, cb: { model.dequeue_load() })
+
+            let blat0 = ((info as! NSDictionary)["lat0"] as! NSNumber) as Double
+            let blat1 = ((info as! NSDictionary)["lat1"] as! NSNumber) as Double
+            let blong0 = ((info as! NSDictionary)["long0"] as! NSNumber) as Double
+            let blong1 = ((info as! NSDictionary)["long1"] as! NSNumber) as Double
+            let screenh = ((info as! NSDictionary)["screenh"] as! NSNumber) as Double
+            self.Load(blat0, blat1: blat1, blong0: blong0, blong1: blong1,
+                      screenh: CGFloat(screenh), cb: { model.dequeue_load() })
             return true
         }
         
@@ -158,14 +172,57 @@ public class MapDescriptor {
         // CANTLOAD is a final state
         
         // Shrink (S)
-        sm[State.LOADED]![State.SHRINKING] = { size in
+        sm[State.LOADED]![State.SHRINKING] = { info in
             if !model.queue_shrink() {
                 NSLog("ERROR ######## could not queue shrink %@", name)
                 return false
             }
-            self.shrink((size as! NSValue).CGSizeValue(), cb: { model.dequeue_shrink() } )
+            let shrink_factor = (info as! NSDictionary)["shrink_factor"] as! NSValue
+            self.Shrink((shrink_factor as! CGFloat),
+                        cb: { model.dequeue_shrink() } )
             return true
         }
+    }
+    
+    // density in pixels per degree
+    func max_density() -> CGFloat {
+        return self.oheight / CGFloat(self.olatheight)
+    }
+    
+    func cur_density() -> CGFloat {
+        return self.cur_crop.height / CGFloat(abs(self.curlat1 - self.curlat0))
+    }
+    
+    // calculate map crop that fills a box (typically, the screen)
+    func calc_crop(boxlat0: Double, boxlat1: Double, boxlong0: Double, boxlong1: Double)
+                    -> (CGRect, Double, Double, Double, Double)
+    {
+        NSLog("calc_crop lat0 %f lat1 %f long0 %f long1 %f", olat0, olat1, olong0, olong1)
+        NSLog("      box blat0 %f blat1 %f blong0 %f blong1 %f", boxlat0, boxlat1, boxlong0, boxlong1)
+        // note that lat1 < lat0 but boxlat1 > boxlat0
+        // FIXME solve for corner cases
+        let newlat0 = min(olat0, boxlat1)//FIXME use clamp?
+        let newlat1 = max(olat1, boxlat0)
+        let newlong0 = max(olong0, boxlong0)
+        let newlong1 = min(olong1, boxlong1)
+        let y0 = self.oheight * -CGFloat((newlat0 - self.olat0) / self.olatheight)
+        let y1 = self.oheight * -CGFloat((newlat1 - self.olat0) / self.olatheight)
+        let x0 = self.owidth *
+            CGFloat(GPSModel2.longitude_minusf(newlong0, minus: self.olong0) / self.olongwidth)
+        let x1 = self.owidth *
+            CGFloat(GPSModel2.longitude_minusf(newlong1, minus: self.olong0) / self.olongwidth)
+        NSLog("      width %f height %f", self.owidth, self.oheight)
+        NSLog("      width %f height %f", x1 - x0, y1 - y0)
+        NSLog("      box lat0 %f lat1 %f long0 %f long1 %f", newlat0, newlat1, newlong0, newlong1)
+        return (CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0),
+                newlat0, newlat1, newlong0, newlong1)
+    }
+    
+    // see if current 'box' (typically, the screen) is covered by the map crop currently in memory
+    func is_crop_enough(boxlat0: Double, boxlat1: Double, boxlong0: Double, boxlong1: Double) -> Bool
+    {
+        let (ideal_crop, _, _, _, _) = self.calc_crop(boxlat0, boxlat1: boxlat1, boxlong0: boxlong0, boxlong1: boxlong1)
+        return CGRectContainsRect(self.cur_crop, ideal_crop)
     }
     
     func trans(newstate: State, arg: AnyObject?) {
@@ -194,15 +251,18 @@ public class MapDescriptor {
         }
     }
     
-    func please_load(screenh: Double) -> Bool {
+    func please_load(lat0: Double, lat1: Double, long0: Double, long1: Double, screenh: Double) -> Bool {
         if model.loader_busy() {
             return false
         }
         
-        let nscreenh = NSNumber(double: screenh)
-        
         if state == State.NOTLOADED || state == State.NOTLOADED_OOM {
-            trans(State.LOADING, arg: nscreenh)
+            let d: NSDictionary = ["lat0": NSNumber(double: lat0),
+                                   "lat1": NSNumber(double: lat1),
+                                   "long0": NSNumber(double: long0),
+                                   "long1": NSNumber(double: long1),
+                                   "screenh": NSNumber(double: screenh)]
+            trans(State.LOADING, arg: d)
             return true
         } else if state == State.LOADING {
             // ignore
@@ -214,7 +274,7 @@ public class MapDescriptor {
         return false
     }
     
-    func please_shrink(factor: Double) -> Bool {
+    func please_shrink(shrink_factor: Double) -> Bool {
         
         if model.shrink_busy() {
             return false
@@ -226,10 +286,9 @@ public class MapDescriptor {
             return false
         }
         
-        let size = CGSize(width: img.size.width * CGFloat(factor),
-                          height: img.size.height * CGFloat(factor))
+        let d: NSDictionary = ["shrink_factor": NSNumber(double: shrink_factor) ]
         
-        trans(State.SHRINKING, arg: NSValue(CGSize: size))
+        trans(State.SHRINKING, arg: d)
         return true
     }
     
@@ -242,7 +301,7 @@ public class MapDescriptor {
         trans(State.NOTLOADED, arg: nil)
     }
     
-    func please_blowup(screenh: Double) -> Bool {
+    func please_blowup(lat0: Double, lat1: Double, long0: Double, long1: Double, screenh: Double) -> Bool {
         if model.loader_busy() {
             return false
         } else if state != State.LOADED {
@@ -250,7 +309,12 @@ public class MapDescriptor {
                   statename[state.rawValue], name)
             return false
         }
-        trans(State.LOADING, arg: NSNumber(double: screenh))
+        let d: NSDictionary = ["lat0": NSNumber(double: lat0),
+                               "lat1": NSNumber(double: lat1),
+                               "long0": NSNumber(double: long0),
+                               "long1": NSNumber(double: long1),
+                               "screenh": NSNumber(double: screenh)]
+        trans(State.LOADING, arg: d)
         return true
     }
     
@@ -267,7 +331,7 @@ public class MapDescriptor {
     }
     
     func is_shrunk() -> Bool {
-        return self.max_density > self.cur_density
+        return self.max_density() > (self.cur_density() + 0.00001)
     }
     
     func ram_estimate() -> Int {
@@ -278,27 +342,37 @@ public class MapDescriptor {
         return self.maxram
     }
     
-    func imgresize(img: UIImage, newsize: CGSize) -> UIImage
+    func imgresize(img: UIImage, crop: CGRect, shrink_factor: CGFloat) -> UIImage
     {
+        let newsize = CGSize(width: crop.width / shrink_factor,
+                             height: crop.height / shrink_factor)
+        
+        // transform crop so it falls exactly on newsize
+        let paintrect = CGRect(
+            x: -crop.origin.x / shrink_factor,
+            y: -crop.origin.y / shrink_factor,
+            width: img.size.width / shrink_factor,
+            height: img.size.height / shrink_factor)
+        
         UIGraphicsBeginImageContextWithOptions(newsize, true, 1.0)
-        img.drawInRect(CGRect(x: 0, y: 0,
-            width: newsize.width, height: newsize.height))
+        img.drawInRect(paintrect)
         let newimg = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext()
         return newimg
     }
     
-    func shrink(newsize: CGSize, cb: () -> ())
+    func Shrink(shrink_factor: CGFloat, cb: () -> ())
     {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
-            NSLog("Shrinking image current density %f", self.cur_density)
-            let newimg = self.imgresize(self.img, newsize: newsize)
+            NSLog("Shrinking image current density %f", self.cur_density())
+            // Error: crop is related to the max image size.
+            let newimg = self.imgresize(self.img, crop: self.cur_crop,
+                                        shrink_factor: shrink_factor)
             dispatch_async(dispatch_get_main_queue()) {
                 if self.state != State.SHRINKING {
                     NSLog("Warning ########### %@ shrink disregarded", self.name)
                 } else {
-                    self.cur_density = Double(newsize.height) / self.latheight
-                    NSLog("        final density %f", self.cur_density)
+                    NSLog("        final density %f", self.cur_density())
                     self.trans(State.LOADED, arg: newimg)
                 }
                 cb()
@@ -306,7 +380,7 @@ public class MapDescriptor {
         }
     }
     
-    func Load(screenh: Double, cb: () -> ())
+    func Load(blat0: Double, blat1: Double, blong0: Double, blong1: Double, screenh: CGFloat, cb: () -> ())
     {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
             let rawimg = UIImage(data: NSData(contentsOfURL: self.file)!)
@@ -314,40 +388,41 @@ public class MapDescriptor {
             if rawimg != nil && rawimg!.size.height > 0 && rawimg!.size.width > 0 {
                 // update image statistics
                 self.maxram = Int(rawimg!.size.width * rawimg!.size.height * 4)
-                self.max_density = Double(rawimg!.size.height) / self.latheight
+                self.oheight = rawimg!.size.height
+                self.owidth = rawimg!.size.width
                 
                 // determine if image should be shrunk right away
-                let hpixels = self.max_density * screenh
+                var factor = CGFloat(1.0)
+                let hpixels = self.max_density() * CGFloat(screenh)
                 if hpixels > 2250 {
                     // image too big: shrink
-                    let factor = CGFloat(1920 / hpixels)
-                    let newsize = CGSize(width: rawimg!.size.width * factor,
-                                         height: rawimg!.size.height * factor)
-                    NSLog("  shrinking-on-load orig density %f screenh %f hpixels %f factor %f",
-                          self.max_density, screenh, hpixels, factor)
-                    let shrunkimg = self.imgresize(rawimg!, newsize: newsize)
-                    self.cur_density = Double(shrunkimg.size.height) / self.latheight
-                    NSLog("        final density %f", self.cur_density)
-                    
-                    dispatch_async(dispatch_get_main_queue()) {
-                        if self.state != State.LOADING {
-                            NSLog("Warning ########### %@ load+shrink disregarded", self.name)
-                        } else {
-                            self.trans(State.LOADED, arg: shrunkimg)
-                        }
-                        cb()
+                    // FIXME
+                    // factor = hpixels / 1920
+                }
+                NSLog("   current density %f screenh %f height %f excess %f",
+                        self.max_density(), screenh, hpixels, factor)
+
+                let (crop, newlat0, newlat1, newlong0, newlong1) =
+                    self.calc_crop(blat0, boxlat1: blat1, boxlong0: blong0, boxlong1: blong1)
+                
+                let shrunk = self.imgresize(rawimg!, crop: crop, shrink_factor: factor)
+                self.cur_crop = crop
+                self.curlat0 = newlat0
+                self.curlat1 = newlat1
+                self.curlong0 = newlong0
+                self.curlong1 = newlong1
+                self.curlatheight = abs(newlat1 - newlat0)
+                self.curlongwidth = abs(newlong1 - newlong0)
+                self.curmidlat = (newlat0 + newlat1) / 2
+                self.curmidlong = (newlong0 + newlong1) / 2
+                
+                dispatch_async(dispatch_get_main_queue()) {
+                    if self.state != State.LOADING {
+                        NSLog("Warning ########### %@ load disregarded", self.name)
+                    } else {
+                        self.trans(State.LOADED, arg: shrunk)
                     }
-                } else {
-                    // using raw image
-                    self.cur_density = self.max_density
-                    dispatch_async(dispatch_get_main_queue()) {
-                        if self.state != State.LOADING {
-                            NSLog("Warning ########### %@ load disregarded", self.name)
-                        } else {
-                            self.trans(State.LOADED, arg: rawimg)
-                        }
-                        cb()
-                    }
+                    cb()
                 }
             } else {
                 dispatch_async(dispatch_get_main_queue()) {
@@ -498,8 +573,8 @@ public class MapDescriptor {
         
         for map in maps {
             let (ins, d) = GPSModel2.map_inside(
-                    map.lat0, maplatmid: map.midlat, maplatb: map.lat1,
-                    maplonga: map.long0, maplongmid: map.midlong, maplongb: map.long1,
+                    map.olat0, maplatmid: map.omidlat, maplatb: map.olat1,
+                    maplonga: map.olong0, maplongmid: map.omidlong, maplongb: map.olong1,
                     lat_circle: clat, long_circle: clong, radius: radius)
             map.insertion = ins
             map.distance = d
@@ -535,17 +610,17 @@ public class MapDescriptor {
                     // example: map is 6000 px height, 15' height = 400 px / minute
                     // if screen zoomed out to 60' height, 60 x 400 = 24000 pixels
                     // but screen has only ~2000 pixels height
-                    let hpixels = map.cur_density * screenh
+                    let hpixels = Double(map.cur_density()) * screenh
                     if hpixels > 2250 {
                         // still in the example, 2000 / 24000 = 1:12 reduction
                         // image becomes 500x500, which is enough to cover 1/4 x 1/4 of
                         // the screen with enough sharpness
-                        NSLog("Shrinking image %@ current density %f screenh %f hpixels %f",
-                              map.name, map.cur_density, screenh, hpixels)
-                        let factor = 1920.0 / hpixels
+                        let factor = hpixels / 1920.0
+                        NSLog("Shrinking image %@ by factor %f", map.name, factor)
                         if !map.please_shrink(factor) {
                             break
                         }
+                        // FIXME crop into the image when possible?
                     }
                 }
             }
@@ -555,13 +630,29 @@ public class MapDescriptor {
             // Memory is available, blow up highest-priority images if shrunk
             
             for map in maps_sorted {
-                if map.insertion > 0 && map.is_loaded() && map.is_shrunk() {
-                    let hpixels = map.cur_density * screenh
-                    if hpixels < 1500 {
-                        NSLog("Blowing up image %@ current density %f screenh %f hpixels %f",
-                              map.name, map.cur_density, screenh, hpixels)
-                        // found wanting in resolution; reload without remove from screen
-                        if !map.please_blowup(screenh) {
+                if map.insertion > 0 && map.is_loaded() {
+                    let (blat0, blat1, blong0, blong1) =
+                        GPSModel2.enclosing_box(clat, clong: clong, radius: radius * 1.5)
+                    var blowup = false
+                    if map.is_shrunk() {
+                        let hpixels = map.cur_density() * CGFloat(screenh)
+                        if hpixels < 1500 {
+                            // found wanting in resolution; reload without remove from screen
+                            NSLog("Blowing up image %@ cur density %f", map.name, map.cur_density())
+                            blowup = true
+                        }
+                    } else {
+                        // FIXME conflict shrink in progress x de-crop
+                        // FIXME position animation not appropriate for crop
+                        if !map.is_crop_enough(blat0, boxlat1: blat1, boxlong0: blong0, boxlong1: blong1) {
+                            NSLog("De-cropping image %@ cur density %f", map.name, map.cur_density())
+                            blowup = true
+                        }
+                    }
+                    if blowup {
+                        if !map.please_blowup(blat0, lat1: blat1,
+                                              long0: blong0, long1: blong1,
+                                              screenh: screenh) {
                             break
                         }
                     }
@@ -592,7 +683,12 @@ public class MapDescriptor {
                         NSLog("Image %@ not loaded due to memory pressure", map.name)
                         map.please_oom()
                     } else {
-                        map.please_load(screenh)
+                        // crop kept in memory
+                        let (blat0, blat1, blong0, blong1) =
+                                GPSModel2.enclosing_box(clat, clong: clong, radius: radius * 1.5)
+                        map.please_load(blat0, lat1: blat1,
+                                        long0: blong0, long1: blong1,
+                                        screenh: screenh)
                     }
                 }
                 new_list[map.name] = map

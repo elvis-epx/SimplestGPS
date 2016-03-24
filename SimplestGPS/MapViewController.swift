@@ -302,13 +302,13 @@ import UIKit
         
         for (_, map) in current_maps {
             (map.centerx, map.centery) = to_raster(
-                    CGFloat(map.midlat), long: CGFloat(map.midlong),
+                    CGFloat(map.curmidlat), long: CGFloat(map.curmidlong),
                     clat: clat, clong: clong,
                     lat_height: zoom_height, scrh: scrh, scrw: scrw,
                     longitude_proportion: longitude_latitude_proportion)
                 
-            map.boundsx = CGFloat(scrw * CGFloat(map.longwidth) / zoom_width)
-            map.boundsy = CGFloat(scrh * CGFloat(map.latheight) / zoom_height)
+            map.boundsx = CGFloat(scrw * CGFloat(map.curlongwidth) / zoom_width)
+            map.boundsy = CGFloat(scrh * CGFloat(map.curlatheight) / zoom_height)
         }
         
         if !canvas.send_img(current_maps, changed: map_list_changed) {
