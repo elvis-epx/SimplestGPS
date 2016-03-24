@@ -509,7 +509,7 @@ public class MapDescriptor {
         // Naïve strategy: release maps not in use right now
         
         for map in maps {
-            if self.ram_within_safe_limits() {
+            if self.ram_within_comfortable_limits() {
                 break
             }
             if map.insertion <= 0 && map.is_loaded() {
@@ -527,7 +527,7 @@ public class MapDescriptor {
             return $0.priority < $1.priority
         })
         
-        if !self.ram_within_safe_limits() && self.ram_within_hard_limits(nil) {
+        if !self.ram_within_safe_limits() {
             // See if we can shrink some image, based on screen resolution
             
             for map in maps_sorted.reverse() {
@@ -565,20 +565,6 @@ public class MapDescriptor {
                             break
                         }
                     }
-                }
-            }
-        }
-        
-        if !ram_within_hard_limits(nil) {
-            // memory full: all unused maps already removed
-            // try to remove lowest-priority after a gap
-            var gap = false
-            for map in maps_sorted {
-                if !map.is_loaded() {
-                    gap = true
-                } else if gap && map.is_loaded() {
-                    NSLog("Gap image evicted from memory: %@", map.name)
-                    map.please_oom()
                 }
             }
         }
@@ -738,6 +724,10 @@ public class MapDescriptor {
         }
         NSLog("Memory %@%d, inuse %d of %d", sign, change,
               self.ram_inuse, self.ram_limit)
+    }
+
+    func ram_within_comfortable_limits() -> Bool {
+        return (self.ram_limit / 100 * 25) > self.ram_inuse
     }
     
     func ram_within_safe_limits() -> Bool {
