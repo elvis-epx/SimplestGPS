@@ -167,7 +167,9 @@ class MapCanvasView: UIView
         
         /* update coordinates (controller changed the descriptor .1 in-place) */
         for (name, view) in image_views {
-            image_anims[name]!.set_rel(CGPoint(x: view.1.centerx, y: view.1.centery), block: {
+            image_anims[name]!.set_rel(
+                CGPoint(x: view.1.vcenterx, y: view.1.vcentery),
+                offset: CGPoint(x: view.1.offsetx, y: view.1.offsety), block: {
                 if view.0.image !== view.1.img {
                     NSLog("    view: replaced %@", name)
                     view.0.image = view.1.img

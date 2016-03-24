@@ -14,6 +14,9 @@ class PositionAnim
     var vspeed: CGVector
     var target: CGPoint
     var current: CGPoint
+    // used when we want to animate a virtual center, while the
+    // real center and the offset 'jump' together
+    var offset: CGPoint
     var name: String
     var view: UIView
     var offx = CGFloat(0)
@@ -29,6 +32,7 @@ class PositionAnim
         // coordinates are RELATIVE: 0.0 is the middle of CGRect size!
         self.target = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
         self.current = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
+        self.offset = CGPoint(x: 0, y: 0)
 
         // 0,0 relative point
         self.offx = size.width / 2
@@ -37,10 +41,16 @@ class PositionAnim
         self.view = view
         self.last_distance = 0
     }
-    
+
     func set_rel(target: CGPoint, block: Optional<() -> Void>)
     {
+        set_rel(target, offset: CGPoint(x: 0, y: 0), block: block)
+    }
+
+    func set_rel(target: CGPoint, offset: CGPoint, block: Optional<() -> Void>)
+    {
         self.target = target
+        self.offset = offset
         self.block = block
         
         if !self.current.x.isNaN && !self.target.x.isNaN {
@@ -95,8 +105,8 @@ class PositionAnim
         // NSLog("%@ %f %f", name, current.x, current.y)
         
         // offset to middle of screen
-        let x = offx + current.x
-        let y = offy + current.y
+        let x = offx + current.x - offset.x
+        let y = offy + current.y - offset.y
 
         let current_rot = CGPoint(x: x, y: y)
         view.center = current_rot

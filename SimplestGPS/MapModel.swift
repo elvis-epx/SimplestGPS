@@ -39,8 +39,10 @@ public class MapDescriptor {
     let omidlong: Double
     var boundsx: CGFloat = 0 // manipulated by Controller
     var boundsy: CGFloat = 0 // manipulated by Controller
-    var centerx: CGFloat = 0 // manipulated by Controller
-    var centery: CGFloat = 0 // manipulated by Controller
+    var vcenterx: CGFloat = 0 // manipulated by Controller
+    var vcentery: CGFloat = 0 // manipulated by Controller
+    var offsetx: CGFloat = 0 // manipulated by Controller
+    var offsety: CGFloat = 0 // manipulated by Controller
     var maxram = 0
     var currentram = 0
     var state = State.NOTLOADED
@@ -197,8 +199,8 @@ public class MapDescriptor {
     func calc_crop(boxlat0: Double, boxlat1: Double, boxlong0: Double, boxlong1: Double)
                     -> (CGRect, Double, Double, Double, Double)
     {
-        NSLog("calc_crop lat0 %f lat1 %f long0 %f long1 %f", olat0, olat1, olong0, olong1)
-        NSLog("      box blat0 %f blat1 %f blong0 %f blong1 %f", boxlat0, boxlat1, boxlong0, boxlong1)
+        // NSLog("calc_crop lat0 %f lat1 %f long0 %f long1 %f", olat0, olat1, olong0, olong1)
+        // NSLog("      box blat0 %f blat1 %f blong0 %f blong1 %f", boxlat0, boxlat1, boxlong0, boxlong1)
         // note that lat1 < lat0 but boxlat1 > boxlat0
         // FIXME solve for corner cases
         let newlat0 = min(olat0, boxlat1)//FIXME use clamp?
@@ -211,9 +213,9 @@ public class MapDescriptor {
             CGFloat(GPSModel2.longitude_minusf(newlong0, minus: self.olong0) / self.olongwidth)
         let x1 = self.owidth *
             CGFloat(GPSModel2.longitude_minusf(newlong1, minus: self.olong0) / self.olongwidth)
-        NSLog("      width %f height %f", self.owidth, self.oheight)
-        NSLog("      width %f height %f", x1 - x0, y1 - y0)
-        NSLog("      box lat0 %f lat1 %f long0 %f long1 %f", newlat0, newlat1, newlong0, newlong1)
+        // NSLog("      width %f height %f", self.owidth, self.oheight)
+        // NSLog("      width %f height %f", x1 - x0, y1 - y0)
+        // NSLog("      box lat0 %f lat1 %f long0 %f long1 %f", newlat0, newlat1, newlong0, newlong1)
         return (CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0),
                 newlat0, newlat1, newlong0, newlong1)
     }
