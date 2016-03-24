@@ -367,6 +367,7 @@ public class MapDescriptor {
     var ram_inuse = 0
     var max_ram_inuse = 0
     static let INITIAL_RAM_LIMIT = 250000000
+    static let MIN_RAM = 75000000
     var ram_limit = INITIAL_RAM_LIMIT
     
     var _loader_busy: Bool = false
@@ -722,7 +723,7 @@ public class MapDescriptor {
         // reset limits after purge so the current usage is low
         // and won't interfere with max_ram_inuse calculation
         
-        self.ram_limit = self.max_ram_inuse / 10 * 8
+        self.ram_limit = max(MapModel.MIN_RAM, self.max_ram_inuse / 10 * 8)
         self.max_ram_inuse = self.ram_limit
     }
     
