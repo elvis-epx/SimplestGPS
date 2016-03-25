@@ -154,7 +154,7 @@ class MapCanvasView: UIView
 
                     NSLog("            inserted below %@", bname)
                     let image = UIImageView(image: map.img)
-                    let anim = PositionAnim(name: "img", view: image, size: map_plane!.frame)
+                    let anim = PositionAnim(name: "img", view: image, size: map_plane!.bounds)
                     image_views[name] = (image, map)
                     image_anims[name] = anim
                     image.hidden = true
@@ -234,7 +234,7 @@ class MapCanvasView: UIView
             target.hidden = true
             map_plane!.addSubview(target)
             target_views.append(target)
-            let anim = PositionAnim(name: "tgt", view: target, size: map_plane!.frame)
+            let anim = PositionAnim(name: "tgt", view: target, size: map_plane!.bounds)
             target_anims.append(anim)
         }
 
@@ -324,9 +324,6 @@ class MapCanvasView: UIView
         } else {
             _current_heading = 0
         }
-        
-        // FIXME error in rotation, new cropped maps, for some reason,
-        // fall in wrong place
         
         /* All map ando points rotate together because all belong to this view */
         map_plane!.transform = CGAffineTransformMakeRotation(_current_heading)
