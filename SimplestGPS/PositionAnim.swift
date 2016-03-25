@@ -16,6 +16,7 @@ class PositionAnim
     var current: CGPoint
     // used when we want to animate a virtual center, while the
     // real center and the offset 'jump' together
+    var last_offset: CGPoint
     var offset: CGPoint
     var name: String
     var view: UIView
@@ -33,6 +34,7 @@ class PositionAnim
         self.target = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
         self.current = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
         self.offset = CGPoint(x: 0, y: 0)
+        self.last_offset = offset
 
         // 0,0 relative point
         self.offx = size.width / 2
@@ -72,7 +74,7 @@ class PositionAnim
             return false
         }
             
-        if target.x.isNaN || target == current {
+        if (target.x.isNaN || target == current) && self.last_offset == self.offset {
             // nothing to do (typical case)
             return false
             
@@ -108,6 +110,8 @@ class PositionAnim
         let x = offx + current.x - offset.x
         let y = offy + current.y - offset.y
 
+        self.last_offset = self.offset
+        
         let current_rot = CGPoint(x: x, y: y)
         view.center = current_rot
         

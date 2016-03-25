@@ -223,7 +223,7 @@ import CoreLocation
     class func contains_latitude(a: Double, b: Double, c: Double, d: Double) -> Bool {
         let (_a, _b) = (min(a, b), max(a, b))
         let (_c, _d) = (min(c, d), max(c, d))
-        return _a >= _c && _b <= _d
+        return (_a + 0.0001) >= _c && (_b - 0.0001) <= _d
     }
 
     class func contains_longitude(a: Double, b: Double, c: Double, d: Double) -> Bool {

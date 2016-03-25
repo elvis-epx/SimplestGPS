@@ -309,9 +309,6 @@ import UIKit
                     lat_height: zoom_height, scrh: scrh, scrw: scrw,
                     longitude_proportion: longitude_latitude_proportion)
             
-            // FIXME still jumps a bit
-            // FIXME not blowing up images
-            
             // rasterized offset from whole map's corner to crop corner
             // this changes abruptly as map is cropped
             (map.offsetx, map.offsety) = to_raster(
