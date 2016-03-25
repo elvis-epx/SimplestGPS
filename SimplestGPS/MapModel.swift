@@ -21,8 +21,7 @@ enum State: Int {
 
 // could not be struct because we want this to passed around by reference
 public class MapDescriptor {
-    let statename = ["NOTLOADED", "LOADING", "LOADED", "CANTLOAD",
-                     "NOTLOADED_OOM", "SHRINKING"]
+    let statename = ["NOTLOADED", "LOADING", "LOADED", "CANTLOAD", "NOTLOADED_OOM"]
     
     let file: NSURL
     var img: UIImage
@@ -131,7 +130,7 @@ public class MapDescriptor {
                 return false
             }
             model.update_ram(self, n: self.maxram)
-            if self.state != State.LOADED { // && self.state != State.SHRINKING {
+            if self.state != State.LOADED {
                 // make this transition usable in others
                 self.img = model.i_loading
                 self.reset_cur()
@@ -182,13 +181,23 @@ public class MapDescriptor {
         // NSLog("calc_crop lat0 %f lat1 %f long0 %f long1 %f", olat0, olat1, olong0, olong1)
         // NSLog("      box blat0 %f blat1 %f blong0 %f blong1 %f", boxlat0, boxlat1, boxlong0, boxlong1)
 
-        // note that lat1 < lat0 but boxlat1 > boxlat0
+        // remember that olat0 northern to olat1
+        let newlat0 = min(olat0, max(boxlat0, boxlat1))
+        let newlat1 = max(olat1, min(boxlat0, boxlat1))
 
-        // FIXME solve for corner cases
-        let newlat0 = min(olat0, boxlat1)//FIXME use clamp?
-        let newlat1 = max(olat1, boxlat0)
-        let newlong0 = max(olong0, boxlong0)
-        let newlong1 = min(olong1, boxlong1)
+        // handle longitude in differential form to avoid international date line
+        let dboxlong0 = GPSModel2.longitude_minusf(boxlong0, minus: olong0)
+        let dboxlong1 = GPSModel2.longitude_minusf(boxlong1, minus: olong0)
+        let dolong0 = 0.0
+        let dolong1 = GPSModel2.longitude_minusf(olong1, minus: olong0)
+        
+        let dnewlong0 = max(dolong0, min(dboxlong0, dboxlong1))
+        let dnewlong1 = min(dolong1, max(dboxlong0, dboxlong1))
+        
+        // back to absolute
+        let newlong0 = GPSModel2.handle_cross_180f(dnewlong0 + olong0)
+        let newlong1 = GPSModel2.handle_cross_180f(dnewlong1 + olong0)
+        
         let y0 = self.oheight * -CGFloat((newlat0 - self.olat0) / self.olatheight)
         let y1 = self.oheight * -CGFloat((newlat1 - self.olat0) / self.olatheight)
         let x0 = self.owidth *
@@ -584,12 +593,13 @@ public class MapDescriptor {
                     NSLog("Shrinking image density %@ cur density %f", map.name, map.cur_density())
                     blowup = true
                 } else if !map.is_crop_enough(blat0, boxlat1: blat1, boxlong0: blong0, boxlong1: blong1) {
-                    NSLog("De-cropping image %@ cur density %f", map.name, map.cur_density())
+                    NSLog("Re-cropping image %@", map.name)
                     blowup = true
                 }
                 if blowup {
                     let (blat0, blat1, blong0, blong1) =
                         GPSModel2.enclosing_box(clat, clong: clong, radius: radius * 1.5)
+                    
                     if !map.please_reload(blat0, lat1: blat1,
                                             long0: blong0, long1: blong1,
                                             screenh: screenh) {

@@ -324,10 +324,13 @@ class MapCanvasView: UIView
         } else {
             _current_heading = 0
         }
-            
-        /* All maps ando points rotate together because all belong to this view */
+        
+        // FIXME error in rotation, new cropped maps, for some reason,
+        // fall in wrong place
+        
+        /* All map ando points rotate together because all belong to this view */
         map_plane!.transform = CGAffineTransformMakeRotation(_current_heading)
-
+        
         for i in 0..<target_count {
             target_anims[i].tick(dt, immediate: immediate)
         }
