@@ -181,22 +181,20 @@ public class MapDescriptor {
         // NSLog("calc_crop lat0 %f lat1 %f long0 %f long1 %f", olat0, olat1, olong0, olong1)
         // NSLog("      box blat0 %f blat1 %f blong0 %f blong1 %f", boxlat0, boxlat1, boxlong0, boxlong1)
 
-        // remember that olat0 northern to olat1
-        let newlat0 = min(olat0, max(boxlat0, boxlat1))
-        let newlat1 = max(olat1, min(boxlat0, boxlat1))
-
-        // handle longitude in differential form to avoid international date line
-        let dboxlong0 = GPSModel2.longitude_minusf(boxlong0, minus: olong0)
-        let dboxlong1 = GPSModel2.longitude_minusf(boxlong1, minus: olong0)
-        let dolong0 = 0.0
-        let dolong1 = GPSModel2.longitude_minusf(olong1, minus: olong0)
+        let _newlat0 = GPSModel2.clamp_lat(boxlat0, a: olat0, b: olat1)
+        let _newlat1 = GPSModel2.clamp_lat(boxlat1, a: olat0, b: olat1)
+        // remember that map.*lat0 northern to map.*lat1,
+        // but boxlat0/boxlat1 might not follow this convention
+        // reorder
+        let (newlat0, newlat1) = (max(_newlat0, _newlat1), min(_newlat0, _newlat1))
         
-        let dnewlong0 = max(dolong0, min(dboxlong0, dboxlong1))
-        let dnewlong1 = min(dolong1, max(dboxlong0, dboxlong1))
+        var newlong0 = GPSModel2.clamp_long(boxlong0, a: olong0, b: olong1)
+        var newlong1 = GPSModel2.clamp_long(boxlong1, a: olong0, b: olong1)
         
-        // back to absolute
-        let newlong0 = GPSModel2.handle_cross_180f(dnewlong0 + olong0)
-        let newlong1 = GPSModel2.handle_cross_180f(dnewlong1 + olong0)
+        if GPSModel2.longitude_minusf(newlong1, minus: newlong0) < 0 {
+            // reorder
+            (newlong0, newlong1) = (newlong1, newlong0)
+        }
         
         let y0 = self.oheight * -CGFloat((newlat0 - self.olat0) / self.olatheight)
         let y1 = self.oheight * -CGFloat((newlat1 - self.olat0) / self.olatheight)

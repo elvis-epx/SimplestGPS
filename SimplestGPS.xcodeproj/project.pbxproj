@@ -129,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				B99D01141C9F9A0D00FA1FC2 /* MapModel.swift */,
+				B912BBEC1B73394400C3C09C /* GPSModel2.swift */,
 				B9AAA5DB1C9236190050F390 /* Settings.bundle */,
 				B95B5D3D1C8F6099002EAEA6 /* SimplestGPS-Bridging-Header.h */,
 				B91E5F9E1C7F83A2000CB068 /* MapViewController.swift */,
@@ -143,7 +144,6 @@
 				B95B688F1C90BC92008E6CD3 /* CompassBGView.swift */,
 				B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */,
 				B9AD65AE1849733200E9C380 /* Main.storyboard */,
-				B912BBEC1B73394400C3C09C /* GPSModel2.swift */,
 				B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */,
 				B93D610C1BBF60DB0092CD5C /* TargetsViewController2.swift */,
 				B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */,
