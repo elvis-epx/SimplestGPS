@@ -20,8 +20,8 @@ class PositionAnim
     var offset: CGPoint
     var name: String
     var view: UIView
-    var offx = CGFloat(0)
-    var offy = CGFloat(0)
+    var supercenterx = CGFloat(0)
+    var supercentery = CGFloat(0)
     var last_distance: CGFloat
     let SETTLE_TIME = CGFloat(0.5)
     var block: Optional<() -> Void> = nil
@@ -37,8 +37,8 @@ class PositionAnim
         self.last_offset = offset
 
         // 0,0 relative point
-        self.offx = size.width / 2
-        self.offy = size.height / 2
+        self.supercenterx = size.width / 2
+        self.supercentery = size.height / 2
         
         self.view = view
         self.last_distance = 0
@@ -106,14 +106,12 @@ class PositionAnim
         
         // NSLog("%@ %f %f", name, current.x, current.y)
         
-        // offset to middle of screen
-        let x = offx + current.x - offset.x
-        let y = offy + current.y - offset.y
+        let x = supercenterx + current.x - offset.x
+        let y = supercentery + current.y - offset.y
 
         self.last_offset = self.offset
         
-        let current_rot = CGPoint(x: x, y: y)
-        view.center = current_rot
+        view.center = CGPoint(x: x, y: y)
         
         return true
     }
