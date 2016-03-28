@@ -183,7 +183,7 @@ class MapCanvasView: UIView
                     view.0.image = view.1.img
                 }
                 view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
-                view.0.hidden = (self.mode == .COMPASS || self.mode == .HEADING)
+                view.0.hidden = false
             })
         }
         
@@ -192,14 +192,14 @@ class MapCanvasView: UIView
     
     func hide_location() -> Bool {
         return self.mode == .COMPASS ||
-               self.mode == .HEADING ||
-               ((self.mode == .MAPHEADING ||
+               self.mode == .COMPASS_H ||
+               ((self.mode == .MAPCOMPASS_H ||
                  self.mode == .MAPCOMPASS) && self.locked)
     }
     
     func hide_locker() -> Bool {
         return self.mode == .COMPASS ||
-               self.mode == .HEADING ||
+               self.mode == .COMPASS_H ||
                !self.locked
     }
     
@@ -287,21 +287,20 @@ class MapCanvasView: UIView
             return
         }
         
-        map_plane!.hidden = !(mode == .MAPONLY || mode == .MAPCOMPASS
-                                    || mode == .MAPHEADING)
+        map_plane!.hidden = mode == .COMPASS || mode == .COMPASS_H
         
         self.mode = mode
         
-        compass!.hidden = (mode == .MAPONLY)
-
-        if mode == .MAPONLY {
+        if mode == .MAP || mode == .MAP_H {
             // nothing to do with compass
+            compass!.hidden = true
             return
         }
-        
-        compass!.send_data(mode == .COMPASS || mode == .HEADING,
+        compass!.hidden = false
+
+        compass!.send_data(mode == .COMPASS || mode == .COMPASS_H,
                             absolute: mode == .COMPASS || mode == .MAPCOMPASS,
-                           transparent: mode == .MAPCOMPASS || mode == .MAPHEADING,
+                           transparent: mode == .MAPCOMPASS || mode == .MAPCOMPASS_H,
                            heading: heading, altitude: altitude, speed: speed,
                            current_target: current_target,
                            targets: targets, tgt_dist: tgt_dist)
@@ -324,7 +323,7 @@ class MapCanvasView: UIView
             self.location_view!.hidden = self.hide_location()
             self.accuracy_view!.hidden = self.hide_location()
             for i in 0..<target_count {
-                target_views[i].hidden = blink_status || mode == .COMPASS || mode == .HEADING
+                target_views[i].hidden = blink_status || mode == .COMPASS || mode == .COMPASS_H
             }
             blink_status = !blink_status
             last_update_blink = this_update
@@ -334,7 +333,7 @@ class MapCanvasView: UIView
             
         let (new_heading, _) = compass!.anim(dt)
         // NSLog("Animated heading: %f", new_heading)
-        if mode == .MAPHEADING {
+        if mode == .MAPCOMPASS_H || mode == .MAP_H {
             _current_heading = new_heading * CGFloat(M_PI / 180.0)
         } else {
             _current_heading = 0

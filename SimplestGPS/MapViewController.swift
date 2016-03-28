@@ -10,11 +10,12 @@ import Foundation
 import UIKit
 
 enum Mode: Int {
-    case MAPONLY = 0
-    case MAPCOMPASS
-    case MAPHEADING
-    case HEADING
-    case COMPASS
+    case MAP = 0
+    case MAPCOMPASS = 1
+    case COMPASS = 2
+    case MAP_H = 3
+    case MAPCOMPASS_H = 4
+    case COMPASS_H = 5
 }
 
 @objc class MapViewController: UIViewController, ModelListener
@@ -32,16 +33,22 @@ enum Mode: Int {
     var diag_height_proportion = CGFloat.NaN
     
     var mode: Mode = .COMPASS
-    let next_mode = [Mode.MAPONLY: Mode.MAPCOMPASS,
-                     Mode.MAPCOMPASS: Mode.MAPHEADING,
-                     Mode.MAPHEADING: Mode.HEADING,
-                     Mode.HEADING: Mode.COMPASS,
-                     Mode.COMPASS: Mode.MAPONLY]
-    let next_mode_nomap = [Mode.MAPONLY: Mode.COMPASS,
-                     Mode.MAPCOMPASS: Mode.HEADING,
-                     Mode.MAPHEADING: Mode.HEADING,
-                     Mode.HEADING: Mode.COMPASS,
-                     Mode.COMPASS: Mode.HEADING]
+    let next_mode = [Mode.MAP: Mode.MAPCOMPASS,
+                     Mode.MAPCOMPASS: Mode.COMPASS,
+                     Mode.COMPASS: Mode.MAP_H,
+                     Mode.MAP_H: Mode.MAPCOMPASS_H,
+                     Mode.MAPCOMPASS_H: Mode.COMPASS_H,
+                     Mode.COMPASS_H: Mode.MAP]
+    let next_mode_nomap = [Mode.MAP: Mode.COMPASS,
+                           Mode.MAP_H: Mode.COMPASS,
+                           Mode.MAPCOMPASS: Mode.COMPASS,
+                           Mode.MAPCOMPASS_H: Mode.COMPASS,
+                           Mode.COMPASS_H: Mode.COMPASS,
+                           Mode.COMPASS: Mode.COMPASS_H]
+    let mode_name: [Mode:String] = [.MAP: "", .MAPCOMPASS: "", .COMPASS: "",
+                                    .MAP_H: "Follows heading",
+                                    .MAPCOMPASS_H: "Follows heading",
+                                    .COMPASS_H: "Follows heading"]
     var tgt_dist = true
     
     // in seconds of latitude degree across the screen height
@@ -242,7 +249,7 @@ enum Mode: Int {
         }
         
         if !gesture {
-            scale.hidden = (mode == .COMPASS || mode == .HEADING)
+            // scale.hidden = (mode == .COMPASS || mode == .COMPASS_H)
             
             // send compass data
             var targets_compass: [(heading: CGFloat, name: String, distance: String)] = []
@@ -274,8 +281,13 @@ enum Mode: Int {
         let scale_m = 2 * zoom_in_widthradius_m(zoom_factor)
         
         if !gesture {
-            scale.text = GPSModel2.format_distance_t(Double(scale_m),
-                                                    met: GPSModel2.model().get_metric())
+            var stext = self.mode_name[self.mode]!
+            if self.mode != .COMPASS && self.mode != .COMPASS_H {
+                stext = GPSModel2.format_distance_t(Double(scale_m),
+                                    met: GPSModel2.model().get_metric()) +
+                    (stext.isEmpty ? "" : " - ") + stext
+            }
+            scale.text = stext
             latitude.text = GPSModel2.model().latitude_formatted()
             longitude.text = GPSModel2.model().longitude_formatted()
             accuracy.text = GPSModel2.model().altitude_formatted() + "↑ " +
@@ -295,7 +307,7 @@ enum Mode: Int {
             // only recalculate map list when we are not in a hurry
             last_map_update = now
 
-            if mode == .COMPASS || mode == .HEADING {
+            if mode == .COMPASS || mode == .COMPASS_H {
                 if current_maps.count > 0 {
                     current_maps = [:]
                     map_list_changed = true
