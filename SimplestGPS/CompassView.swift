@@ -82,7 +82,7 @@ class CompassView: UIView {
                    altitude: String, speed: String,
                       current_target: Int,
                       targets: [(heading: CGFloat, name: String, distance: String)],
-                      tgt_dist: Bool)
+                      tgt_dist: Int)
     {
         let target_change = current_target != last_target
         let ref_change = absolute != last_absolute
@@ -160,10 +160,10 @@ class CompassView: UIView {
                 }
                 tgtminis2[i].labels(targets[i].name, distance: targets[i].distance)
                 tgtminis_anim[i].set(tgtheading, block: {
-                    self.tgtminis[i].hidden = i == current_target || tgt_dist
+                    self.tgtminis[i].hidden = i == current_target || (tgt_dist > 0)
                 })
                 tgtminis2_anim[i].set(tgtheading, block: {
-                    self.tgtminis2[i].hidden = i == current_target || !tgt_dist
+                    self.tgtminis2[i].hidden = i == current_target || !(tgt_dist > 0)
                 })
                 if ref_change {
                     tgtminis_anim[i].bigchange()

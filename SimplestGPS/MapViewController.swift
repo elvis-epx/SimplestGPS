@@ -32,7 +32,7 @@ enum Mode: Int {
     var width_height_proportion = CGFloat.NaN
     var diag_height_proportion = CGFloat.NaN
     
-    var mode: Mode = .COMPASS
+    var mode: Mode = .MAPCOMPASS
     let next_mode = [Mode.MAP: Mode.MAPCOMPASS,
                      Mode.MAPCOMPASS: Mode.COMPASS,
                      Mode.COMPASS: Mode.MAP_H,
@@ -45,11 +45,17 @@ enum Mode: Int {
                            Mode.MAPCOMPASS_H: Mode.COMPASS,
                            Mode.COMPASS_H: Mode.COMPASS,
                            Mode.COMPASS: Mode.COMPASS_H]
+    let int_to_mode = [Mode.MAP.rawValue: Mode.MAP,
+                       Mode.MAPCOMPASS.rawValue: Mode.MAPCOMPASS,
+                       Mode.COMPASS.rawValue: Mode.COMPASS,
+                       Mode.MAP_H.rawValue: Mode.MAP_H,
+                       Mode.MAPCOMPASS_H.rawValue: Mode.MAPCOMPASS_H,
+                       Mode.COMPASS_H.rawValue: Mode.COMPASS_H]
     let mode_name: [Mode:String] = [.MAP: "", .MAPCOMPASS: "", .COMPASS: "",
                                     .MAP_H: "Follows heading",
                                     .MAPCOMPASS_H: "Follows heading",
                                     .COMPASS_H: "Follows heading"]
-    var tgt_dist = true
+    var tgt_dist = 1
     
     // in seconds of latitude degree across the screen height
     var zoom_factor: CGFloat = 30
@@ -133,10 +139,22 @@ enum Mode: Int {
                         userInfo: nil, repeats: true)
         NSRunLoop.currentRunLoop().addTimer(update_timer!, forMode: NSRunLoopCommonModes)
         
-        if MapModel.model().are_there_maps() {
-            mode = .MAPCOMPASS
-        } else {
-            mode = .COMPASS
+        if int_to_mode[GPSModel2.model().get_mode()] != nil {
+            mode = int_to_mode[GPSModel2.model().get_mode()]!
+        }
+        tgt_dist = GPSModel2.model().get_tgtdist() % 2
+        current_target = GPSModel2.model().get_currenttarget()
+        if current_target >= GPSModel2.model().target_count() {
+            current_target = -1
+        }
+
+        
+        if !MapModel.model().are_there_maps() {
+            if mode == .MAP || mode == .MAPCOMPASS {
+                mode = .COMPASS
+            } else if mode == .MAP_H || mode == .MAPCOMPASS_H {
+                mode = .COMPASS_H
+            }
         }
     }
     
@@ -547,8 +565,10 @@ enum Mode: Int {
     
     @IBAction func tgd_button(sender: AnyObject)
     {
-        NSLog("tgd")
-        tgt_dist = !tgt_dist
+        NSLog("TGD button")
+        tgt_dist += 1
+        tgt_dist %= 2
+        GPSModel2.model().set_tgtdist(tgt_dist)
         repaint(false, gesture: false)
     }
     
@@ -559,6 +579,7 @@ enum Mode: Int {
         } else {
             mode = next_mode_nomap[mode]!
         }
+        GPSModel2.model().set_mode(mode.rawValue)
         repaint(false, gesture: false)
     }
     
@@ -568,6 +589,7 @@ enum Mode: Int {
         if current_target >= GPSModel2.model().target_count() {
             current_target = -1
         }
+        GPSModel2.model().set_currenttarget(current_target)
         repaint(false, gesture: false)
     }
     

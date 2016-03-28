@@ -280,7 +280,7 @@ class MapCanvasView: UIView
     func send_compass(mode: Mode, heading: CGFloat, altitude: String, speed: String,
                       current_target: Int,
                       targets: [(heading: CGFloat, name: String, distance: String)],
-                      tgt_dist: Bool)
+                      tgt_dist: Int)
     {
         if map_plane == nil {
             // init2() not called yet

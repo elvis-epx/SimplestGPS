@@ -30,6 +30,9 @@ import CoreLocation
     var lman: CLLocationManager? = nil
     var metric: Int = 1;
     var editing: Int = -1
+    var mode: Int = 1 // MAPCOMPASS
+    var tgt_dist: Int = 1
+    var current_target: Int = -1
     
     var prefsObserver : NSObjectProtocol!
     
@@ -977,6 +980,9 @@ import CoreLocation
         let prefs = NSUserDefaults.standardUserDefaults();
         
         prefs.registerDefaults(["metric": 1, "next_target": 3,
+            "mode": 1, // MAPCOMPASS
+            "tgt_dist": 1,
+            "current_target": -1,
             "names": ["1": "Joinville", "2": "Blumenau"],
             "lats": ["1": GPSModel2.parse_latz("26.18.19.50S"),
                 "2": GPSModel2.parse_latz("26.54.46.10S")],
@@ -989,6 +995,9 @@ import CoreLocation
         lats = prefs.dictionaryForKey("lats")!
         longs = prefs.dictionaryForKey("longs")!
         alts = prefs.dictionaryForKey("alts")!
+        mode = prefs.integerForKey("mode")
+        tgt_dist = prefs.integerForKey("tgt_dist")
+        current_target = prefs.integerForKey("current_target")
         
         self.updateTargetList()
         self.upgradeAltitudes()
@@ -1012,6 +1021,36 @@ import CoreLocation
                                     self.prefs_changed()
                                 }
         )
+    }
+    
+    func get_mode() -> Int {
+        return mode
+    }
+    
+    func set_mode(new_mode: Int) {
+        self.mode = new_mode
+        let prefs = NSUserDefaults.standardUserDefaults();
+        prefs.setObject(self.mode, forKey: "mode");
+    }
+    
+    func get_tgtdist() -> Int {
+        return tgt_dist
+    }
+    
+    func set_tgtdist(new_tgtdist: Int) {
+        self.tgt_dist = new_tgtdist
+        let prefs = NSUserDefaults.standardUserDefaults();
+        prefs.setObject(self.tgt_dist, forKey: "tgt_dist");
+    }
+   
+    func get_currenttarget() -> Int {
+        return current_target
+    }
+    
+    func set_currenttarget(new_currenttarget: Int) {
+        self.current_target = new_currenttarget
+        let prefs = NSUserDefaults.standardUserDefaults();
+        prefs.setObject(self.current_target, forKey: "current_target");
     }
     
     deinit {
