@@ -9,6 +9,14 @@
 import Foundation
 import UIKit
 
+enum Mode: Int {
+    case MAPONLY = 0
+    case MAPCOMPASS
+    case MAPHEADING
+    case HEADING
+    case COMPASS
+}
+
 @objc class MapViewController: UIViewController, ModelListener
 {
     @IBOutlet weak var canvas: MapCanvasView!
@@ -24,14 +32,17 @@ import UIKit
     var width_height_proportion = CGFloat.NaN
     var diag_height_proportion = CGFloat.NaN
     
-    let MODE_MAPONLY = 0
-    let MODE_MAPCOMPASS = 1
-    let MODE_MAPHEADING = 2
-    let MODE_COMPASS = 3
-    let MODE_HEADING = 4
-    let MODE_COUNT = 5
-    
-    var mode = 1
+    var mode: Mode = .COMPASS
+    let next_mode = [Mode.MAPONLY: Mode.MAPCOMPASS,
+                     Mode.MAPCOMPASS: Mode.MAPHEADING,
+                     Mode.MAPHEADING: Mode.HEADING,
+                     Mode.HEADING: Mode.COMPASS,
+                     Mode.COMPASS: Mode.MAPONLY]
+    let next_mode_nomap = [Mode.MAPONLY: Mode.COMPASS,
+                     Mode.MAPCOMPASS: Mode.HEADING,
+                     Mode.MAPHEADING: Mode.HEADING,
+                     Mode.HEADING: Mode.COMPASS,
+                     Mode.COMPASS: Mode.HEADING]
     var tgt_dist = true
     
     // in seconds of latitude degree across the screen height
@@ -115,6 +126,12 @@ import UIKit
                                selector: #selector(MapViewController.update),
                         userInfo: nil, repeats: true)
         NSRunLoop.currentRunLoop().addTimer(update_timer!, forMode: NSRunLoopCommonModes)
+        
+        if MapModel.model().are_there_maps() {
+            mode = .MAPCOMPASS
+        } else {
+            mode = .COMPASS
+        }
     }
     
     override func viewWillLayoutSubviews() {
@@ -226,7 +243,7 @@ import UIKit
         }
         
         if !gesture {
-            scale.hidden = (mode == MODE_COMPASS || mode == MODE_HEADING)
+            scale.hidden = (mode == .COMPASS || mode == .HEADING)
             // latitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
             // longitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
             // accuracy.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
@@ -282,7 +299,7 @@ import UIKit
             // only recalculate map list when we are not in a hurry
             last_map_update = now
 
-            if mode == MODE_COMPASS || mode == MODE_HEADING {
+            if mode == .COMPASS || mode == .HEADING {
                 if current_maps.count > 0 {
                     current_maps = [:]
                     map_list_changed = true
@@ -528,8 +545,11 @@ import UIKit
     
     @IBAction func mod_button(sender: AnyObject)
     {
-        mode += 1
-        mode %= MODE_COUNT
+        if MapModel.model().are_there_maps() {
+            mode = next_mode[mode]!
+        } else {
+            mode = next_mode_nomap[mode]!
+        }
         repaint(false, gesture: false)
     }
     

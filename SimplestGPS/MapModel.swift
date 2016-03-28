@@ -682,7 +682,7 @@ public class MapDescriptor {
         return nil
     }
     
-    override init()
+    init(_: Int)
     {
         i_notloaded = MapModel.simple_image(UIColor(colorLiteralRed: 0, green: 1.0, blue: 0, alpha: 0.33))
         i_oom = MapModel.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 0.0, alpha: 0.33))
@@ -737,6 +737,11 @@ public class MapDescriptor {
         )
     }
     
+    func are_there_maps() -> Bool
+    {
+        return self.maps.count > 0
+    }
+    
     deinit {
         let notifications = NSNotificationCenter.defaultCenter()
         notifications.removeObserver(memoryWarningObserver, name: UIApplicationDidReceiveMemoryWarningNotification, object: nil)
@@ -785,7 +790,7 @@ public class MapDescriptor {
         return self.ram_limit > (self.ram_inuse + additional)
     }
     
-    static let singleton = MapModel();
+    static let singleton = MapModel(1);
     
     class func model() -> MapModel
     {

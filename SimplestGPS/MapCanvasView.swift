@@ -44,14 +44,7 @@ class MapCanvasView: UIView
 
     var target_count: Int = 0;
     
-    let MODE_MAPONLY = 0
-    let MODE_MAPCOMPASS = 1
-    let MODE_MAPHEADING = 2
-    let MODE_COMPASS = 3
-    let MODE_HEADING = 4
-    let MODE_COUNT = 5
-    
-    var mode = 0
+    var mode: Mode = .COMPASS
     var _current_heading = CGFloat(0.0)
     
     override init(frame: CGRect) {
@@ -61,7 +54,7 @@ class MapCanvasView: UIView
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        self.mode = MODE_MAPONLY;
+        self.mode = .COMPASS
         self.backgroundColor = UIColor.blackColor()
         self.opaque = true
         
@@ -175,8 +168,7 @@ class MapCanvasView: UIView
                     view.0.image = view.1.img
                 }
                 view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
-                view.0.hidden = (self.mode == self.MODE_COMPASS
-                                || self.mode == self.MODE_HEADING)
+                view.0.hidden = (self.mode == .COMPASS || self.mode == .HEADING)
             })
         }
         
@@ -203,13 +195,13 @@ class MapCanvasView: UIView
         accuracy_anim!.set_rel(pointrel, block: {
             self.accuracy_view!.layer.cornerRadius = accuracy
             self.accuracy_view!.bounds = CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2)
-            self.accuracy_view!.hidden = (self.mode == self.MODE_COMPASS
-                                        || self.mode == self.MODE_HEADING)
+            self.accuracy_view!.hidden = (self.mode == .COMPASS
+                                        || self.mode == .HEADING)
             })
         
         location_anim!.set_rel(pointrel, block: {
-            self.location_view!.hidden = (self.mode == self.MODE_COMPASS
-                                            || self.mode == self.MODE_HEADING)
+            self.location_view!.hidden = (self.mode == .COMPASS
+                                            || self.mode == .HEADING)
             })
     }
 
@@ -259,7 +251,7 @@ class MapCanvasView: UIView
         immediate = true
     }
     
-    func send_compass(mode: Int, heading: CGFloat, altitude: String, speed: String,
+    func send_compass(mode: Mode, heading: CGFloat, altitude: String, speed: String,
                       current_target: Int,
                       targets: [(heading: CGFloat, name: String, distance: String)],
                       tgt_dist: Bool)
@@ -269,21 +261,21 @@ class MapCanvasView: UIView
             return
         }
         
-        map_plane!.hidden = !(mode == MODE_MAPONLY || mode == MODE_MAPCOMPASS
-                                    || mode == MODE_MAPHEADING)
+        map_plane!.hidden = !(mode == .MAPONLY || mode == .MAPCOMPASS
+                                    || mode == .MAPHEADING)
         
         self.mode = mode
         
-        compass!.hidden = (mode == MODE_MAPONLY)
+        compass!.hidden = (mode == .MAPONLY)
 
-        if mode == MODE_MAPONLY {
+        if mode == .MAPONLY {
             // nothing to do with compass
             return
         }
         
-        compass!.send_data(mode == MODE_COMPASS || mode == MODE_HEADING,
-                            absolute: mode == MODE_COMPASS || mode == MODE_MAPCOMPASS,
-                           transparent: mode == MODE_MAPCOMPASS || mode == MODE_MAPHEADING,
+        compass!.send_data(mode == .COMPASS || mode == .HEADING,
+                            absolute: mode == .COMPASS || mode == .MAPCOMPASS,
+                           transparent: mode == .MAPCOMPASS || mode == .MAPHEADING,
                            heading: heading, altitude: altitude, speed: speed,
                            current_target: current_target,
                            targets: targets, tgt_dist: tgt_dist)
@@ -308,8 +300,8 @@ class MapCanvasView: UIView
                 location_view!.backgroundColor = UIColor.yellowColor()
             }
             for i in 0..<target_count {
-                target_views[i].hidden = blink_status || mode == MODE_COMPASS
-                                            || mode == MODE_HEADING
+                target_views[i].hidden = blink_status || mode == .COMPASS
+                                            || mode == .HEADING
             }
             blink_status = !blink_status
             last_update_blink = this_update
@@ -319,7 +311,7 @@ class MapCanvasView: UIView
             
         let (new_heading, _) = compass!.anim(dt)
         // NSLog("Animated heading: %f", new_heading)
-        if mode == MODE_MAPHEADING {
+        if mode == .MAPHEADING {
             _current_heading = new_heading * CGFloat(M_PI / 180.0)
         } else {
             _current_heading = 0
