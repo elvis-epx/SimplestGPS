@@ -36,6 +36,9 @@ class MapCanvasView: UIView
     // compass
     var compass: CompassView? = nil
     
+    // locker
+    var locker: UITextView? = nil
+    
     var updater: CADisplayLink? = nil
     var last_update: CFTimeInterval = Double.NaN
     var last_update_blink: CFTimeInterval = Double.NaN
@@ -94,6 +97,19 @@ class MapCanvasView: UIView
         let compass_frame = CGRect(x: 0, y: slack / 2, width: self.frame.width, height: self.frame.width)
         compass = CompassView.init(frame: compass_frame)
         self.addSubview(compass!)
+        
+        locker = UITextView(frame: CGRect(x: compass_frame.origin.x + compass_frame.size.width * 0.85,
+                                          y: compass_frame.origin.y + compass_frame.size.height * 0.85,
+                                          width: compass_frame.size.width * 0.15,
+                                          height: compass_frame.size.width * 0.15))
+        locker!.editable = false
+        locker!.selectable = false
+        locker!.userInteractionEnabled = false
+        locker!.backgroundColor = UIColor.clearColor()
+        locker!.font = UIFont.systemFontOfSize(frame.width / 10)
+        locker!.textAlignment = .Right
+        locker!.text = "🔒"
+        self.addSubview(locker!)
     }
 
     func send_img(list: [String:MapDescriptor], changed: Bool) -> Bool {
@@ -178,7 +194,13 @@ class MapCanvasView: UIView
         return self.mode == .COMPASS ||
                self.mode == .HEADING ||
                ((self.mode == .MAPHEADING ||
-                 self.mode == .MAPCOMPASS) && locked)
+                 self.mode == .MAPCOMPASS) && self.locked)
+    }
+    
+    func hide_locker() -> Bool {
+        return self.mode == .COMPASS ||
+               self.mode == .HEADING ||
+               !self.locked
     }
     
     func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat, locked: Bool)
@@ -189,6 +211,7 @@ class MapCanvasView: UIView
         }
         
         self.locked = locked
+        self.locker!.hidden = self.hide_locker()
         
         /* Point is relative: 0 ,0 = middle of screen */
         let pointrel = CGPoint(x: xrel, y: yrel)
@@ -297,6 +320,7 @@ class MapCanvasView: UIView
         }
         
         if (this_update - last_update_blink) > 0.5 {
+            self.locker!.hidden = self.hide_locker()
             self.location_view!.hidden = self.hide_location()
             self.accuracy_view!.hidden = self.hide_location()
             for i in 0..<target_count {
