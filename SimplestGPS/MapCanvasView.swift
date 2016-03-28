@@ -198,8 +198,7 @@ class MapCanvasView: UIView
             })
         
         location_anim!.set_rel(pointrel, block: {
-            self.location_view!.hidden =
-                (!self.blink_status) || self.mode == .COMPASS || self.mode == .HEADING
+            self.location_view!.hidden = self.mode == .COMPASS || self.mode == .HEADING
             })
     }
 
@@ -288,8 +287,7 @@ class MapCanvasView: UIView
         }
         
         if (this_update - last_update_blink) > 0.5 {
-            self.location_view!.hidden =
-                (!self.blink_status) || self.mode == .COMPASS || self.mode == .HEADING
+            self.location_view!.hidden = self.mode == .COMPASS || self.mode == .HEADING
             for i in 0..<target_count {
                 target_views[i].hidden = blink_status || mode == .COMPASS || mode == .HEADING
             }

@@ -23,7 +23,7 @@ class MapPointView: UIView
         super.init(frame: CGRect(origin: p, size: s))
         self.backgroundColor = UIColor.clearColor()
         if rot {
-            angle = CGFloat(45.0 * M_PI / 180.0)
+            angle = CGFloat(0.0 * M_PI / 180.0)
         }
         self.transform = CGAffineTransformMakeRotation(angle)
     }
