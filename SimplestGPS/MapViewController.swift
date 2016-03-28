@@ -23,7 +23,6 @@ enum Mode: Int {
     @IBOutlet weak var scale: UILabel!
     @IBOutlet weak var new_target: UIButton!
     
-    @IBOutlet weak var altitude: UILabel!
     @IBOutlet weak var accuracy: UILabel!
     @IBOutlet weak var longitude: UILabel!
     @IBOutlet weak var latitude: UILabel!
@@ -279,8 +278,8 @@ enum Mode: Int {
                                                     met: GPSModel2.model().get_metric())
             latitude.text = GPSModel2.model().latitude_formatted()
             longitude.text = GPSModel2.model().longitude_formatted()
-            altitude.text = GPSModel2.model().altitude_formatted()
-            accuracy.text = GPSModel2.model().accuracy_formatted()
+            accuracy.text = GPSModel2.model().altitude_formatted() + "↑ " +
+                GPSModel2.model().accuracy_formatted()
         }
         
         let accuracy_px = scrw * CGFloat(GPSModel2.model().horizontal_accuracy()) / scale_m
@@ -347,7 +346,8 @@ enum Mode: Int {
         let (xrel, yrel) = to_raster(gpslat, long: gpslong, clat: clat, clong: clong,
                                              lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                              longitude_proportion: longitude_latitude_proportion)
-        canvas.send_pos_rel(xrel, yrel: yrel, accuracy: CGFloat(accuracy_px))
+        canvas.send_pos_rel(xrel, yrel: yrel, accuracy: CGFloat(accuracy_px),
+                            locked: (clat == gpslat && clong == gpslong))
 
         /*
         NSLog("My position %f %f translated to rel %f,%f", clat, clong, xrel, yrel)

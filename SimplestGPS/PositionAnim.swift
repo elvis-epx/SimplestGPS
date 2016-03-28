@@ -62,12 +62,14 @@ class PositionAnim
         }
     }
     
-    func tick(pdt: CGFloat, immediate: Bool) -> Bool
+    func tick(pdt: CGFloat, t: CGAffineTransform, immediate: Bool) -> Bool
     {
         if self.block != nil {
             block!();
             self.block = nil
         }
+        
+        view.transform = t
         
         if target.x.isNaN && current.x.isNaN {
             // nothing to do (pathologic case)

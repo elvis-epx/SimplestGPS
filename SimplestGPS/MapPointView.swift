@@ -12,9 +12,8 @@ import UIKit
 class MapPointView: UIView
 {
     var color: CGColor
-    var angle = CGFloat(0)
-    
-    init(frame: CGRect, color: UIColor, rot: Bool)
+ 
+    init(frame: CGRect, color: UIColor)
     {
         // we expect the frame of the compass but build ourselves smaller
         self.color = color.CGColor
@@ -22,10 +21,6 @@ class MapPointView: UIView
         let p = CGPoint(x: frame.width / 2, y: frame.height / 2)
         super.init(frame: CGRect(origin: p, size: s))
         self.backgroundColor = UIColor.clearColor()
-        if rot {
-            angle = CGFloat(0.0 * M_PI / 180.0)
-        }
-        self.transform = CGAffineTransformMakeRotation(angle)
     }
 
     required init?(coder aDecoder: NSCoder) {

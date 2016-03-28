@@ -46,6 +46,7 @@ class MapCanvasView: UIView
     
     var mode: Mode = .COMPASS
     var _current_heading = CGFloat(0.0)
+    var locked: Bool = false
     
     override init(frame: CGRect) {
         fatalError("init(coder:) has not been implemented")
@@ -85,7 +86,7 @@ class MapCanvasView: UIView
         map_plane!.addSubview(accuracy_view!)
         accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, size: map_plane!.frame)
     
-        location_view = MapPointView(frame: self.frame, color: UIColor.redColor(), rot: true)
+        location_view = MapPointView(frame: self.frame, color: UIColor.redColor())
         map_plane!.addSubview(location_view!)
         location_anim = PositionAnim(name: "location", view: location_view!, size: map_plane!.frame)
 
@@ -173,12 +174,21 @@ class MapCanvasView: UIView
         return true
     }
     
-    func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat)
+    func hide_location() -> Bool {
+        return self.mode == .COMPASS ||
+               self.mode == .HEADING ||
+               ((self.mode == .MAPHEADING ||
+                 self.mode == .MAPCOMPASS) && locked)
+    }
+    
+    func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat, locked: Bool)
     {
         if map_plane == nil {
             // init2() not called yet
             return
         }
+        
+        self.locked = locked
         
         /* Point is relative: 0 ,0 = middle of screen */
         let pointrel = CGPoint(x: xrel, y: yrel)
@@ -190,16 +200,16 @@ class MapCanvasView: UIView
            wrong position/rotation because animation did not have a chance
            to set it.
          */
+        
         accuracy_anim!.set_rel(pointrel, block: {
             self.accuracy_view!.layer.cornerRadius = accuracy
             self.accuracy_view!.bounds = CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2)
-            self.accuracy_view!.hidden = (self.mode == .COMPASS
-                                        || self.mode == .HEADING)
+            self.accuracy_view!.hidden = self.hide_location()
             })
         
         location_anim!.set_rel(pointrel, block: {
-            self.location_view!.hidden = self.mode == .COMPASS || self.mode == .HEADING
-            })
+            self.location_view!.hidden = self.hide_location()
+        })
     }
 
     func send_targets_rel(list: [(CGFloat, CGFloat)])
@@ -215,7 +225,7 @@ class MapCanvasView: UIView
         let updated_targets = target_views.count < target_count
 
         while target_views.count < target_count {
-            let target = MapPointView(frame: self.frame, color: UIColor.blueColor(), rot: false)
+            let target = MapPointView(frame: self.frame, color: UIColor.greenColor())
             target.hidden = true
             map_plane!.addSubview(target)
             target_views.append(target)
@@ -287,7 +297,8 @@ class MapCanvasView: UIView
         }
         
         if (this_update - last_update_blink) > 0.5 {
-            self.location_view!.hidden = self.mode == .COMPASS || self.mode == .HEADING
+            self.location_view!.hidden = self.hide_location()
+            self.accuracy_view!.hidden = self.hide_location()
             for i in 0..<target_count {
                 target_views[i].hidden = blink_status || mode == .COMPASS || mode == .HEADING
             }
@@ -307,15 +318,17 @@ class MapCanvasView: UIView
         
         /* All map ando points rotate together because all belong to this view */
         map_plane!.transform = CGAffineTransformMakeRotation(_current_heading)
+        /* Cancel map plane rotation so the crosshairs is always straight */
+        let cancel_rot = CGAffineTransformMakeRotation(-_current_heading)
         
         for i in 0..<target_count {
-            target_anims[i].tick(dt, immediate: immediate)
+            target_anims[i].tick(dt, t: cancel_rot, immediate: immediate)
         }
         for (_, anim) in image_anims {
-            anim.tick(dt, immediate: immediate)
+            anim.tick(dt, t: CGAffineTransformIdentity, immediate: immediate)
         }
-        accuracy_anim!.tick(dt, immediate: immediate)
-        location_anim!.tick(dt, immediate: immediate)
+        accuracy_anim!.tick(dt, t: CGAffineTransformIdentity, immediate: immediate)
+        location_anim!.tick(dt, t: cancel_rot, immediate: immediate)
 
         immediate = false
         
