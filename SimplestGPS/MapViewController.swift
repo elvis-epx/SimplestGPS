@@ -147,6 +147,9 @@ enum Mode: Int {
         if current_target >= GPSModel2.model().target_count() {
             current_target = -1
         }
+        zoom_factor = CGFloat(GPSModel2.model().get_zoom())
+        zoom_factor = max(zoom_factor, zoom_min)
+        zoom_factor = min(zoom_factor, zoom_max)
 
         
         if !MapModel.model().are_there_maps() {
@@ -464,6 +467,7 @@ enum Mode: Int {
         zoom_factor = new_zoom_factor
         zoom_factor = max(zoom_factor, zoom_min)
         zoom_factor = min(zoom_factor, zoom_max)
+        GPSModel2.model().set_zoom(Double(zoom_factor))
         
         repaint(true, gesture: false)
     }
@@ -526,6 +530,7 @@ enum Mode: Int {
         zoom_factor /= rec.scale
         zoom_factor = max(zoom_factor, zoom_min)
         zoom_factor = min(zoom_factor, zoom_max)
+        GPSModel2.model().set_zoom(Double(zoom_factor))
         rec.scale = 1.0
         repaint(true, gesture: true)
     }

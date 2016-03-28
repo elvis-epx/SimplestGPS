@@ -33,6 +33,7 @@ import CoreLocation
     var mode: Int = 1 // MAPCOMPASS
     var tgt_dist: Int = 1
     var current_target: Int = -1
+    var zoom: Double = 0.0
     
     var prefsObserver : NSObjectProtocol!
     
@@ -983,6 +984,7 @@ import CoreLocation
             "mode": 1, // MAPCOMPASS
             "tgt_dist": 1,
             "current_target": -1,
+            "zoom": 0.0,
             "names": ["1": "Joinville", "2": "Blumenau"],
             "lats": ["1": GPSModel2.parse_latz("26.18.19.50S"),
                 "2": GPSModel2.parse_latz("26.54.46.10S")],
@@ -998,6 +1000,7 @@ import CoreLocation
         mode = prefs.integerForKey("mode")
         tgt_dist = prefs.integerForKey("tgt_dist")
         current_target = prefs.integerForKey("current_target")
+        zoom = prefs.doubleForKey("zoom")
         
         self.updateTargetList()
         self.upgradeAltitudes()
@@ -1051,6 +1054,16 @@ import CoreLocation
         self.current_target = new_currenttarget
         let prefs = NSUserDefaults.standardUserDefaults();
         prefs.setObject(self.current_target, forKey: "current_target");
+    }
+    
+    func get_zoom() -> Double {
+        return zoom
+    }
+    
+    func set_zoom(new_zoom: Double) {
+        self.zoom = new_zoom
+        let prefs = NSUserDefaults.standardUserDefaults();
+        prefs.setObject(self.zoom, forKey: "zoom");
     }
     
     deinit {
