@@ -291,15 +291,12 @@ class MapCanvasView: UIView
         
         self.mode = mode
         
-        if mode == .MAP || mode == .MAP_H {
-            // nothing to do with compass
-            compass!.hidden = true
-            return
-        }
-        compass!.hidden = false
+        compass!.hidden = mode == .MAP || mode == .MAP_H
+        // need to send data even if compass hidden because we
+        // use its animation to rotate the map
 
         compass!.send_data(mode == .COMPASS || mode == .COMPASS_H,
-                            absolute: mode == .COMPASS || mode == .MAPCOMPASS,
+                            absolute: mode == .COMPASS || mode == .MAPCOMPASS || mode == .MAP,
                            transparent: mode == .MAPCOMPASS || mode == .MAPCOMPASS_H,
                            heading: heading, altitude: altitude, speed: speed,
                            current_target: current_target,
