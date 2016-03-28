@@ -37,6 +37,7 @@
 		B9D542991C80CBD70063DCD8 /* MapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */; };
 		B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */; };
 		B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */; };
+		B9F0F78C1CA8B1510038F50E /* MapPointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F0F78B1CA8B1510038F50E /* MapPointView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,6 +75,7 @@
 		B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapCanvasView.swift; sourceTree = "<group>"; };
 		B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetViewController2.swift; sourceTree = "<group>"; };
 		B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetCell2.swift; sourceTree = "<group>"; };
+		B9F0F78B1CA8B1510038F50E /* MapPointView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapPointView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 				B95B5D3D1C8F6099002EAEA6 /* SimplestGPS-Bridging-Header.h */,
 				B91E5F9E1C7F83A2000CB068 /* MapViewController.swift */,
 				B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */,
+				B9F0F78B1CA8B1510038F50E /* MapPointView.swift */,
 				B963D9AB1C9A0294003D024D /* PositionAnim.swift */,
 				B95B688B1C908DEF008E6CD3 /* CompassView.swift */,
 				B95B68971C911A39008E6CD3 /* CompassAnim.swift */,
@@ -253,6 +256,7 @@
 				B99D01151C9F9A0D00FA1FC2 /* MapModel.swift in Sources */,
 				B95B68981C911A39008E6CD3 /* CompassAnim.swift in Sources */,
 				B95B688C1C908DF0008E6CD3 /* CompassView.swift in Sources */,
+				B9F0F78C1CA8B1510038F50E /* MapPointView.swift in Sources */,
 				B95B68961C90D18D008E6CD3 /* TargetMiniNeedleView.swift in Sources */,
 				B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */,
 				B91E5F9F1C7F83A2000CB068 /* MapViewController.swift in Sources */,

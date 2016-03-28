@@ -80,14 +80,12 @@ class MapCanvasView: UIView
         self.addSubview(map_plane!)
 
         accuracy_view = UIView.init(frame: CGRect(x: 0, y: 0, width: 2, height: 2))
-        accuracy_view!.alpha = 0.2
+        accuracy_view!.alpha = 0.25
         accuracy_view!.backgroundColor = UIColor.yellowColor()
         map_plane!.addSubview(accuracy_view!)
         accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, size: map_plane!.frame)
     
-        location_view = UIView.init(frame: CGRect(x: 0, y: 0, width: 16, height: 16))
-        location_view!.layer.cornerRadius = 8
-        location_view!.alpha = 1
+        location_view = MapPointView(frame: self.frame, color: UIColor.redColor(), rot: true)
         map_plane!.addSubview(location_view!)
         location_anim = PositionAnim(name: "location", view: location_view!, size: map_plane!.frame)
 
@@ -200,8 +198,8 @@ class MapCanvasView: UIView
             })
         
         location_anim!.set_rel(pointrel, block: {
-            self.location_view!.hidden = (self.mode == .COMPASS
-                                            || self.mode == .HEADING)
+            self.location_view!.hidden =
+                (!self.blink_status) || self.mode == .COMPASS || self.mode == .HEADING
             })
     }
 
@@ -218,11 +216,7 @@ class MapCanvasView: UIView
         let updated_targets = target_views.count < target_count
 
         while target_views.count < target_count {
-            let f = CGRect(x: 0, y: 0, width: 16, height: 16)
-            let target = UIView.init(frame: f)
-            target.backgroundColor = UIColor.blueColor()
-            target.layer.cornerRadius = 8
-            target.alpha = 1
+            let target = MapPointView(frame: self.frame, color: UIColor.blueColor(), rot: false)
             target.hidden = true
             map_plane!.addSubview(target)
             target_views.append(target)
@@ -293,15 +287,11 @@ class MapCanvasView: UIView
             last_update = this_update
         }
         
-        if (this_update - last_update_blink) > 0.33333 {
-            if blink_status {
-                location_view!.backgroundColor = UIColor.redColor()
-            } else {
-                location_view!.backgroundColor = UIColor.yellowColor()
-            }
+        if (this_update - last_update_blink) > 0.5 {
+            self.location_view!.hidden =
+                (!self.blink_status) || self.mode == .COMPASS || self.mode == .HEADING
             for i in 0..<target_count {
-                target_views[i].hidden = blink_status || mode == .COMPASS
-                                            || mode == .HEADING
+                target_views[i].hidden = blink_status || mode == .COMPASS || mode == .HEADING
             }
             blink_status = !blink_status
             last_update_blink = this_update

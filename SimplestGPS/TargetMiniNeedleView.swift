@@ -13,6 +13,7 @@ class TargetMiniNeedleView: UIView
 {
     override init(frame: CGRect)
     {
+        // we expect a frame with the size of the compass, but build ourselves smaller
         let s = CGSize(width: frame.width / 13, height: frame.width / 25)
         let p = CGPoint(x: frame.width / 2 - s.width / 2, y: frame.width / 17)
         super.init(frame: CGRect(origin: p, size: s))
@@ -24,7 +25,7 @@ class TargetMiniNeedleView: UIView
     }
     
     override func drawRect(rect: CGRect) {
-        NSLog("MiniNeedle drawRect")
+        // NSLog("MiniNeedle drawRect")
         let ctx = UIGraphicsGetCurrentContext()
         if ctx == nil {
             return

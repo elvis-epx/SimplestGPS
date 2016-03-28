@@ -244,9 +244,6 @@ enum Mode: Int {
         
         if !gesture {
             scale.hidden = (mode == .COMPASS || mode == .HEADING)
-            // latitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
-            // longitude.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
-            // accuracy.hidden = !(mode == MODE_COMPASS || mode == MODE_HEADING)
             
             // send compass data
             var targets_compass: [(heading: CGFloat, name: String, distance: String)] = []

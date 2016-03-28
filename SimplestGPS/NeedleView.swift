@@ -17,7 +17,8 @@ class NeedleView: UIView {
         fatalError("init has not been implemented")
     }
 
-    init(frame: CGRect, color: UIColor) {        
+    init(frame: CGRect, color: UIColor) {
+        // we expect a frame with the size of the compass, but build ourselves smaller
         self.color = color
         let s = CGSize(width: frame.width / 6, height: frame.height)
         let p = CGPoint(x: frame.width / 2 - s.width / 2, y: 0)
@@ -30,7 +31,7 @@ class NeedleView: UIView {
     }
     
     override func drawRect(rect: CGRect) {
-        NSLog("NeedleView drawRect")
+        // NSLog("NeedleView drawRect")
         let ctx = UIGraphicsGetCurrentContext()
         if ctx == nil {
             return

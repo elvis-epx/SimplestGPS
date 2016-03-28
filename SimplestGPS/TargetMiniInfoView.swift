@@ -26,6 +26,7 @@ class TargetMiniInfoView: UIView {
         distance.editable = false
         distance.selectable = false
 
+        // we expect a frame with the size of the compass, but build ourselves smaller
         let s = CGSize(width: frame.width / 2, height: frame.width / 10)
         let p = CGPoint(x: frame.width / 4, y: 0)
         super.init(frame: CGRect(origin: p, size: s))
