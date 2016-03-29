@@ -15,7 +15,7 @@ class CompassAnim
     let mass: CGFloat
     var target: CGFloat
     var current: CGFloat
-    let drag: CGFloat
+    let friction: CGFloat
     var name: String
     var lost: Bool
     let view: UIView
@@ -30,11 +30,11 @@ class CompassAnim
     let OPACITY_LOST = CGFloat(12000.0) // points/sec
     let OPACITY_OK = CGFloat(50000.0) // points/sec
     
-    init(name: String, view: UIView, pivot: CGPoint, mass: CGFloat, drag: CGFloat) {
+    init(name: String, view: UIView, pivot: CGPoint, mass: CGFloat, friction: CGFloat) {
         self.name = name
         self.speed = 0.0
         self.mass = mass
-        self.drag = drag
+        self.friction = friction
         self.target = 0.0
         self.current = 0.0
         self.lost = false
@@ -120,7 +120,7 @@ class CompassAnim
             }
             let acceleration = force2 / mass * (force > 0 ? 1 : -1)
     
-            speed -= speed * drag * dt
+            speed -= speed * friction * dt
             speed += acceleration * dt
             speed = max(speed, -MAX_SPEED)
             speed = min(speed, MAX_SPEED)

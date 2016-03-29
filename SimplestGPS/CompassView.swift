@@ -50,9 +50,9 @@ class CompassView: UIView {
 
         // relative coordinates (subviews see self.origin as 0,0)
         let pivot = CGPoint(x: frame.width / 2, y: frame.height / 2)
-        back_anim = CompassAnim(name: "compass", view: back, pivot: pivot, mass: 0.4, drag: 4.0)
-        needle_anim = CompassAnim(name: "needle", view: needle, pivot: pivot, mass: 0.25, drag: 4.0)
-        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle, pivot: pivot, mass: 0.3, drag: 4.0)
+        back_anim = CompassAnim(name: "compass", view: back, pivot: pivot, mass: 0.4, friction: 4.0)
+        needle_anim = CompassAnim(name: "needle", view: needle, pivot: pivot, mass: 0.25, friction: 4.0)
+        tgtneedle_anim = CompassAnim(name: "tgtneedle", view: tgtneedle, pivot: pivot, mass: 0.3, friction: 4.0)
         
         super.init(frame: frame)
 
@@ -135,10 +135,10 @@ class CompassView: UIView {
             let mini2 = TargetMiniInfoView(frame: child_frame)
             let mini_anim = CompassAnim(name: "minitgtneedle",
                                         view: mini, pivot: pivot, mass: 0.36,
-                                        drag: 3.5 + CGFloat(drand48()) * 2)
+                                        friction: 3.5 + CGFloat(drand48()) * 2)
             let mini2_anim = CompassAnim(name: "minitgtneedle2",
                                          view: mini2, pivot: pivot, mass: 0.36,
-                                         drag: 3.5 + CGFloat(drand48()) * 2)
+                                         friction: 3.5 + CGFloat(drand48()) * 2)
             tgtminis.append(mini)
             tgtminis2.append(mini2)
             tgtminis_anim.append(mini_anim)
