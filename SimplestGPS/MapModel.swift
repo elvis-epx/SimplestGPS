@@ -377,6 +377,8 @@ public class MapDescriptor {
                 NSLog("   current density %f screenh %f height %f excess %f",
                       self.max_density(), screenh, hpixels, factor)
                 
+                // TODO load a bigger chunk if the map is low density,
+                // or if this is the only map on screen
                 let (crop, newlat0, newlat1, newlong0, newlong1) =
                     self.calc_crop(blat0, boxlat1: blat1, boxlong0: blong0, boxlong1: blong1)
                 
