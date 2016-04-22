@@ -696,6 +696,17 @@ public class MapDescriptor {
         
         let fileManager = NSFileManager.defaultManager()
         let documentsUrl = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0] as NSURL
+        
+        #if (arch(i386) || arch(x86_64)) && os(iOS)
+        // Write a canary file to find the app's Documents folder in Simulator
+        let w = documentsUrl.URLByAppendingPathComponent("canary666.txt")
+        let text = "bla"
+        do {
+            try text.writeToURL(w, atomically: false, encoding: NSUTF8StringEncoding)
+        } catch {
+        }
+        #endif
+        
         if let directoryUrls = try? NSFileManager.defaultManager().contentsOfDirectoryAtURL(documentsUrl,
                                                                                             includingPropertiesForKeys: nil,
                                                                                             options:NSDirectoryEnumerationOptions.SkipsSubdirectoryDescendants) {
