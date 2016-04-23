@@ -100,7 +100,7 @@
                                     <constraint firstAttribute="width" constant="80" id="LZV-cF-vmz"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
-                                <state key="normal" title="TGD">
+                                <state key="normal" title="THF">
                                     <color key="titleColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
                                 <connections>
@@ -217,7 +217,7 @@
                                         <rect key="frame" x="0.0" y="22" width="600" height="70"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="SPd-HC-R28" id="hRA-Cy-0GD">
-                                            <rect key="frame" x="0.0" y="0.0" width="600" height="69"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="600" height="69.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nameeeeeeeeeeeee" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gYI-6G-IfP">
@@ -244,10 +244,22 @@
                                     <outlet property="delegate" destination="nfc-wt-9rG" id="LLy-vy-W6M"/>
                                 </connections>
                             </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="bottom" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fQC-Nf-qiO">
+                                <rect key="frame" x="277" y="552" width="46" height="39"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <state key="normal" title="Help">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="getHelp:" destination="nfc-wt-9rG" eventType="touchDown" id="suj-mI-fO0"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="fQC-Nf-qiO" firstAttribute="centerX" secondItem="U7z-fw-36S" secondAttribute="centerX" id="91T-53-a3s"/>
                             <constraint firstItem="mjj-HO-i3M" firstAttribute="top" secondItem="cx0-tc-xA7" secondAttribute="bottom" constant="9" id="9CK-ak-61A"/>
+                            <constraint firstItem="mjj-HO-i3M" firstAttribute="top" secondItem="fQC-Nf-qiO" secondAttribute="bottom" constant="9" id="DNq-ZG-O4d"/>
                             <constraint firstItem="mjj-HO-i3M" firstAttribute="top" secondItem="LfJ-eF-cPs" secondAttribute="bottom" constant="9" id="F9l-PF-0fr"/>
                             <constraint firstAttribute="trailingMargin" secondItem="9v4-Xt-iPm" secondAttribute="trailing" constant="-20" id="Kh6-kS-spY"/>
                             <constraint firstItem="mjj-HO-i3M" firstAttribute="top" secondItem="9v4-Xt-iPm" secondAttribute="bottom" constant="73" id="XLy-rq-QA4"/>

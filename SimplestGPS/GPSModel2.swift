@@ -34,6 +34,7 @@ import CoreLocation
     var tgt_dist: Int = 1
     var current_target: Int = -1
     var zoom: Double = 0.0
+    var welcome: Int = 0;
     
     var prefsObserver : NSObjectProtocol!
     
@@ -983,6 +984,7 @@ import CoreLocation
         prefs.registerDefaults(["metric": 1, "next_target": 3,
             "mode": 1, // MAPCOMPASS
             "tgt_dist": 1,
+            "welcome": 0,
             "current_target": -1,
             "zoom": 0.0,
             "names": ["1": "Joinville", "2": "Blumenau"],
@@ -1001,6 +1003,7 @@ import CoreLocation
         tgt_dist = prefs.integerForKey("tgt_dist")
         current_target = prefs.integerForKey("current_target")
         zoom = prefs.doubleForKey("zoom")
+        welcome = prefs.integerForKey("welcome")
         
         self.updateTargetList()
         self.upgradeAltitudes()
@@ -1024,6 +1027,16 @@ import CoreLocation
                                     self.prefs_changed()
                                 }
         )
+    }
+    
+    func show_welcome() -> Bool {
+        if welcome == 0 {
+            welcome = 1;
+            let prefs = NSUserDefaults.standardUserDefaults();
+            prefs.setInteger(welcome, forKey: "welcome");
+            return true;
+        }
+        return false;
     }
     
     func get_mode() -> Int {

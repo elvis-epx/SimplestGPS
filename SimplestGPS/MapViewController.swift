@@ -130,6 +130,14 @@ enum Mode: Int {
         canvas.addGestureRecognizer(tap3)
     }
     
+    override func viewDidAppear(animated: Bool) {
+        if GPSModel2.model().show_welcome() {
+            let alert = UIAlertController(title: "Welcome!", message: "If you need instructions about this app, press 'PIN' at lower left corner, then 'Help' at the bottom.", preferredStyle: UIAlertControllerStyle.Alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
+            self.presentViewController(alert, animated: true, completion: nil)
+        }
+    }
+    
     override func viewWillAppear(animated: Bool) {
         NSLog("     map will appear")
         super.viewWillAppear(animated)

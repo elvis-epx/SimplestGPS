@@ -40,6 +40,10 @@ import UIKit
     {
         // UIViewController *sourceViewController = sender.sourceViewController;
     }
+
+    @IBAction func getHelp(sender: AnyObject) {
+        UIApplication.sharedApplication().openURL(NSURL(string: "http://epxx.co/ctb/SimplestGPS/")!)
+    }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if sender === new_target {
