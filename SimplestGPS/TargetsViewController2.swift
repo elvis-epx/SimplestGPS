@@ -10,17 +10,14 @@ import Foundation
 import UIKit
 
 @objc class TargetsViewController2: UIViewController, ModelListener, UITableViewDelegate,
-                                    UITableViewDataSource, UIGestureRecognizerDelegate
+                                    UITableViewDataSource
 {
     @IBOutlet weak var table: UITableView?
     @IBOutlet weak var new_target: UIButton?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let lpgr = UILongPressGestureRecognizer.init(target: self, action: #selector(TargetsViewController2.handleLongPress(_:)))
-        lpgr.minimumPressDuration = 0.5
-        lpgr.delegate = self
-        table!.addGestureRecognizer(lpgr)
+        table?.allowsSelection = true;
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -33,19 +30,10 @@ import UIKit
         GPSModel2.model().delObs(self)
     }
     
-    func handleLongPress(g: UILongPressGestureRecognizer)
+    func tableView(t: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
-        let p = g.locationInView(table)
-        let ipath = table!.indexPathForRowAtPoint(p)
-        if ipath == nil {
-            NSLog("long press on table view but not on a row");
-        } else if g.state == .Began {
-            NSLog("long press on table view at row %d", ipath!.row)
-        } else if g.state == .Ended {
-            NSLog("gestureRecognizer.state = %d", g.state.rawValue);
-            GPSModel2.model().target_setEdit(ipath!.row)
-            self.performSegueWithIdentifier("openTarget", sender: self)
-        }
+        GPSModel2.model().target_setEdit(indexPath.row)
+        self.performSegueWithIdentifier("openTarget", sender: self)
     }
     
     @IBAction func backToTable(sender: UIStoryboardSegue)
