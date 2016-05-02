@@ -11,15 +11,17 @@ import UIKit
 
 class NeedleView: UIView {
     var color: UIColor
+    var thickness: CGFloat
 
     override init(frame: CGRect)
     {
         fatalError("init has not been implemented")
     }
 
-    init(frame: CGRect, color: UIColor) {
+    init(frame: CGRect, color: UIColor, thickness: CGFloat) {
         // we expect a frame with the size of the compass, but build ourselves smaller
         self.color = color
+        self.thickness = thickness
         let s = CGSize(width: frame.width / 6, height: frame.height)
         let p = CGPoint(x: frame.width / 2 - s.width / 2, y: 0)
         super.init(frame: CGRect(origin: p, size: s))
@@ -42,7 +44,8 @@ class NeedleView: UIView {
                                  self.bounds.size.height / 2)
 
         CGContextSetStrokeColorWithColor(ctx, color.CGColor)
-        CGContextSetLineWidth(ctx, 1.5)
+        CGContextSetLineWidth(ctx, 1.5 * thickness)
+        
         CGContextMoveToPoint(ctx, center.x + off, center.y - radius)
         CGContextAddLineToPoint(ctx, center.x + off, center.y + radius + off * 3)
         CGContextStrokePath(ctx)
@@ -51,11 +54,16 @@ class NeedleView: UIView {
         CGContextAddLineToPoint(ctx, center.x - off, center.y + radius + off * 3)
         CGContextStrokePath(ctx)
 
-        CGContextMoveToPoint(ctx, center.x - 4 * off, center.y - radius + off * 6)
+        // arrow point
+        
+        let al = CGFloat(4.0) // arrow angle
+        let aa = CGFloat(2.0) // arrow height
+        
+        CGContextMoveToPoint(ctx, center.x - al * off, center.y - radius + off * al * aa)
         CGContextAddLineToPoint(ctx, center.x, center.y - radius - off * 3)
         CGContextStrokePath(ctx)
 
-        CGContextMoveToPoint(ctx, center.x + 4 * off, center.y - radius + off * 6)
+        CGContextMoveToPoint(ctx, center.x + al * off, center.y - radius + off * al * aa)
         CGContextAddLineToPoint(ctx, center.x, center.y - radius - off * 3)
         CGContextStrokePath(ctx)
     }

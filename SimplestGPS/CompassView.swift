@@ -36,8 +36,10 @@ class CompassView: UIView {
     override init(frame: CGRect) {
         let child_frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
         bg = CompassBGView(frame: child_frame)
-        needle = NeedleView(frame: child_frame, color: UIColor.redColor())
-        tgtneedle = NeedleView(frame: child_frame, color: UIColor.greenColor())
+        needle = NeedleView(frame: child_frame,
+                            color: UIColor(red: 1.0, green: 0, blue: 0.5, alpha: 1.0),
+                            thickness: 2.0)
+        tgtneedle = NeedleView(frame: child_frame, color: UIColor.greenColor(), thickness: 1.0)
         back = BareCompassView(frame: child_frame)
         tgtdistance = UITextView(frame: CGRect(x: 0, y: frame.height * 0.65, width: frame.width, height: frame.height * 0.1))
         tgtname = UITextView(frame: CGRect(x: 0, y: frame.height * 0.57, width: frame.width, height: frame.height * 0.1))
@@ -107,14 +109,14 @@ class CompassView: UIView {
         }
         
         if current_target < 0 {
-            tgtdistance.textColor = UIColor.redColor()
-            // tgtname.textColor = UIColor.redColor()
+            tgtdistance.textColor = UIColor(red: 1.0, green: 0, blue: 0.5, alpha: 1.0)
+            tgtname.textColor = UIColor(red: 1.0, green: 0, blue: 0.5, alpha: 1.0)
             tgtdistance.text = speed
             tgtname.text = ""
             tgtneedle.hidden = true
         } else {
-            tgtdistance.textColor = UIColor.cyanColor()
-            tgtname.textColor = UIColor.cyanColor()
+            tgtdistance.textColor = UIColor.greenColor()
+            tgtname.textColor = UIColor.greenColor()
             tgtname.text = targets[current_target].name
             tgtdistance.text = targets[current_target].distance
             
