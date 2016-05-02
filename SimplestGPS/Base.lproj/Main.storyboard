@@ -110,6 +110,7 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mrM-pp-NuZ">
                                 <rect key="frame" x="520" y="0.0" width="80" height="80"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="80" id="G6K-jZ-qlI"/>
                                     <constraint firstAttribute="width" constant="80" id="MVj-ng-ETB"/>
@@ -156,8 +157,11 @@
                         <outlet property="canvas" destination="ruK-YN-pqb" id="Ypl-9m-aJS"/>
                         <outlet property="latitude" destination="gC6-W2-cIs" id="XrH-JR-8ro"/>
                         <outlet property="longitude" destination="Sci-7l-XQp" id="rmp-cU-WFt"/>
+                        <outlet property="mod_b" destination="AhK-gZ-Bul" id="xCW-Nm-Qid"/>
                         <outlet property="new_target" destination="ZJU-aR-bMo" id="KZY-Qd-PCj"/>
                         <outlet property="scale" destination="Ehl-KC-tZl" id="vnq-ME-ZQL"/>
+                        <outlet property="tgt_b" destination="mrM-pp-NuZ" id="YeW-jS-qbN"/>
+                        <outlet property="thf_b" destination="kAI-ob-o5A" id="UZU-ZV-Rr9"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dPa-Io-I7X" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -217,7 +221,7 @@
                                         <rect key="frame" x="0.0" y="22" width="600" height="70"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="SPd-HC-R28" id="hRA-Cy-0GD">
-                                            <rect key="frame" x="0.0" y="0.0" width="600" height="69.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="600" height="69"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nameeeeeeeeeeeee" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gYI-6G-IfP">

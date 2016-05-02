@@ -22,7 +22,11 @@ enum Mode: Int {
 {
     @IBOutlet weak var canvas: MapCanvasView!
     @IBOutlet weak var scale: UILabel!
+    
     @IBOutlet weak var new_target: UIButton!
+    @IBOutlet weak var thf_b: UIButton!
+    @IBOutlet weak var tgt_b: UIButton!
+    @IBOutlet weak var mod_b: UIButton!
     
     @IBOutlet weak var accuracy: UILabel!
     @IBOutlet weak var longitude: UILabel!
@@ -128,6 +132,9 @@ enum Mode: Int {
         tap3.numberOfTapsRequired = 3
         tap3.numberOfTouchesRequired = 3
         canvas.addGestureRecognizer(tap3)
+        
+        let lp = UILongPressGestureRecognizer(target: self, action: "tgt_longpress:")
+        self.tgt_b.addGestureRecognizer(lp)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -159,7 +166,6 @@ enum Mode: Int {
         zoom_factor = max(zoom_factor, zoom_min)
         zoom_factor = min(zoom_factor, zoom_max)
 
-        
         if !MapModel.model().are_there_maps() {
             if mode == .MAP || mode == .MAPCOMPASS {
                 mode = .COMPASS
@@ -602,6 +608,12 @@ enum Mode: Int {
         if current_target >= GPSModel2.model().target_count() {
             current_target = -1
         }
+        GPSModel2.model().set_currenttarget(current_target)
+        repaint(false, gesture: false)
+    }
+    
+    func tgt_longpress(guesture: UILongPressGestureRecognizer) {
+        current_target = -1
         GPSModel2.model().set_currenttarget(current_target)
         repaint(false, gesture: false)
     }
