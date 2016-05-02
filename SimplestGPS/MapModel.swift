@@ -732,8 +732,8 @@ public class MapDescriptor {
                                         file: url,
                                         name: url.lastPathComponent!,
                                         priority: coords.latheight,
-                                        latNW: coords.lat,
-                                        longNW: coords.long,
+                                        latNW: lat,
+                                        longNW: long,
                                         latheight: coords.latheight,
                                         longwidth: coords.longwidth)
                 maps.append(map)
