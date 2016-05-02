@@ -175,16 +175,16 @@ class CompassView: UIView {
         }
     }
     
-    func anim(dx: CGFloat) -> (CGFloat, Bool)
+    func anim(dx: CGFloat) -> (CGFloat, CGFloat)
     {
-        let ret = back_anim.tick(dx)
-        needle_anim.tick(dx)
+        let reta = back_anim.tick(dx)
+        let retb = needle_anim.tick(dx)
         tgtneedle_anim.tick(dx)
         for i in 0..<tgtminis_anim.count {
             tgtminis_anim[i].tick(dx)
             tgtminis2_anim[i].tick(dx)
         }
         
-        return ret
+        return (reta.0, retb.0)
     }
 }

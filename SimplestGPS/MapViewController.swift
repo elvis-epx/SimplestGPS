@@ -133,7 +133,7 @@ enum Mode: Int {
         tap3.numberOfTouchesRequired = 3
         canvas.addGestureRecognizer(tap3)
         
-        let lp = UILongPressGestureRecognizer(target: self, action: "tgt_longpress:")
+        let lp = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.tgt_longpress(_:)))
         self.tgt_b.addGestureRecognizer(lp)
     }
     
@@ -400,10 +400,11 @@ enum Mode: Int {
         NSLog("My position %f %f translated to rel %f,%f", clat, clong, xrel, yrel)
         */
         
-        var targets: [(CGFloat, CGFloat)] = []
+        var targets: [(CGFloat, CGFloat, CGFloat)] = []
         for tgt in 0..<GPSModel2.model().target_count() {
             let tlat = GPSModel2.model().target_latitude(tgt)
             let tlong = GPSModel2.model().target_longitude(tgt)
+            let tangle = CGFloat(180.0 + GPSModel2.model().target_heading(tgt)) * CGFloat(M_PI / 180.0)
             if GPSModel2.inside(tlat, long: tlong,
                                 lat_circle: Double(clat),
                                 long_circle: Double(clong),
@@ -413,7 +414,7 @@ enum Mode: Int {
                                              clat: clat, clong: clong,
                                              lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                              longitude_proportion: longitude_latitude_proportion)
-                targets.append(xrel, yrel)
+                targets.append((xrel, yrel, tangle))
                 if debug {
                     NSLog("Target[%d] %f %f translated to rel %f,%f", tgt, tlat, tlong, xrel, yrel)
                 }
@@ -506,7 +507,7 @@ enum Mode: Int {
             let dabs = hypot(dx, dy)
             var dangle = atan2(dy, dx)
             // take into account the current screen heading
-            dangle -= canvas.current_heading()
+            dangle -= canvas.curr_screen_rotation()
             // recalculate cartesian vector
             dx = cos(dangle) * dabs
             dy = sin(dangle) * dabs

@@ -22,11 +22,11 @@ class MapCanvasView: UIView
     var image_anims: [String: PositionAnim] = [:]
     
     // location points of targets painted on the map
-    var target_views: [UIView] = []
+    var target_views: [MapPointView] = []
     var target_anims: [PositionAnim] = []
 
     // location point painted over the map
-    var location_view: UIView? = nil
+    var location_view: MapPointView? = nil
     var location_anim: PositionAnim? = nil
     
     // accuracy circle painted beneath the location point
@@ -48,7 +48,7 @@ class MapCanvasView: UIView
     var target_count: Int = 0;
     
     var mode: Mode = .COMPASS
-    var _current_heading = CGFloat(0.0)
+    var current_screen_rotation = CGFloat(0.0)
     var locked: Bool = false
     
     override init(frame: CGRect) {
@@ -89,7 +89,7 @@ class MapCanvasView: UIView
         map_plane!.addSubview(accuracy_view!)
         accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, size: map_plane!.frame)
     
-        location_view = MapPointView(frame: self.frame, color: UIColor.redColor())
+        location_view = MapPointView(frame: self.frame, color: UIColor.redColor(), out: true)
         map_plane!.addSubview(location_view!)
         location_anim = PositionAnim(name: "location", view: location_view!, size: map_plane!.frame)
 
@@ -230,12 +230,10 @@ class MapCanvasView: UIView
             self.accuracy_view!.hidden = self.hide_location()
             })
         
-        location_anim!.set_rel(pointrel, block: {
-            self.location_view!.hidden = self.hide_location()
-        })
+        location_anim!.set_rel(pointrel, block: {})
     }
 
-    func send_targets_rel(list: [(CGFloat, CGFloat)])
+    func send_targets_rel(list: [(CGFloat, CGFloat, CGFloat)])
     {
         if map_plane == nil {
             // init2() not called yet
@@ -248,7 +246,7 @@ class MapCanvasView: UIView
         let updated_targets = target_views.count < target_count
 
         while target_views.count < target_count {
-            let target = MapPointView(frame: self.frame, color: UIColor.greenColor())
+            let target = MapPointView(frame: self.frame, color: UIColor.greenColor(), out: false)
             target.hidden = true
             map_plane!.addSubview(target)
             target_views.append(target)
@@ -264,6 +262,7 @@ class MapCanvasView: UIView
         for i in 0..<target_views.count {
             if i < self.target_count {
                 target_anims[i].set_rel(CGPoint(x: list[i].0, y: list[i].1), block: nil)
+                target_views[i].angle = list[i].2
             } else {
                 target_anims[i].set_rel(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN), block: nil)
                 // hide immediately because animation might be already stopped in NaN
@@ -315,9 +314,9 @@ class MapCanvasView: UIView
             last_update = this_update
         }
         
-        if (this_update - last_update_blink) > 0.5 {
+        if (this_update - last_update_blink) > 0.35 {
             self.locker!.hidden = self.hide_locker()
-            self.location_view!.hidden = self.hide_location()
+            self.location_view!.hidden = blink_status || self.hide_location()
             self.accuracy_view!.hidden = self.hide_location()
             for i in 0..<target_count {
                 target_views[i].hidden = blink_status || mode == .COMPASS || mode == .COMPASS_H
@@ -327,36 +326,40 @@ class MapCanvasView: UIView
         }
 
         let dt = CGFloat(this_update - last_update)
-            
-        let (new_heading, _) = compass!.anim(dt)
+        var needle_rotation: CGFloat = 0
+        
+        let (new_heading, new_needle) = compass!.anim(dt)
         // NSLog("Animated heading: %f", new_heading)
         if mode == .MAPCOMPASS_H || mode == .MAP_H {
-            _current_heading = new_heading * CGFloat(M_PI / 180.0)
+            current_screen_rotation = new_heading * CGFloat(M_PI / 180.0)
         } else {
-            _current_heading = 0
+            current_screen_rotation = 0
+            needle_rotation = new_needle * CGFloat(M_PI / 180.0)
         }
         
-        /* All map ando points rotate together because all belong to this view */
-        map_plane!.transform = CGAffineTransformMakeRotation(_current_heading)
-        /* Cancel map plane rotation so the crosshairs is always straight */
-        let cancel_rot = CGAffineTransformMakeRotation(-_current_heading)
+        /* All map and points rotate together because all belong to this view */
+        map_plane!.transform = CGAffineTransformMakeRotation(current_screen_rotation)
         
         for i in 0..<target_count {
-            target_anims[i].tick(dt, t: cancel_rot, immediate: immediate)
+            target_anims[i].tick(dt,
+                    t: CGAffineTransformMakeRotation(target_views[i].angle),
+                    immediate: immediate)
         }
         for (_, anim) in image_anims {
             anim.tick(dt, t: CGAffineTransformIdentity, immediate: immediate)
         }
         accuracy_anim!.tick(dt, t: CGAffineTransformIdentity, immediate: immediate)
-        location_anim!.tick(dt, t: cancel_rot, immediate: immediate)
+        location_anim!.tick(dt,
+                    t: CGAffineTransformMakeRotation(needle_rotation - current_screen_rotation),
+                    immediate: immediate)
 
         immediate = false
         
         last_update = this_update
     }
     
-    func current_heading() -> CGFloat
+    func curr_screen_rotation() -> CGFloat
     {
-        return _current_heading
+        return current_screen_rotation
     }
 }
