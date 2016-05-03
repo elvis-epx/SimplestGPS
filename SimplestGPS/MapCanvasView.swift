@@ -244,11 +244,11 @@ class MapCanvasView: UIView
     func send_targets_rel(list: [(CGFloat, CGFloat, CGFloat)],
                           label_x: CGFloat, label_y: CGFloat,
                           change_label: Bool,
-                          label_name: String, label_distance: String)
+                          label_name: String, label_distance: String) -> Bool
     {
         if map_plane == nil {
             // init2() not called yet
-            return
+            return false
         }
         
         /* Points are relative: 0, 0 = middle of screen */
@@ -265,25 +265,59 @@ class MapCanvasView: UIView
             target_anims.append(anim)
         }
         
-        if (label_x != label_x) {
+        if (label_x != label_x || self.mode != .MAP) {
             target_label_anim!.set_rel(CGPoint(x: label_x, y: label_y), block: {
-                self.target_label!.hidden = true
+               self.target_label!.hidden = true
             })
-        } else {
+            self.target_label!.hidden = true
+            
+        } else if self.mode == .MAP {
+            // cast label to screen
+            var lx = label_x
+            var ly = label_y
+            let w2 = target_label!.bounds.width / 2
+            let h2 = target_label!.bounds.height / 2
+            let lim = self.bounds.width / 2
+            let lim3 = self.bounds.height / 2 - h2 * 4
+            let lim2 = w2
+            lx = max(lx, lim2 - lim)
+            lx = min(lx, lim - lim2)
+            ly = max(ly, -lim3)
+            ly = min(ly, +lim3)
+            // half size of crosshairs plus half size of label
+            let distx = (self.bounds.width / 8 + w2) * 0.8
+            let disty = (self.bounds.width / 8 + h2) * 0.8
+            let cdistx = abs(label_x - lx)
+            let cdisty = abs(label_y - ly)
+            
+            if cdistx < distx && cdisty < disty {
+                // crosshairs beneath the label; move label
+                if (label_y > 0 && label_y < lim / 1.6) || (label_y < -lim / 1.6) {
+                    ly += disty - cdisty
+                } else {
+                    ly -= disty - cdisty
+                }
+                if (label_x > 0) {
+                    lx -= distx - cdistx
+                } else {
+                    lx += distx - cdistx
+                }
+            }
+
             if (change_label) {
                 target_label!.labels(label_name, distance: label_distance)
                 label_immediate = true
             }
             target_label_anim!.set_rel(
-                CGPoint(x: label_x, y: label_y),
+                CGPoint(x: lx, y: ly),
                 block: {
-                    self.target_label!.hidden = !(self.mode == .MAP || self.mode == .MAP_H)
+                    self.target_label!.hidden = !(self.mode == .MAP)
                 })
         }
         
         if updated_targets {
             // dirty; return to settle layout
-            return
+            return true
         }
 
         for i in 0..<target_views.count {
@@ -296,6 +330,8 @@ class MapCanvasView: UIView
                 self.target_views[i].hidden = true
             }
         }
+        
+        return true
     }
     
     func update_immediately() {
@@ -379,7 +415,7 @@ class MapCanvasView: UIView
         location_anim!.tick(dt,
                     t: CGAffineTransformMakeRotation(needle_rotation - current_screen_rotation),
                     immediate: immediate)
-        target_label_anim!.tick(dt, t: CGAffineTransformIdentity, immediate: label_immediate || immediate)
+        target_label_anim!.tick(dt, t: CGAffineTransformIdentity, immediate: label_immediate)
 
         immediate = false
         label_immediate = false

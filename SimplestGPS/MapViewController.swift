@@ -439,26 +439,26 @@ enum Mode: Int {
             }
             if tgt == current_target {
                 label_x = 0
-                label_y = scrh / 4
+                label_y = -scrh / 4
                 if last_label_target != current_target {
                     change_label = true
                     label_name = GPSModel2.model().target_name(tgt)
                     label_distance = GPSModel2.model().target_distance_formatted(tgt)
                     last_label_target = current_target
-                    last_label_update = NSDate().dateByAddingTimeInterval(3)
+                    last_label_update = NSDate().dateByAddingTimeInterval(2)
                     label_status = 1
                 } else if label_status == 1 {
                     if NSDate().compare(last_label_update!) == .OrderedDescending {
                         label_status = 2
                     }
                 } else if label_status == 2 {
+                    // FIXME angle when cur_heading != 0
                     let (xrel, yrel) = to_raster(CGFloat(tlat), long: CGFloat(tlong),
                                                  clat: clat, clong: clong,
                                                 lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                                 longitude_proportion: longitude_latitude_proportion)
-                    // FIXME better angle
-                    label_x = max(-scrw / 2, min(xrel, scrw / 2))
-                    label_y = max(-scrh / 2, min(yrel, scrh / 2))
+                    label_x = xrel
+                    label_y = yrel
                     // label_angle = tangle1 - (cur_heading * CGFloat(M_PI / 180.0)) - CGFloat(M_PI / 2)
                 }
             }
@@ -469,12 +469,15 @@ enum Mode: Int {
             label_status = 0
         }
         
-        canvas.send_targets_rel(targets,
+        if !canvas.send_targets_rel(targets,
                                 label_x: label_x,
                                 label_y: label_y,
                                 change_label: change_label,
                                 label_name: label_name,
-                                label_distance: label_distance)
+                                label_distance: label_distance) {
+            // needs to send again
+            last_label_target = -1
+        }
         
         GPSModel2.model().releas()
         
