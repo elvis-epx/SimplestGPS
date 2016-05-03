@@ -20,6 +20,22 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 		</dict>
+        <dict>
+            <key>Title</key>
+            <string>Sound</string>
+            <key>Type</key>
+            <string>PSGroupSpecifier</string>
+        </dict>
+        <dict>
+            <key>DefaultValue</key>
+            <true/>
+            <key>Key</key>
+            <string>beep</string>
+            <key>Title</key>
+            <string>Beep when near target</string>
+            <key>Type</key>
+            <string>PSToggleSwitchSpecifier</string>
+        </dict>
 	</array>
 	<key>StringsTable</key>
 	<string>Root</string>

@@ -10,6 +10,8 @@
 		B90AAEEB184C1E59003A302E /* icon58.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEA184C1E59003A302E /* icon58.png */; };
 		B90AAEED184C1E5F003A302E /* icon80.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEC184C1E5F003A302E /* icon80.png */; };
 		B90AAEEF184C1E64003A302E /* icon120.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEE184C1E64003A302E /* icon120.png */; };
+		B912A9AD1CD9108C00DF5768 /* 670.wav in Resources */ = {isa = PBXBuildFile; fileRef = B912A9AB1CD9108C00DF5768 /* 670.wav */; };
+		B912A9AE1CD9108C00DF5768 /* 1000.wav in Resources */ = {isa = PBXBuildFile; fileRef = B912A9AC1CD9108C00DF5768 /* 1000.wav */; };
 		B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B912BBEC1B73394400C3C09C /* GPSModel2.swift */; };
 		B91E5F9F1C7F83A2000CB068 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91E5F9E1C7F83A2000CB068 /* MapViewController.swift */; };
 		B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */; };
@@ -45,6 +47,8 @@
 		B90AAEEA184C1E59003A302E /* icon58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon58.png; sourceTree = "<group>"; };
 		B90AAEEC184C1E5F003A302E /* icon80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon80.png; sourceTree = "<group>"; };
 		B90AAEEE184C1E64003A302E /* icon120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon120.png; sourceTree = "<group>"; };
+		B912A9AB1CD9108C00DF5768 /* 670.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 670.wav; sourceTree = "<group>"; };
+		B912A9AC1CD9108C00DF5768 /* 1000.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 1000.wav; sourceTree = "<group>"; };
 		B912BBEC1B73394400C3C09C /* GPSModel2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSModel2.swift; sourceTree = "<group>"; };
 		B91E5F9E1C7F83A2000CB068 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		B93D61081BBF574A0092CD5C /* GPSAppDelegate2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSAppDelegate2.swift; sourceTree = "<group>"; };
@@ -132,6 +136,8 @@
 		B9AD65A21849733200E9C380 /* SimplestGPS */ = {
 			isa = PBXGroup;
 			children = (
+				B912A9AB1CD9108C00DF5768 /* 670.wav */,
+				B912A9AC1CD9108C00DF5768 /* 1000.wav */,
 				B99D01141C9F9A0D00FA1FC2 /* MapModel.swift */,
 				B912BBEC1B73394400C3C09C /* GPSModel2.swift */,
 				B9AAA5DB1C9236190050F390 /* Settings.bundle */,
@@ -229,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9AD65B51849733200E9C380 /* Images.xcassets in Resources */,
+				B912A9AE1CD9108C00DF5768 /* 1000.wav in Resources */,
 				B9692845184FB50A00998B77 /* icon114.png in Resources */,
 				B9AAA5DC1C9236190050F390 /* Settings.bundle in Resources */,
 				B9692849184FB51700998B77 /* icon57.png in Resources */,
@@ -237,6 +244,7 @@
 				B9AD65B01849733200E9C380 /* Main.storyboard in Resources */,
 				B90AAEEB184C1E59003A302E /* icon58.png in Resources */,
 				B90AAEED184C1E5F003A302E /* icon80.png in Resources */,
+				B912A9AD1CD9108C00DF5768 /* 670.wav in Resources */,
 				B9692847184FB51100998B77 /* icon29.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

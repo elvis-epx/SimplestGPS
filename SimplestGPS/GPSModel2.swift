@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import CoreLocation
+import AVFoundation
 
 @objc protocol ModelListener {
     func fail()
@@ -22,6 +23,9 @@ import CoreLocation
     var lats = [NSObject: AnyObject]()
     var longs = [NSObject: AnyObject]()
     var alts = [NSObject: AnyObject]()
+    var tdistances = [String: Double]()
+    var tlastdistances = [String: Double]()
+    var theadings = [String: Double]()
     var target_list = [String]()
     var next_target: Int = 0
     var curloc: CLLocation? = nil
@@ -29,12 +33,18 @@ import CoreLocation
     var held: Bool = false
     var lman: CLLocationManager? = nil
     var metric: Int = 1;
+    var beep: Int = 1;
     var editing: Int = -1
     var mode: Int = 1 // MAPCOMPASS
     var tgt_dist: Int = 1
     var current_target: Int = -1
     var zoom: Double = 0.0
-    var welcome: Int = 0;
+    var welcome: Int = 0
+    
+    var fwav_hi = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("1000", ofType: "wav")!)
+    var fwav_lo = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("670", ofType: "wav")!)
+    var wav_hi: AVAudioPlayer? = nil
+    var wav_lo: AVAudioPlayer? = nil
     
     var prefsObserver : NSObjectProtocol!
     
@@ -776,7 +786,7 @@ import CoreLocation
         return GPSModel2.format_longitude_t(self.target_longitude(index));
     }
     
-    func target_heading(index: Int) -> Double
+    func target_calc_heading(index: Int) -> Double
     {
         if index < 0 || index >= target_list.count {
             return Double.NaN;
@@ -794,6 +804,21 @@ import CoreLocation
         let long2 = longs[key] as! Double;
         
         return GPSModel2.azimuth(lat1, lat2: lat2, long1: long1, long2: long2);
+    }
+    
+    func target_heading(index: Int) -> Double
+    {
+        if index < 0 || index >= target_list.count {
+            return Double.NaN;
+        }
+        
+        let key = target_list[index]
+        
+        if let d = theadings[key] {
+            return d
+        }
+        
+        return Double.NaN
     }
 
     func target_heading_formatted(index: Int) -> String
@@ -827,7 +852,7 @@ import CoreLocation
         return GPSModel2.format_heading_delta_t(target_heading_delta(index));
     }
     
-    func target_distance(index: Int) -> Double
+    func target_calc_distance(index: Int) -> Double
     {
         if index < 0 || index >= target_list.count {
             return Double.NaN;
@@ -845,6 +870,21 @@ import CoreLocation
         let long2 = longs[key] as! Double;
         
         return GPSModel2.harvesine(lat1, lat2: lat2, long1: long1, long2: long2);
+    }
+    
+    func target_distance(index: Int) -> Double
+    {
+        if index < 0 || index >= target_list.count {
+            return Double.NaN;
+        }
+
+        let key = target_list[index]
+        
+        if let d = tdistances[key] {
+            return d
+        }
+        
+        return Double.NaN
     }
     
     func target_distance_formatted(index: Int) -> String
@@ -934,8 +974,63 @@ import CoreLocation
     
     func update()
     {
+        for i in 0..<target_list.count {
+            let tgtname = target_list[i]
+            tdistances[tgtname] = target_calc_distance(i)
+            theadings[tgtname] = target_calc_heading(i)
+        }
+        process_target_alarms()
+        
         for observer in observers {
-            observer.update();
+            observer.update()
+        }
+    }
+    
+    func process_target_alarms()
+    {
+        for i in 0..<target_list.count {
+            let tgtname = target_list[i]
+            let cur = tdistances[tgtname]!
+            if current_target != i || beep != 1 || cur != cur {
+                // does nothing
+            } else if let last = tlastdistances[tgtname] {
+                if last == last {
+                    // last distance is known
+                    process_alarm(last, cur: cur)
+                }
+            }
+            tlastdistances[tgtname] = tdistances[tgtname]
+        }
+    }
+    
+    func process_alarm(last: Double, cur: Double)
+    {
+        let min = 1853.0
+        let sec = min / 60
+        
+        // FIXME remove
+        NSLog("Target beep %.0f -> %.0f", last, cur)
+        
+        if last > min * 3 && cur < min * 3 ||
+                last > min && cur < min ||
+                last > 30 * sec && cur < 30 * sec ||
+                last > 15 * sec && cur < 15 * sec ||
+                last > 5 * sec && cur < 5 * sec ||
+                last > 3 * sec && cur < 3 * sec ||
+                last > 2 * sec && cur < 2 * sec ||
+                last > 1 * sec && cur < 1 * sec {
+            wav_hi!.play()
+        }
+
+        if cur > min * 3 && last < min * 3 ||
+            cur > min && last < min ||
+            cur > 30 * sec && last < 30 * sec ||
+            cur > 15 * sec && last < 15 * sec ||
+            cur > 5 * sec && last < 5 * sec ||
+            cur > 3 * sec && last < 3 * sec ||
+            cur > 2 * sec && last < 2 * sec ||
+            cur > 1 * sec && last < 1 * sec {
+            wav_lo!.play()
         }
     }
 
@@ -979,9 +1074,16 @@ import CoreLocation
     {
         super.init()
         
+        self.wav_hi = try? AVAudioPlayer(contentsOfURL: fwav_hi, fileTypeHint: nil)
+        self.wav_lo = try? AVAudioPlayer(contentsOfURL: fwav_lo, fileTypeHint: nil)
+        self.wav_hi!.prepareToPlay()
+        self.wav_lo!.prepareToPlay()
+        
         let prefs = NSUserDefaults.standardUserDefaults();
         
-        prefs.registerDefaults(["metric": 1, "next_target": 3,
+        prefs.registerDefaults(["metric": 1,
+            "beep": 1,
+            "next_target": 3,
             "mode": 1, // MAPCOMPASS
             "tgt_dist": 1,
             "welcome": 0,
@@ -1009,6 +1111,7 @@ import CoreLocation
         self.upgradeAltitudes()
         
         metric = prefs.integerForKey("metric")
+        beep = prefs.integerForKey("beep")
         next_target = prefs.integerForKey("next_target")
         curloc = nil
         
@@ -1088,6 +1191,7 @@ import CoreLocation
     {
         let prefs = NSUserDefaults.standardUserDefaults();
         metric = prefs.integerForKey("metric")
+        beep = prefs.integerForKey("beep")
     }
     
     static let singleton = GPSModel2(1);
@@ -1103,17 +1207,6 @@ import CoreLocation
         target_list = target_list.sort({$0.localizedCaseInsensitiveCompare($1) ==
             .OrderedAscending});
         NSLog("Number of targets: %ld", target_list.count);
-    }
-    
-    func set_metric(value: Int)
-    {
-        metric = value
-        let prefs = NSUserDefaults.standardUserDefaults()
-        prefs.setInteger(metric, forKey: "metric")
-        if curloc != nil {
-            return;
-        }
-        self.update();
     }
     
     func get_metric() -> Int
