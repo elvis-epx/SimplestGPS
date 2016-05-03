@@ -410,7 +410,8 @@ enum Mode: Int {
         var targets: [(CGFloat, CGFloat, CGFloat)] = []
         var label_x = CGFloat.NaN
         var label_y = CGFloat.NaN
-        var change_label = false
+        var changed_label = false
+        var presenting_label = false
         var label_name = ""
         var label_distance = ""
         
@@ -440,14 +441,19 @@ enum Mode: Int {
             if tgt == current_target {
                 label_x = 0
                 label_y = -scrh / 4
-                if last_label_target != current_target {
-                    change_label = true
+                if !gesture {
+                    // streamline processing during drag
                     label_name = GPSModel2.model().target_name(tgt)
                     label_distance = GPSModel2.model().target_distance_formatted(tgt)
+                }
+                if last_label_target != current_target {
+                    changed_label = true
+                    presenting_label = true
                     last_label_target = current_target
                     last_label_update = NSDate().dateByAddingTimeInterval(2)
                     label_status = 1
                 } else if label_status == 1 {
+                    presenting_label = true
                     if NSDate().compare(last_label_update!) == .OrderedDescending {
                         label_status = 2
                     }
@@ -472,7 +478,9 @@ enum Mode: Int {
         if !canvas.send_targets_rel(targets,
                                 label_x: label_x,
                                 label_y: label_y,
-                                change_label: change_label,
+                                changed_label: changed_label,
+                                presenting_label: presenting_label,
+                                gesture: gesture,
                                 label_name: label_name,
                                 label_distance: label_distance) {
             // needs to send again

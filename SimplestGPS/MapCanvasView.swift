@@ -243,7 +243,9 @@ class MapCanvasView: UIView
 
     func send_targets_rel(list: [(CGFloat, CGFloat, CGFloat)],
                           label_x: CGFloat, label_y: CGFloat,
-                          change_label: Bool,
+                          changed_label: Bool,
+                          presenting_label: Bool,
+                          gesture: Bool,
                           label_name: String, label_distance: String) -> Bool
     {
         if map_plane == nil {
@@ -275,37 +277,42 @@ class MapCanvasView: UIView
             // cast label to screen
             var lx = label_x
             var ly = label_y
-            let w2 = target_label!.bounds.width / 2
-            let h2 = target_label!.bounds.height / 2
-            let lim = self.bounds.width / 2
-            let lim3 = self.bounds.height / 2 - h2 * 4
-            let lim2 = w2
-            lx = max(lx, lim2 - lim)
-            lx = min(lx, lim - lim2)
-            ly = max(ly, -lim3)
-            ly = min(ly, +lim3)
-            // half size of crosshairs plus half size of label
-            let distx = (self.bounds.width / 8 + w2) * 0.8
-            let disty = (self.bounds.width / 8 + h2) * 0.8
-            let cdistx = abs(label_x - lx)
-            let cdisty = abs(label_y - ly)
+            if !presenting_label {
+                let w2 = target_label!.bounds.width / 2
+                let h2 = target_label!.bounds.height / 2
+                let lim = self.bounds.width / 2
+                let lim3 = self.bounds.height / 2 - h2 * 4
+                let lim2 = w2
+                lx = max(lx, lim2 - lim)
+                lx = min(lx, lim - lim2)
+                ly = max(ly, -lim3)
+                ly = min(ly, +lim3)
+                // half size of crosshairs plus half size of label
+                let distx = (self.bounds.width / 8 + w2) * 0.8
+                let disty = (self.bounds.width / 8 + h2) * 0.8
+                let cdistx = abs(label_x - lx)
+                let cdisty = abs(label_y - ly)
             
-            if cdistx < distx && cdisty < disty {
-                // crosshairs beneath the label; move label
-                if (label_y > 0 && label_y < lim / 1.6) || (label_y < -lim / 1.6) {
-                    ly += disty - cdisty
-                } else {
-                    ly -= disty - cdisty
-                }
-                if (label_x > 0) {
-                    lx -= distx - cdistx
-                } else {
-                    lx += distx - cdistx
+                if cdistx < distx && cdisty < disty {
+                    // crosshairs beneath the label; move label
+                    if (label_y > 0 && label_y < lim / 1.6) || (label_y < -lim / 1.6) {
+                        ly += disty - cdisty
+                    } else {
+                        ly -= disty - cdisty
+                    }
+                    if (label_x > 0) {
+                        lx -= distx - cdistx
+                    } else {
+                        lx += distx - cdistx
+                    }
                 }
             }
 
-            if (change_label) {
+            if !gesture {
+                // streamline processing during drag
                 target_label!.labels(label_name, distance: label_distance)
+            }
+            if (changed_label) {
                 label_immediate = true
             }
             target_label_anim!.set_rel(
