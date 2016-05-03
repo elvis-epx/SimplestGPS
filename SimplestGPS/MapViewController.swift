@@ -89,6 +89,10 @@ enum Mode: Int {
     var gpslong = CGFloat.NaN
     
     var current_target = -1
+    var last_label_target = -1
+    var last_label_update: NSDate? = nil
+    var label_status = 0
+    
     var update_timer: NSTimer? = nil
     
     var debug = false
@@ -282,11 +286,12 @@ enum Mode: Int {
         if !GPSModel2.model().hold() {
             return
         }
-        
+
+        let cur_heading = CGFloat(GPSModel2.model().heading())
+
         if !gesture {
             // scale.hidden = (mode == .COMPASS || mode == .COMPASS_H)
-            
-            // send compass data
+
             var targets_compass: [(heading: CGFloat, name: String, distance: String)] = []
             for tgt in 0..<GPSModel2.model().target_count() {
                 targets_compass.append((
@@ -297,8 +302,10 @@ enum Mode: Int {
             if current_target >= targets_compass.count {
                 current_target = -1
             }
+            
+            // send compass data
             canvas.send_compass(mode,
-                                heading: CGFloat(GPSModel2.model().heading()),
+                                heading: cur_heading,
                                 altitude: GPSModel2.model().altitude_formatted(),
                                 speed: GPSModel2.model().speed_formatted(),
                                 current_target: current_target,
@@ -401,10 +408,17 @@ enum Mode: Int {
         */
         
         var targets: [(CGFloat, CGFloat, CGFloat)] = []
+        var label_x = CGFloat.NaN
+        var label_y = CGFloat.NaN
+        var change_label = false
+        var label_name = ""
+        var label_distance = ""
+        
         for tgt in 0..<GPSModel2.model().target_count() {
             let tlat = GPSModel2.model().target_latitude(tgt)
             let tlong = GPSModel2.model().target_longitude(tgt)
-            let tangle = CGFloat(180.0 + GPSModel2.model().target_heading(tgt)) * CGFloat(M_PI / 180.0)
+            let tangle1 = CGFloat(GPSModel2.model().target_heading(tgt) * M_PI / 180.0)
+            let tangle = CGFloat(M_PI) + tangle1
             if GPSModel2.inside(tlat, long: tlong,
                                 lat_circle: Double(clat),
                                 long_circle: Double(clong),
@@ -423,8 +437,44 @@ enum Mode: Int {
                     NSLog("Target[%d] %f %f not in space", tgt, tlat, tlong)
                 }
             }
+            if tgt == current_target {
+                label_x = 0
+                label_y = scrh / 4
+                if last_label_target != current_target {
+                    change_label = true
+                    label_name = GPSModel2.model().target_name(tgt)
+                    label_distance = GPSModel2.model().target_distance_formatted(tgt)
+                    last_label_target = current_target
+                    last_label_update = NSDate().dateByAddingTimeInterval(3)
+                    label_status = 1
+                } else if label_status == 1 {
+                    if NSDate().compare(last_label_update!) == .OrderedDescending {
+                        label_status = 2
+                    }
+                } else if label_status == 2 {
+                    let (xrel, yrel) = to_raster(CGFloat(tlat), long: CGFloat(tlong),
+                                                 clat: clat, clong: clong,
+                                                lat_height: zoom_height, scrh: scrh, scrw: scrw,
+                                                longitude_proportion: longitude_latitude_proportion)
+                    // FIXME better angle
+                    label_x = max(-scrw / 2, min(xrel, scrw / 2))
+                    label_y = max(-scrh / 2, min(yrel, scrh / 2))
+                    // label_angle = tangle1 - (cur_heading * CGFloat(M_PI / 180.0)) - CGFloat(M_PI / 2)
+                }
+            }
         }
-        canvas.send_targets_rel(targets)
+        
+        if label_x != label_x {
+            last_label_target = -1
+            label_status = 0
+        }
+        
+        canvas.send_targets_rel(targets,
+                                label_x: label_x,
+                                label_y: label_y,
+                                change_label: change_label,
+                                label_name: label_name,
+                                label_distance: label_distance)
         
         GPSModel2.model().releas()
         

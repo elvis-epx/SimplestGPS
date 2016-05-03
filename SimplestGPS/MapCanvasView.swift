@@ -24,6 +24,10 @@ class MapCanvasView: UIView
     // location points of targets painted on the map
     var target_views: [MapPointView] = []
     var target_anims: [PositionAnim] = []
+    
+    var target_label: MapLabelView? = nil
+    var target_label_anim: PositionAnim? = nil
+    var label_immediate = false;
 
     // location point painted over the map
     var location_view: MapPointView? = nil
@@ -45,7 +49,7 @@ class MapCanvasView: UIView
     var blink_status: Bool = false
     var immediate = false
 
-    var target_count: Int = 0;
+    var target_count: Int = 0
     
     var mode: Mode = .COMPASS
     var current_screen_rotation = CGFloat(0.0)
@@ -92,6 +96,10 @@ class MapCanvasView: UIView
         location_view = MapPointView(frame: self.frame, color: UIColor.redColor(), out: true)
         map_plane!.addSubview(location_view!)
         location_anim = PositionAnim(name: "location", view: location_view!, size: map_plane!.frame)
+        
+        target_label = MapLabelView(frame: self.frame)
+        self.addSubview(target_label!)
+        target_label_anim = PositionAnim(name: "target_label", view: target_label!, size: self.frame)
 
         let slack = self.frame.height - self.frame.width
         let compass_frame = CGRect(x: 0, y: slack / 2, width: self.frame.width, height: self.frame.width)
@@ -233,7 +241,10 @@ class MapCanvasView: UIView
         location_anim!.set_rel(pointrel, block: {})
     }
 
-    func send_targets_rel(list: [(CGFloat, CGFloat, CGFloat)])
+    func send_targets_rel(list: [(CGFloat, CGFloat, CGFloat)],
+                          label_x: CGFloat, label_y: CGFloat,
+                          change_label: Bool,
+                          label_name: String, label_distance: String)
     {
         if map_plane == nil {
             // init2() not called yet
@@ -253,7 +264,23 @@ class MapCanvasView: UIView
             let anim = PositionAnim(name: "tgt", view: target, size: map_plane!.bounds)
             target_anims.append(anim)
         }
-
+        
+        if (label_x != label_x) {
+            target_label_anim!.set_rel(CGPoint(x: label_x, y: label_y), block: {
+                self.target_label!.hidden = true
+            })
+        } else {
+            if (change_label) {
+                target_label!.labels(label_name, distance: label_distance)
+                label_immediate = true
+            }
+            target_label_anim!.set_rel(
+                CGPoint(x: label_x, y: label_y),
+                block: {
+                    self.target_label!.hidden = !(self.mode == .MAP || self.mode == .MAP_H)
+                })
+        }
+        
         if updated_targets {
             // dirty; return to settle layout
             return
@@ -352,8 +379,10 @@ class MapCanvasView: UIView
         location_anim!.tick(dt,
                     t: CGAffineTransformMakeRotation(needle_rotation - current_screen_rotation),
                     immediate: immediate)
+        target_label_anim!.tick(dt, t: CGAffineTransformIdentity, immediate: label_immediate || immediate)
 
         immediate = false
+        label_immediate = false
         
         last_update = this_update
     }

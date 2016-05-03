@@ -34,6 +34,7 @@
 		B9AD65B01849733200E9C380 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65AE1849733200E9C380 /* Main.storyboard */; };
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
+		B9B7ECCC1CD81C78006ED4B0 /* MapLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B7ECCB1CD81C78006ED4B0 /* MapLabelView.swift */; };
 		B9D542991C80CBD70063DCD8 /* MapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */; };
 		B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */; };
 		B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */; };
@@ -72,6 +73,7 @@
 		B9AD65AF1849733200E9C380 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B9AD65B41849733200E9C380 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		B9AD65D118497AAB00E9C380 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		B9B7ECCB1CD81C78006ED4B0 /* MapLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapLabelView.swift; sourceTree = "<group>"; };
 		B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapCanvasView.swift; sourceTree = "<group>"; };
 		B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetViewController2.swift; sourceTree = "<group>"; };
 		B9E3A2CB1BBE467100A5267C /* TargetCell2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetCell2.swift; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 				B95B5D3D1C8F6099002EAEA6 /* SimplestGPS-Bridging-Header.h */,
 				B91E5F9E1C7F83A2000CB068 /* MapViewController.swift */,
 				B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */,
+				B9B7ECCB1CD81C78006ED4B0 /* MapLabelView.swift */,
 				B9F0F78B1CA8B1510038F50E /* MapPointView.swift */,
 				B963D9AB1C9A0294003D024D /* PositionAnim.swift */,
 				B95B688B1C908DEF008E6CD3 /* CompassView.swift */,
@@ -249,6 +252,7 @@
 				B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */,
 				B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */,
 				B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */,
+				B9B7ECCC1CD81C78006ED4B0 /* MapLabelView.swift in Sources */,
 				B95B68921C90BF30008E6CD3 /* NeedleView.swift in Sources */,
 				B9D542991C80CBD70063DCD8 /* MapCanvasView.swift in Sources */,
 				B95B68901C90BC92008E6CD3 /* CompassBGView.swift in Sources */,
