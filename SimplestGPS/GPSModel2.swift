@@ -26,6 +26,7 @@ import AVFoundation
     var tdistances = [String: Double]()
     var tlastdistances = [String: Double]()
     var theadings = [String: Double]()
+    var trelheadings = [String: Double]()
     var target_list = [String]()
     var next_target: Int = 0
     var curloc: CLLocation? = nil
@@ -43,8 +44,11 @@ import AVFoundation
     
     var fwav_hi = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("1000", ofType: "wav")!)
     var fwav_lo = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("670", ofType: "wav")!)
+    var fwav_side = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("836", ofType: "wav")!)
     var wav_hi: AVAudioPlayer? = nil
     var wav_lo: AVAudioPlayer? = nil
+    var wav_side: AVAudioPlayer? = nil
+    var last_side_played: NSDate? = nil
     
     var prefsObserver : NSObjectProtocol!
     
@@ -826,14 +830,12 @@ import AVFoundation
         return GPSModel2.format_heading_t(self.target_heading(index));
     }
     
-    func target_heading_delta(index: Int) -> Double
+    func calc_heading_delta(tgt_heading: Double, cur_heading: Double) -> Double
     {
-        let tgt_heading = target_heading(index)
         if tgt_heading != tgt_heading {
             return Double.NaN
         }
         
-        let cur_heading = self.heading()
         if cur_heading < 0 || cur_heading != cur_heading {
             return Double.NaN
         }
@@ -847,10 +849,12 @@ import AVFoundation
         return delta;
     }
 
+    /*
     func target_heading_delta_formatted(index: Int) -> String
     {
         return GPSModel2.format_heading_delta_t(target_heading_delta(index));
     }
+    */
     
     func target_calc_distance(index: Int) -> Double
     {
@@ -974,10 +978,13 @@ import AVFoundation
     
     func update()
     {
+        let cur_heading = heading()
         for i in 0..<target_list.count {
             let tgtname = target_list[i]
             tdistances[tgtname] = target_calc_distance(i)
             theadings[tgtname] = target_calc_heading(i)
+            trelheadings[tgtname] = calc_heading_delta(theadings[tgtname]!,
+                                                    cur_heading: cur_heading)
         }
         process_target_alarms()
         
@@ -991,6 +998,7 @@ import AVFoundation
         for i in 0..<target_list.count {
             let tgtname = target_list[i]
             let cur = tdistances[tgtname]!
+            let rel_heading = trelheadings[tgtname]!
             if current_target != i || beep != 1 || cur != cur {
                 // does nothing
             } else if let last = tlastdistances[tgtname] {
@@ -998,8 +1006,34 @@ import AVFoundation
                     // last distance is known
                     process_alarm(last, cur: cur)
                 }
+                if rel_heading == rel_heading {
+                    process_sidepass(abs(rel_heading), distance: cur)
+                }
             }
             tlastdistances[tgtname] = tdistances[tgtname]
+        }
+    }
+    
+    func process_sidepass(abs_rel_angle: Double, distance: Double)
+    {
+        // cone of warning that we are leaving a target sideways
+        var fudge = 10.0
+        
+        // decrease the cone when it is very far
+        if distance > 2000.0 {
+            fudge *= distance / 2000.0
+        }
+
+        NSLog("Rel tgt az %.0f dst %.0f fudge %.0f", abs_rel_angle, distance, fudge)
+        
+        if abs_rel_angle > (90.0 - fudge) && abs_rel_angle < (90.0 + fudge) {
+            if last_side_played != nil {
+                if NSDate().compare(last_side_played!) == .OrderedAscending {
+                    return
+                }
+            }
+            wav_side!.play()
+            last_side_played = NSDate().dateByAddingTimeInterval(5)
         }
     }
     
@@ -1007,9 +1041,6 @@ import AVFoundation
     {
         let min = 1853.0
         let sec = min / 60
-        
-        // FIXME remove
-        NSLog("Target beep %.0f -> %.0f", last, cur)
         
         if last > min * 3 && cur < min * 3 ||
                 last > min && cur < min ||
@@ -1074,10 +1105,13 @@ import AVFoundation
     {
         super.init()
         
+        try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
         self.wav_hi = try? AVAudioPlayer(contentsOfURL: fwav_hi, fileTypeHint: nil)
         self.wav_lo = try? AVAudioPlayer(contentsOfURL: fwav_lo, fileTypeHint: nil)
+        self.wav_side = try? AVAudioPlayer(contentsOfURL: fwav_side, fileTypeHint: nil)
         self.wav_hi!.prepareToPlay()
         self.wav_lo!.prepareToPlay()
+        self.wav_side!.prepareToPlay()
         
         let prefs = NSUserDefaults.standardUserDefaults();
         
