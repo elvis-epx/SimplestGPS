@@ -54,6 +54,8 @@ class MapCanvasView: UIView
     var mode: Mode = .COMPASS
     var current_screen_rotation = CGFloat(0.0)
     var locked: Bool = false
+    var blink_pos: Bool = true
+    var blink_tgt: Bool = true
     
     override init(frame: CGRect) {
         fatalError("init(coder:) has not been implemented")
@@ -211,13 +213,15 @@ class MapCanvasView: UIView
                !self.locked
     }
     
-    func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat, locked: Bool)
+    func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat,
+                      locked: Bool, blink: Int)
     {
         if map_plane == nil {
             // init2() not called yet
             return
         }
         
+        self.blink_pos = blink == 1
         self.locked = locked
         self.locker!.hidden = self.hide_locker()
         
@@ -246,7 +250,8 @@ class MapCanvasView: UIView
                           changed_label: Bool,
                           presenting_label: Bool,
                           gesture: Bool,
-                          label_name: String, label_distance: String) -> Bool
+                          label_name: String, label_distance: String,
+                          blink: Int) -> Bool
     {
         if map_plane == nil {
             // init2() not called yet
@@ -255,6 +260,8 @@ class MapCanvasView: UIView
         
         /* Points are relative: 0, 0 = middle of screen */
         self.target_count = list.count
+        
+        self.blink_tgt = blink == 1
 
         let updated_targets = target_views.count < target_count
 
@@ -385,11 +392,15 @@ class MapCanvasView: UIView
         }
         
         if (this_update - last_update_blink) > 0.35 {
+            let blink_loc_status = blink_status && self.blink_pos
+            let blink_tgt_status = blink_status && self.blink_tgt
             self.locker!.hidden = self.hide_locker()
-            self.location_view!.hidden = blink_status || self.hide_location()
+            self.location_view!.hidden = blink_loc_status ||
+                    self.hide_location()
             self.accuracy_view!.hidden = self.hide_location()
             for i in 0..<target_count {
-                target_views[i].hidden = blink_status || mode == .COMPASS || mode == .COMPASS_H
+                target_views[i].hidden = blink_tgt_status ||
+                        mode == .COMPASS || mode == .COMPASS_H
             }
             blink_status = !blink_status
             last_update_blink = this_update

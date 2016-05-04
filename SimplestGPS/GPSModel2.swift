@@ -41,6 +41,7 @@ import AVFoundation
     var current_target: Int = -1
     var zoom: Double = 0.0
     var welcome: Int = 0
+    var blink: Int = 1
     
     var fwav_hi = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("1000", ofType: "wav")!)
     var fwav_lo = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("670", ofType: "wav")!)
@@ -1024,7 +1025,7 @@ import AVFoundation
             fudge *= distance / 2000.0
         }
 
-        NSLog("Rel tgt az %.0f dst %.0f fudge %.0f", abs_rel_angle, distance, fudge)
+        // NSLog("Rel tgt az %.0f dst %.0f fudge %.0f", abs_rel_angle, distance, fudge)
         
         if abs_rel_angle > (90.0 - fudge) && abs_rel_angle < (90.0 + fudge) {
             if last_side_played != nil {
@@ -1039,28 +1040,17 @@ import AVFoundation
     
     func process_alarm(last: Double, cur: Double)
     {
-        let min = 1853.0
-        let sec = min / 60
-        
-        if last > min * 3 && cur < min * 3 ||
-                last > min && cur < min ||
-                last > 30 * sec && cur < 30 * sec ||
-                last > 15 * sec && cur < 15 * sec ||
-                last > 5 * sec && cur < 5 * sec ||
-                last > 3 * sec && cur < 3 * sec ||
-                last > 2 * sec && cur < 2 * sec ||
-                last > 1 * sec && cur < 1 * sec {
-            wav_hi!.play()
+        var rnd = 1000.0
+        if cur < 100 {
+            rnd = 10.0
+        } else if cur < 10000 {
+            rnd = 100.0
         }
-
-        if cur > min * 3 && last < min * 3 ||
-            cur > min && last < min ||
-            cur > 30 * sec && last < 30 * sec ||
-            cur > 15 * sec && last < 15 * sec ||
-            cur > 5 * sec && last < 5 * sec ||
-            cur > 3 * sec && last < 3 * sec ||
-            cur > 2 * sec && last < 2 * sec ||
-            cur > 1 * sec && last < 1 * sec {
+        let barrier = round((last + cur) / 2.0 / rnd) * rnd
+        
+        if last > barrier && cur < barrier {
+            wav_hi!.play()
+        } else if cur < barrier && last < barrier {
             wav_lo!.play()
         }
     }
@@ -1121,6 +1111,7 @@ import AVFoundation
             "mode": 1, // MAPCOMPASS
             "tgt_dist": 1,
             "welcome": 0,
+            "blink": 1,
             "current_target": -1,
             "zoom": 0.0,
             "names": ["1": "Joinville", "2": "Blumenau"],
@@ -1140,6 +1131,7 @@ import AVFoundation
         current_target = prefs.integerForKey("current_target")
         zoom = prefs.doubleForKey("zoom")
         welcome = prefs.integerForKey("welcome")
+        blink = prefs.integerForKey("blink")
         
         self.updateTargetList()
         self.upgradeAltitudes()
@@ -1194,6 +1186,16 @@ import AVFoundation
         self.tgt_dist = new_tgtdist
         let prefs = NSUserDefaults.standardUserDefaults();
         prefs.setObject(self.tgt_dist, forKey: "tgt_dist");
+    }
+    
+    func get_blink() -> Int {
+        return blink
+    }
+    
+    func set_blink(new_blink: Int) {
+        self.blink = new_blink
+        let prefs = NSUserDefaults.standardUserDefaults();
+        prefs.setObject(self.blink, forKey: "blink");
     }
    
     func get_currenttarget() -> Int {

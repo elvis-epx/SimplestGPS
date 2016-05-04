@@ -60,6 +60,7 @@ enum Mode: Int {
                                     .MAPCOMPASS_H: "Follows heading",
                                     .COMPASS_H: "Follows heading"]
     var tgt_dist = 1
+    var blink = 1
     
     // in seconds of latitude degree across the screen height
     var zoom_factor: CGFloat = 30
@@ -162,6 +163,7 @@ enum Mode: Int {
             mode = int_to_mode[GPSModel2.model().get_mode()]!
         }
         tgt_dist = GPSModel2.model().get_tgtdist() % 2
+        blink = GPSModel2.model().get_blink() % 2
         current_target = GPSModel2.model().get_currenttarget()
         if current_target >= GPSModel2.model().target_count() {
             current_target = -1
@@ -401,7 +403,8 @@ enum Mode: Int {
                                              lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                              longitude_proportion: longitude_latitude_proportion)
         canvas.send_pos_rel(xrel, yrel: yrel, accuracy: CGFloat(accuracy_px),
-                            locked: (clat == gpslat && clong == gpslong))
+                            locked: (clat == gpslat && clong == gpslong),
+                            blink: blink)
 
         /*
         NSLog("My position %f %f translated to rel %f,%f", clat, clong, xrel, yrel)
@@ -440,7 +443,7 @@ enum Mode: Int {
             }
             if tgt == current_target {
                 label_x = 0
-                label_y = -scrh / 4
+                label_y = 0
                 if !gesture {
                     // streamline processing during drag
                     label_name = GPSModel2.model().target_name(tgt)
@@ -482,7 +485,8 @@ enum Mode: Int {
                                 presenting_label: presenting_label,
                                 gesture: gesture,
                                 label_name: label_name,
-                                label_distance: label_distance) {
+                                label_distance: label_distance,
+                                blink: blink) {
             // needs to send again
             last_label_target = -1
         }
@@ -647,9 +651,15 @@ enum Mode: Int {
     @IBAction func tgd_button(sender: AnyObject)
     {
         NSLog("TGD button")
-        tgt_dist += 1
-        tgt_dist %= 2
-        GPSModel2.model().set_tgtdist(tgt_dist)
+        if mode == Mode.MAP || mode == Mode.MAP_H {
+            blink += 1
+            blink %= 2
+            GPSModel2.model().set_blink(blink)
+        } else {
+            tgt_dist += 1
+            tgt_dist %= 2
+            GPSModel2.model().set_tgtdist(tgt_dist)
+        }
         repaint(false, gesture: false)
     }
     
