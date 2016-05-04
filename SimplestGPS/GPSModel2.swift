@@ -1145,7 +1145,7 @@ import AVFoundation
         lman!.delegate = self
         lman!.distanceFilter = kCLDistanceFilterNone
         lman!.desiredAccuracy = kCLLocationAccuracyBest
-        lman!.requestAlwaysAuthorization()
+        lman!.requestWhenInUseAuthorization()
         lman!.startUpdatingLocation()
         
         let notifications = NSNotificationCenter.defaultCenter()
