@@ -274,13 +274,13 @@ class MapCanvasView: UIView
             target_anims.append(anim)
         }
         
-        if (label_x != label_x || self.mode != .MAP) {
+        if (label_x != label_x || (self.mode != .MAP && self.mode != .MAP_H)) {
             target_label_anim!.set_rel(CGPoint(x: label_x, y: label_y), block: {
                self.target_label!.hidden = true
             })
             self.target_label!.hidden = true
             
-        } else if self.mode == .MAP {
+        } else if self.mode == .MAP || self.mode == .MAP_H {
             // cast label to screen
             var lx = label_x
             var ly = label_y
@@ -325,7 +325,7 @@ class MapCanvasView: UIView
             target_label_anim!.set_rel(
                 CGPoint(x: lx, y: ly),
                 block: {
-                    self.target_label!.hidden = !(self.mode == .MAP)
+                    self.target_label!.hidden = !(self.mode == .MAP || self.mode == .MAP_H)
                 })
         }
         

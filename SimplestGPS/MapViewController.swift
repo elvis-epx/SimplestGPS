@@ -466,9 +466,18 @@ enum Mode: Int {
                                                  clat: clat, clong: clong,
                                                 lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                                 longitude_proportion: longitude_latitude_proportion)
-                    label_x = xrel
-                    label_y = yrel
-                    // label_angle = tangle1 - (cur_heading * CGFloat(M_PI / 180.0)) - CGFloat(M_PI / 2)
+                    if mode == .MAP_H {
+                        // convert to polar, rotate, back to cartesian
+                        // this is calculated manually since the label does not belong to map canvas
+                        // and does not rotate along with maps and crosshairs
+                        let phi = atan2(yrel, xrel) - cur_heading * CGFloat(M_PI / 180.0)
+                        let vlen = hypot(xrel, yrel)
+                        label_x = vlen * cos(phi)
+                        label_y = vlen * sin(phi)
+                    } else {
+                        label_x = xrel
+                        label_y = yrel
+                    }
                 }
             }
         }
