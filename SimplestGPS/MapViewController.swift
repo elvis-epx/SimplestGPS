@@ -93,6 +93,7 @@ enum Mode: Int {
     var last_label_target = -1
     var last_label_update: NSDate? = nil
     var label_status = 0
+    var last_label_heading = CGFloat.NaN
     
     var update_timer: NSTimer? = nil
     
@@ -470,7 +471,14 @@ enum Mode: Int {
                         // convert to polar, rotate, back to cartesian
                         // this is calculated manually since the label does not belong to map canvas
                         // and does not rotate along with maps and crosshairs
-                        let phi = atan2(yrel, xrel) - cur_heading * CGFloat(M_PI / 180.0)
+                        var he = cur_heading
+                        if he != he {
+                            // we need a non-NaN number here
+                            he = last_label_heading
+                        } else {
+                            last_label_heading = he
+                        }
+                        let phi = atan2(yrel, xrel) - he * CGFloat(M_PI / 180.0)
                         let vlen = hypot(xrel, yrel)
                         label_x = vlen * cos(phi)
                         label_y = vlen * sin(phi)

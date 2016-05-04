@@ -1050,7 +1050,7 @@ import AVFoundation
         
         if last > barrier && cur < barrier {
             wav_hi!.play()
-        } else if cur < barrier && last < barrier {
+        } else if cur > barrier && last < barrier {
             wav_lo!.play()
         }
     }
