@@ -1018,11 +1018,11 @@ import AVFoundation
     func process_sidepass(abs_rel_angle: Double, distance: Double)
     {
         // cone of warning that we are leaving a target sideways
-        var fudge = 10.0
+        var fudge = 15.0
         
         // decrease the cone when it is very far
-        if distance > 2000.0 {
-            fudge *= distance / 2000.0
+        if distance > 1500.0 {
+            fudge *= distance / 1500.0
         }
 
         // NSLog("Rel tgt az %.0f dst %.0f fudge %.0f", abs_rel_angle, distance, fudge)
@@ -1034,7 +1034,7 @@ import AVFoundation
                 }
             }
             wav_side!.play()
-            last_side_played = NSDate().dateByAddingTimeInterval(5)
+            last_side_played = NSDate().dateByAddingTimeInterval(3)
         }
     }
     
