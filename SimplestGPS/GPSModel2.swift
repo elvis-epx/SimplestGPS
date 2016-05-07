@@ -1022,7 +1022,7 @@ import AVFoundation
         
         // decrease the cone when it is very far
         if distance > 1500.0 {
-            fudge *= distance / 1500.0
+            fudge *= 1500.0 / distance
         }
 
         // NSLog("Rel tgt az %.0f dst %.0f fudge %.0f", abs_rel_angle, distance, fudge)
