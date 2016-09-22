@@ -1,0 +1,6 @@
+framework module Pods_SimplestGPS {
+  umbrella header "Pods-SimplestGPS-umbrella.h"
+
+  export *
+  module * { export * }
+}
