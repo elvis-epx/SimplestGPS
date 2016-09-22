@@ -14,20 +14,20 @@ class BareCompassView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.clearColor()
+        self.backgroundColor = UIColor.clear
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func toRad(a: CGFloat) -> CGFloat {
+    func toRad(_ a: CGFloat) -> CGFloat {
         return CGFloat(Double(a) * M_PI / 180.0)
     }
     
     // from http://sketchytech.blogspot.com.br/2014/11/swift-how-to-draw-clock-face-using.html
     
-    func genpoints(sides: Int, cx: CGFloat, cy: CGFloat, r: CGFloat, adj: CGFloat=0) -> [CGPoint] {
+    func genpoints(_ sides: Int, cx: CGFloat, cy: CGFloat, r: CGFloat, adj: CGFloat=0) -> [CGPoint] {
         let angle = toRad(CGFloat(360.0 / Double(sides)))
         var i = sides
         var points = [CGPoint]()
@@ -40,76 +40,80 @@ class BareCompassView: UIView {
         return points
     }
     
-    func markers(ctx: CGContextRef, cx: CGFloat, cy: CGFloat, r: CGFloat, sides: Int, color: UIColor) {
+    func markers(_ ctx: CGContext, cx: CGFloat, cy: CGFloat, r: CGFloat, sides: Int, color: UIColor) {
         let points = genpoints(sides, cx: cx, cy: cy, r: r)
-        let path = CGPathCreateMutable()
+        let path = CGMutablePath()
         var divider: CGFloat = 1 / 12
-        for p in points.enumerate() {
-            if p.index % 5 == 0 {
+        for (index, element) in points.enumerated() {
+            if index % 5 == 0 {
                 divider = 1 / 7
             } else {
                 divider = 1 / 12
             }
             
-            let xn = p.element.x + divider * (cx - p.element.x)
-            let yn = p.element.y + divider * (cy - p.element.y)
-            CGPathMoveToPoint(path, nil, p.element.x, p.element.y)
-            CGPathAddLineToPoint(path, nil, xn, yn)
-            CGPathCloseSubpath(path)
-            CGContextAddPath(ctx, path)
+            let xn = element.x + divider * (cx - element.x)
+            let yn = element.y + divider * (cy - element.y)
+            path.move(to: element)
+            let pn = CGPoint(x: xn, y: yn)
+            path.addLine(to: pn)
+            path.closeSubpath()
+            ctx.addPath(path)
         }
         // set path color
-        let cgcolor = color.CGColor
-        CGContextSetStrokeColorWithColor(ctx,cgcolor)
-        CGContextSetLineWidth(ctx, 3.0)
-        CGContextStrokePath(ctx)
+        let cgcolor = color.cgColor
+        ctx.setStrokeColor(cgcolor)
+        ctx.setLineWidth(3.0)
+        ctx.strokePath()
     }
     
-    func cardinals(rect:CGRect, ctx:CGContextRef, cx:CGFloat, cy:CGFloat, r:CGFloat, sides:Int, color:UIColor)
+    func cardinals(_ rect:CGRect, ctx:CGContext, cx:CGFloat, cy:CGFloat, r:CGFloat, sides:Int, color:UIColor)
     {
         // Flip text co-ordinate space, see: http://blog.spacemanlabs.com/2011/08/quick-tip-drawing-core-text-right-side-up/
-        CGContextTranslateCTM(ctx, 0.0, CGRectGetHeight(rect))
-        CGContextScaleCTM(ctx, 1.0, -1.0)
+        ctx.translateBy(x: 0.0, y: rect.height)
+        ctx.scaleBy(x: 1.0, y: -1.0)
         // dictates on how inset the ring of numbers will be
         let inset:CGFloat = r / 4
         // An adjustment of 270 degrees to position numbers correctly
         let points = genpoints(sides, cx: cx, cy: cy, r: r - inset, adj: 270)
         let aFont = UIFont(name: "Helvetica", size: r / 5)
-        let attr:CFDictionaryRef = [NSFontAttributeName:aFont!,NSForegroundColorAttributeName:UIColor.whiteColor()]
+        let attr = [NSFontAttributeName:aFont!,NSForegroundColorAttributeName:UIColor.white]
         
-        for p in points.enumerate() {
-            if p.index > 0 {
-                let text = CFAttributedStringCreate(nil, labels[p.index], attr)
-                let line = CTLineCreateWithAttributedString(text)
+        for (index, element) in points.enumerated() {
+            if index > 0 {
+                let text = CFAttributedStringCreate(nil,
+                                labels[index] as CFString!,
+                                attr as CFDictionary!)
+                let line = CTLineCreateWithAttributedString(text!)
                 
-                let bounds = CTLineGetBoundsWithOptions(line, CTLineBoundsOptions.UseOpticalBounds)
-                CGContextSetLineWidth(ctx, 1.5)
-                CGContextSetTextDrawingMode(ctx, .Fill)
+                let bounds = CTLineGetBoundsWithOptions(line, CTLineBoundsOptions.useOpticalBounds)
+                ctx.setLineWidth(1.5)
+                ctx.setTextDrawingMode(.fill)
                 
-                CGContextSaveGState(ctx);
-                CGContextTranslateCTM(ctx, p.element.x, p.element.y);
-                CGContextRotateCTM(ctx, toRad(CGFloat(-360.0 * Double(p.index) / 12.0)))
-                CGContextSetTextPosition(ctx, -bounds.width / 2, -bounds.midY)
+                ctx.saveGState();
+                ctx.translateBy(x: element.x, y: element.y);
+                ctx.rotate(by: toRad(CGFloat(-360.0 * Double(index) / 12.0)))
+                ctx.textPosition = CGPoint(x: -bounds.width / 2,
+                                           y: -bounds.midY)
                 CTLineDraw(line, ctx)
-                CGContextRestoreGState(ctx)
+                ctx.restoreGState()
             }
         }
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         if context == nil {
             return
         }
         
         let radius = (self.bounds.size.width - 12) / 2
-        let center = CGPointMake(self.bounds.size.width / 2,
-                                 self.bounds.size.height / 2)
+        let center = CGPoint(x: self.bounds.size.width / 2,
+                                 y: self.bounds.size.height / 2)
         
         markers(context!, cx: center.x, cy: center.y, r: radius,
-                sides: 60, color: UIColor.whiteColor())
+                sides: 60, color: UIColor.white)
         
         cardinals(self.bounds, ctx: context!, cx: center.x, cy: center.y,
-                  r: radius, sides: 12, color: UIColor.whiteColor())
+                  r: radius, sides: 12, color: UIColor.white)
     }
 }

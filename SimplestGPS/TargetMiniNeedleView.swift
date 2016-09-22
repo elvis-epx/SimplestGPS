@@ -17,14 +17,14 @@ class TargetMiniNeedleView: UIView
         let s = CGSize(width: frame.width / 13, height: frame.width / 25)
         let p = CGPoint(x: frame.width / 2 - s.width / 2, y: frame.width / 17)
         super.init(frame: CGRect(origin: p, size: s))
-        self.backgroundColor = UIColor.clearColor()
+        self.backgroundColor = UIColor.clear
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         // NSLog("MiniNeedle drawRect")
         let ctx = UIGraphicsGetCurrentContext()
         if ctx == nil {
@@ -42,19 +42,19 @@ class TargetMiniNeedleView: UIView
         let y1 = y + b
         let xm = x
 
-        CGContextSetStrokeColorWithColor(ctx, UIColor.greenColor().CGColor)
-        CGContextSetLineWidth(ctx, 2.0)
+        ctx?.setStrokeColor(UIColor.green.cgColor)
+        ctx?.setLineWidth(2.0)
 
-        CGContextMoveToPoint(ctx, x0, y0) 
-        CGContextAddLineToPoint(ctx, x1, y0)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: x0, y: y0)) 
+        ctx?.addLine(to: CGPoint(x: x1, y: y0))
+        ctx?.strokePath()
         
-        CGContextMoveToPoint(ctx, x1, y0)
-        CGContextAddLineToPoint(ctx, xm, y1)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: x1, y: y0))
+        ctx?.addLine(to: CGPoint(x: xm, y: y1))
+        ctx?.strokePath()
         
-        CGContextMoveToPoint(ctx, xm, y1)
-        CGContextAddLineToPoint(ctx, x0, y0)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: xm, y: y1))
+        ctx?.addLine(to: CGPoint(x: x0, y: y0))
+        ctx?.strokePath()
     }
 }

@@ -44,7 +44,7 @@ class CompassAnim
         opacity = 10000
     }
     
-    func set(target: CGFloat, block: Optional<() -> Void>)
+    func set(_ target: CGFloat, block: Optional<() -> Void>)
     {
         self.block = block
 
@@ -72,7 +72,7 @@ class CompassAnim
         self.fast = true
     }
     
-    func tick(pdt: CGFloat) -> (CGFloat, Bool)
+    func tick(_ pdt: CGFloat) -> (CGFloat, Bool)
     {
         if self.block != nil {
             block!();
@@ -81,7 +81,7 @@ class CompassAnim
         
         if !self.lost && target == current && opacity == 10000 {
             // nothing to do
-            return (current % 360.0, false)
+            return (current.truncatingRemainder(dividingBy: 360.0), false)
         }
 
         var dt = pdt
@@ -150,13 +150,13 @@ class CompassAnim
         if (xlate == nil) {
             self.xlate = CGPoint(x: pivot.x - view.center.x, y: pivot.y - view.center.y)
         }
-        var transform = CGAffineTransformMakeTranslation(xlate!.x, xlate!.y)
-        transform = CGAffineTransformRotate(transform, current * CGFloat(M_PI / 180.0))
-        transform = CGAffineTransformTranslate(transform, -xlate!.x, -xlate!.y)
+        var transform = CGAffineTransform(translationX: xlate!.x, y: xlate!.y)
+        transform = transform.rotated(by: current * CGFloat(M_PI / 180.0))
+        transform = transform.translatedBy(x: -xlate!.x, y: -xlate!.y)
         
         view.transform = transform
         view.alpha = CGFloat(opacity) / 10000.0
 
-        return (current % 360.0, true)
+        return (current.truncatingRemainder(dividingBy: 360.0), true)
     }
 }

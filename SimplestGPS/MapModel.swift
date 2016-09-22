@@ -12,18 +12,18 @@ import UIKit
 typealias ClosureType = (AnyObject?) -> Bool
 
 enum State: Int {
-    case NOTLOADED = 0
-    case LOADING
-    case LOADED
-    case CANTLOAD
-    case NOTLOADED_OOM
+    case notloaded = 0
+    case loading
+    case loaded
+    case cantload
+    case notloaded_OOM
 }
 
 // could not be struct because we want this to passed around by reference
-public class MapDescriptor {
+open class MapDescriptor {
     let statename = ["NOTLOADED", "LOADING", "LOADED", "CANTLOAD", "NOTLOADED_OOM"]
     
-    let file: NSURL
+    let file: URL
     var img: UIImage
     let name: String
     let priority: Double
@@ -43,7 +43,7 @@ public class MapDescriptor {
     var offsety: CGFloat = 0 // manipulated by Controller
     var maxram = 0
     var currentram = 0
-    var state = State.NOTLOADED
+    var state = State.notloaded
     var insertion = 0
     var distance = 0.0
     var sm: [State:[State:ClosureType]] = [:]
@@ -60,7 +60,7 @@ public class MapDescriptor {
     var curmidlat: Double = 0
     var curmidlong: Double = 0
     
-    init(model: MapModel, file: NSURL, name: String, priority: Double, latNW: Double,
+    init(model: MapModel, file: URL, name: String, priority: Double, latNW: Double,
          longNW: Double, latheight: Double, longwidth: Double)
     {
         self.model = model
@@ -80,38 +80,38 @@ public class MapDescriptor {
         
         self.reset_cur()
         
-        sm[State.NOTLOADED] = [:]
-        sm[State.LOADING] = [:]
-        sm[State.LOADED] = [:]
-        sm[State.CANTLOAD] = [:]
-        sm[State.NOTLOADED_OOM] = [:]
+        sm[State.notloaded] = [:]
+        sm[State.loading] = [:]
+        sm[State.loaded] = [:]
+        sm[State.cantload] = [:]
+        sm[State.notloaded_OOM] = [:]
         
         // Cleanup (A)
-        sm[State.NOTLOADED]![State.NOTLOADED_OOM] = { _ in
+        sm[State.notloaded]![State.notloaded_OOM] = { _ in
             model.update_ram(self, n: 0)
             self.img = model.i_oom
             self.reset_cur()
             return true
         }
         
-        sm[State.LOADING]![State.NOTLOADED_OOM] =
-            sm[State.NOTLOADED]![State.NOTLOADED_OOM]
+        sm[State.loading]![State.notloaded_OOM] =
+            sm[State.notloaded]![State.notloaded_OOM]
         
-        sm[State.LOADED]![State.NOTLOADED_OOM] =
-            sm[State.LOADING]![State.NOTLOADED_OOM]
+        sm[State.loaded]![State.notloaded_OOM] =
+            sm[State.loading]![State.notloaded_OOM]
         
-        sm[State.LOADING]![State.NOTLOADED] = { _ in
+        sm[State.loading]![State.notloaded] = { _ in
             model.update_ram(self, n: 0)
             self.img = model.i_notloaded
             self.reset_cur()
             return true
         }
         
-        sm[State.LOADED]![State.NOTLOADED] =
-            sm[State.LOADING]![State.NOTLOADED]
+        sm[State.loaded]![State.notloaded] =
+            sm[State.loading]![State.notloaded]
         
         // Fail (F)
-        sm[State.LOADING]![State.CANTLOAD] = { _ in
+        sm[State.loading]![State.cantload] = { _ in
             model.update_ram(self, n: 0)
             self.img = model.i_cantload
             self.reset_cur()
@@ -119,18 +119,18 @@ public class MapDescriptor {
         }
         
         // Null
-        sm[State.NOTLOADED_OOM]![State.NOTLOADED_OOM] = { _ in
+        sm[State.notloaded_OOM]![State.notloaded_OOM] = { _ in
             return true
         }
         
         // Loading (L)
-        sm[State.NOTLOADED]![State.LOADING] = { info in
+        sm[State.notloaded]![State.loading] = { info in
             if !model.queue_load() {
                 NSLog("ERROR ######## could not queue load %@", name)
                 return false
             }
             model.update_ram(self, n: self.maxram)
-            if self.state != State.LOADED {
+            if self.state != State.loaded {
                 // make this transition usable in others
                 self.img = model.i_loading
                 self.reset_cur()
@@ -147,14 +147,14 @@ public class MapDescriptor {
         }
         
         // blowup / shrink
-        sm[State.LOADED]![State.LOADING] =
-            sm[State.NOTLOADED]![State.LOADING]
+        sm[State.loaded]![State.loading] =
+            sm[State.notloaded]![State.loading]
         
-        sm[State.NOTLOADED_OOM]![State.LOADING] =
-            sm[State.NOTLOADED]![State.LOADING]
+        sm[State.notloaded_OOM]![State.loading] =
+            sm[State.notloaded]![State.loading]
         
         // Commit (C)
-        sm[State.LOADING]![State.LOADED] = { img in
+        sm[State.loading]![State.loaded] = { img in
             model.update_ram(self, n: 0)
             let imgc = img as! UIImage
             let new_size = Int(imgc.size.width * imgc.size.height * 4)
@@ -175,7 +175,7 @@ public class MapDescriptor {
     }
     
     // calculate map crop that fills a box (typically, the screen)
-    func calc_crop(boxlat0: Double, boxlat1: Double, boxlong0: Double, boxlong1: Double)
+    func calc_crop(_ boxlat0: Double, boxlat1: Double, boxlong0: Double, boxlong1: Double)
         -> (CGRect, Double, Double, Double, Double)
     {
         // NSLog("calc_crop lat0 %f lat1 %f long0 %f long1 %f", olat0, olat1, olong0, olong1)
@@ -213,7 +213,7 @@ public class MapDescriptor {
     
     // see if current 'box' (typically, the screen) is covered by the map crop currently in memory
     // i.e. if the map contains the box
-    func is_crop_enough(boxlat0: Double, boxlat1: Double, boxlong0: Double, boxlong1: Double) -> Bool
+    func is_crop_enough(_ boxlat0: Double, boxlat1: Double, boxlong0: Double, boxlong1: Double) -> Bool
     {
         let (_, ideallat0, ideallat1, ideallong0, ideallong1) =
                 calc_crop(boxlat0, boxlat1: boxlat1, boxlong0: boxlong0, boxlong1: boxlong1)
@@ -231,7 +231,7 @@ public class MapDescriptor {
         return contained
     }
     
-    func trans(newstate: State, arg: AnyObject?) {
+    func trans(_ newstate: State, arg: AnyObject?) {
         let oldstate = state
         if sm[oldstate]![newstate] == nil {
             NSLog("############# ERROR ########### cannot move state %@ -> %@",
@@ -248,29 +248,29 @@ public class MapDescriptor {
     
     /* Convenience methods for clients */
     func please_oom() {
-        if state == State.NOTLOADED || state == State.LOADING ||
-            state == State.NOTLOADED_OOM || is_loaded() {
-            trans(State.NOTLOADED_OOM, arg: nil)
+        if state == State.notloaded || state == State.loading ||
+            state == State.notloaded_OOM || is_loaded() {
+            trans(State.notloaded_OOM, arg: nil)
         } else {
             NSLog("Warning ####### please_oom called for invalid state %@ %@",
                   statename[state.rawValue], name)
         }
     }
     
-    func please_load(lat0: Double, lat1: Double, long0: Double, long1: Double, screenh: Double) -> Bool {
+    func please_load(_ lat0: Double, lat1: Double, long0: Double, long1: Double, screenh: Double) -> Bool {
         if model.loader_busy() {
             return false
         }
         
-        if state == State.NOTLOADED || state == State.NOTLOADED_OOM {
-            let d: NSDictionary = ["lat0": NSNumber(double: lat0),
-                                   "lat1": NSNumber(double: lat1),
-                                   "long0": NSNumber(double: long0),
-                                   "long1": NSNumber(double: long1),
-                                   "screenh": NSNumber(double: screenh)]
-            trans(State.LOADING, arg: d)
+        if state == State.notloaded || state == State.notloaded_OOM {
+            let d: NSDictionary = ["lat0": NSNumber(value: lat0 as Double),
+                                   "lat1": NSNumber(value: lat1 as Double),
+                                   "long0": NSNumber(value: long0 as Double),
+                                   "long1": NSNumber(value: long1 as Double),
+                                   "screenh": NSNumber(value: screenh as Double)]
+            trans(State.loading, arg: d)
             return true
-        } else if state == State.LOADING {
+        } else if state == State.loading {
             // ignore
             return true
         }
@@ -281,37 +281,37 @@ public class MapDescriptor {
     }
     
     func please_unload() {
-        if !is_loaded() && state != State.LOADING {
+        if !is_loaded() && state != State.loading {
             NSLog("Warning ####### please_unload called for invalid state %@ %@",
                   statename[state.rawValue], name)
             return
         }
-        trans(State.NOTLOADED, arg: nil)
+        trans(State.notloaded, arg: nil)
     }
     
-    func please_reload(lat0: Double, lat1: Double, long0: Double, long1: Double, screenh: Double) -> Bool {
+    func please_reload(_ lat0: Double, lat1: Double, long0: Double, long1: Double, screenh: Double) -> Bool {
         if model.loader_busy() {
             return false
-        } else if state != State.LOADED {
+        } else if state != State.loaded {
             NSLog("Warning ####### please_blowup called for invalid state %@ %@",
                   statename[state.rawValue], name)
             return false
         }
-        let d: NSDictionary = ["lat0": NSNumber(double: lat0),
-                               "lat1": NSNumber(double: lat1),
-                               "long0": NSNumber(double: long0),
-                               "long1": NSNumber(double: long1),
-                               "screenh": NSNumber(double: screenh)]
-        trans(State.LOADING, arg: d)
+        let d: NSDictionary = ["lat0": NSNumber(value: lat0 as Double),
+                               "lat1": NSNumber(value: lat1 as Double),
+                               "long0": NSNumber(value: long0 as Double),
+                               "long1": NSNumber(value: long1 as Double),
+                               "screenh": NSNumber(value: screenh as Double)]
+        trans(State.loading, arg: d)
         return true
     }
     
     func is_unloaded_but_is_loadable() -> Bool {
-        return state == State.NOTLOADED || state == State.NOTLOADED_OOM
+        return state == State.notloaded || state == State.notloaded_OOM
     }
     
     func is_loaded() -> Bool {
-        return state == State.LOADED
+        return state == State.loaded
     }
     
     func is_shrunk() -> Bool {
@@ -326,7 +326,7 @@ public class MapDescriptor {
         return self.maxram
     }
     
-    func imgresize(img: UIImage, crop: CGRect, shrink_factor: CGFloat) -> UIImage
+    func imgresize(_ img: UIImage, crop: CGRect, shrink_factor: CGFloat) -> UIImage
     {
         let newsize = CGSize(width: crop.width / shrink_factor,
                              height: crop.height / shrink_factor)
@@ -339,10 +339,10 @@ public class MapDescriptor {
             height: img.size.height / shrink_factor)
         
         UIGraphicsBeginImageContextWithOptions(newsize, true, 1.0)
-        img.drawInRect(paintrect)
+        img.draw(in: paintrect)
         let newimg = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext()
-        return newimg
+        return newimg!
     }
     
     func reset_cur() {
@@ -356,10 +356,10 @@ public class MapDescriptor {
         self.curmidlong = omidlong
     }
     
-    func Load(blat0: Double, blat1: Double, blong0: Double, blong1: Double, screenh: CGFloat, cb: () -> ())
+    func Load(_ blat0: Double, blat1: Double, blong0: Double, blong1: Double, screenh: CGFloat, cb: @escaping () -> ())
     {
-        dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
-            let rawimg = UIImage(data: NSData(contentsOfURL: self.file)!)
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.background).async {
+            let rawimg = UIImage(data: try! Data(contentsOf: self.file))
             
             if rawimg != nil && rawimg!.size.height > 0 && rawimg!.size.width > 0 {
                 // update image statistics
@@ -384,8 +384,8 @@ public class MapDescriptor {
                 
                 let shrunk = self.imgresize(rawimg!, crop: crop, shrink_factor: factor)
                 
-                dispatch_async(dispatch_get_main_queue()) {
-                    if self.state != State.LOADING {
+                DispatchQueue.main.async {
+                    if self.state != State.loading {
                         NSLog("Warning ########### %@ load disregarded", self.name)
                     } else {
                         self.curlat0 = newlat0
@@ -396,16 +396,16 @@ public class MapDescriptor {
                         self.curlongwidth = abs(newlong1 - newlong0)
                         self.curmidlat = (newlat0 + newlat1) / 2
                         self.curmidlong = (newlong0 + newlong1) / 2
-                        self.trans(State.LOADED, arg: shrunk)
+                        self.trans(State.loaded, arg: shrunk)
                     }
                     cb()
                 }
             } else {
-                dispatch_async(dispatch_get_main_queue()) {
-                    if self.state != State.LOADING {
+                DispatchQueue.main.async {
+                    if self.state != State.loading {
                         NSLog("Warning ########### %@ load (cantload) disregarded", self.name)
                     } else {
-                        self.trans(State.CANTLOAD, arg: nil)
+                        self.trans(State.cantload, arg: nil)
                     }
                     cb()
                 }
@@ -432,7 +432,7 @@ public class MapDescriptor {
     
     var memoryWarningObserver : NSObjectProtocol!
     
-    class func parse_map_name(f: String) -> (ok: Bool, lat: Double, long: Double,
+    class func parse_map_name(_ f: String) -> (ok: Bool, lat: Double, long: Double,
         latheight: Double, longwidth: Double, dx: Double, dy: Double)
     {
         NSLog("Parsing %@", f)
@@ -443,9 +443,9 @@ public class MapDescriptor {
         var dx: Double? = 0.0
         var dy: Double? = 0.0
         
-        let e = f.lowercaseString
-        let g = (e.characters.split(".").map{ String($0) }).first!
-        var h = (g.characters.split("+").map{ String($0) })
+        let e = f.lowercased()
+        let g = (e.characters.split(separator: ".").map{ String($0) }).first!
+        var h = (g.characters.split(separator: "+").map{ String($0) })
         
         if h.count != 4 && h.count != 6 {
             NSLog("    did not find 4/6 tokens")
@@ -488,8 +488,8 @@ public class MapDescriptor {
         if (ew == "w") {
             long = -1;
         }
-        h[0] = h[0].substringToIndex(h[0].endIndex.predecessor())
-        h[1] = h[1].substringToIndex(h[1].endIndex.predecessor())
+        h[0] = h[0].substring(to: h[0].characters.index(before: h[0].endIndex))
+        h[1] = h[1].substring(to: h[1].characters.index(before: h[1].endIndex))
         let ilat = Int(h[0])
         if (ilat == nil) {
             NSLog("    lat not parsable")
@@ -536,7 +536,7 @@ public class MapDescriptor {
         current_map_list = [:]
     }
     
-    func get_maps(clat: Double, clong: Double, radius: Double, screenh: Double) -> [String:MapDescriptor]?
+    func get_maps(_ clat: Double, clong: Double, radius: Double, screenh: Double) -> [String:MapDescriptor]?
     {
         // NOTE: we use a radius instead of a box to test if a map belongs to the screen,
         // because in HEADING modes the map rotates, so the map x screen overlap must be
@@ -570,7 +570,7 @@ public class MapDescriptor {
         
         // sorting helps the culling algorithm
         
-        let maps_sorted = maps.sort({
+        let maps_sorted = maps.sorted(by: {
             if $0.priority == $1.priority {
                 return $0.distance < $1.distance
             }
@@ -612,7 +612,7 @@ public class MapDescriptor {
         if !ram_within_hard_limits(nil) {
             // memory full: all unused maps already removed
             // try to remove lowest-priority
-            for map in maps_sorted.reverse() {
+            for map in maps_sorted.reversed() {
                 if map.is_loaded() {
                     NSLog("Lowest prio image evicted from memory: %@", map.name)
                     map.please_oom()
@@ -635,7 +635,7 @@ public class MapDescriptor {
                         // crop kept in memory
                         let (blat0, blat1, blong0, blong1) =
                             GPSModel2.enclosing_box(clat, clong: clong, radius: radius * 1.5)
-                        map.please_load(blat0, lat1: blat1,
+                        _ = map.please_load(blat0, lat1: blat1,
                                         long0: blong0, long1: blong1,
                                         screenh: screenh)
                     }
@@ -654,7 +654,7 @@ public class MapDescriptor {
             if map.is_loaded() {
                 memory_tally += map.currentram
             }
-            if map.state == State.LOADING {
+            if map.state == State.loading {
                 inflight += 1
             }
         }
@@ -694,25 +694,25 @@ public class MapDescriptor {
         
         maps = []
         
-        let fileManager = NSFileManager.defaultManager()
-        let documentsUrl = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0] as NSURL
+        let fileManager = FileManager.default
+        let documentsUrl = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0] as URL
         
         #if (arch(i386) || arch(x86_64)) && os(iOS)
         // Write a canary file to find the app's Documents folder in Simulator
-        let w = documentsUrl.URLByAppendingPathComponent("canary666.txt")
+        let w = documentsUrl.appendingPathComponent("canary666.txt")
         let text = "bla"
         do {
-            try text.writeToURL(w, atomically: false, encoding: NSUTF8StringEncoding)
+            try text.write(to: w, atomically: false, encoding: String.Encoding.utf8)
         } catch {
         }
         #endif
         
-        if let directoryUrls = try? NSFileManager.defaultManager().contentsOfDirectoryAtURL(documentsUrl,
+        if let directoryUrls = try? FileManager.default.contentsOfDirectory(at: documentsUrl,
                                                                                             includingPropertiesForKeys: nil,
-                                                                                            options:NSDirectoryEnumerationOptions.SkipsSubdirectoryDescendants) {
+                                                                                            options:FileManager.DirectoryEnumerationOptions.skipsSubdirectoryDescendants) {
             NSLog("%@", directoryUrls)
             for url in directoryUrls {
-                let f = url.lastPathComponent!
+                let f = url.lastPathComponent
                 let coords = MapModel.parse_map_name(f)
                 if !coords.ok {
                     continue
@@ -730,7 +730,7 @@ public class MapDescriptor {
                 
                 let map = MapDescriptor(model: self,
                                         file: url,
-                                        name: url.lastPathComponent!,
+                                        name: url.lastPathComponent,
                                         priority: coords.latheight,
                                         latNW: lat,
                                         longNW: long,
@@ -740,11 +740,11 @@ public class MapDescriptor {
             }
         }
         
-        let notifications = NSNotificationCenter.defaultCenter()
-        memoryWarningObserver = notifications.addObserverForName(UIApplicationDidReceiveMemoryWarningNotification,
+        let notifications = NotificationCenter.default
+        memoryWarningObserver = notifications.addObserver(forName: NSNotification.Name.UIApplicationDidReceiveMemoryWarning,
                                                                  object: nil,
-                                                                 queue: NSOperationQueue.mainQueue(),
-                                                                 usingBlock: { [unowned self] (notification : NSNotification!) -> Void in
+                                                                 queue: OperationQueue.main,
+                                                                 using: { [unowned self] (notification : Notification!) -> Void in
                                                                     self.memory_low()
             }
         )
@@ -756,8 +756,8 @@ public class MapDescriptor {
     }
     
     deinit {
-        let notifications = NSNotificationCenter.defaultCenter()
-        notifications.removeObserver(memoryWarningObserver, name: UIApplicationDidReceiveMemoryWarningNotification, object: nil)
+        let notifications = NotificationCenter.default
+        notifications.removeObserver(memoryWarningObserver, name: NSNotification.Name.UIApplicationDidReceiveMemoryWarning, object: nil)
     }
     
     func memory_low() {
@@ -774,7 +774,7 @@ public class MapDescriptor {
         self.max_ram_inuse = self.ram_limit
     }
     
-    func update_ram(map: MapDescriptor, n: Int) {
+    func update_ram(_ map: MapDescriptor, n: Int) {
         let change = n - map.currentram
         map.currentram = n
         self.ram_inuse += change
@@ -795,7 +795,7 @@ public class MapDescriptor {
         return (self.ram_limit / 10 * 5) > self.ram_inuse
     }
     
-    func ram_within_hard_limits(newobj: MapDescriptor?) -> Bool {
+    func ram_within_hard_limits(_ newobj: MapDescriptor?) -> Bool {
         var additional = 0
         if newobj != nil {
             additional += newobj!.ram_estimate()
@@ -810,16 +810,16 @@ public class MapDescriptor {
         return singleton
     }
     
-    class func simple_image(color: UIColor) -> UIImage
+    class func simple_image(_ color: UIColor) -> UIImage
     {
         let rect = CGRect(x: 0.0, y: 0.0, width: 50.0, height: 50.0)
         UIGraphicsBeginImageContext(rect.size)
         let context = UIGraphicsGetCurrentContext();
-        CGContextSetFillColorWithColor(context, color.CGColor)
-        CGContextFillRect(context, rect)
+        context?.setFillColor(color.cgColor)
+        context?.fill(rect)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return image
+        return image!
     }
     
     func queue_load() -> Bool {

@@ -18,8 +18,8 @@ import UIKit
     @IBOutlet weak var delete_button: UIButton?
     @IBOutlet weak var back_button: UIButton?
  
-    private var dialog: Int = 0
-    private var index: Int = 0
+    fileprivate var dialog: Int = 0
+    fileprivate var index: Int = 0
     
     override func viewDidLoad()
     {
@@ -33,10 +33,10 @@ import UIKit
     }
     
     func quitEdit() {
-        self.performSegueWithIdentifier("backToTable", sender: self)
+        self.performSegue(withIdentifier: "backToTable", sender: self)
     }
     
-    @IBAction func back(sender: AnyObject?)
+    @IBAction func back(_ sender: AnyObject?)
     {
         let err = GPSModel2.model().target_set(index,
                                                 nam: name!.text!,
@@ -61,7 +61,7 @@ import UIKit
         alert.show()
     }
     
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+    func alertView(_ alertView: UIAlertView, clickedButtonAt buttonIndex: Int) {
         if buttonIndex == 0 {
             // pass
         } else if buttonIndex == 1 {
@@ -75,7 +75,7 @@ import UIKit
         }
     }
     
-    @IBAction func del(sender: AnyObject?)
+    @IBAction func del(_ sender: AnyObject?)
     {
         if index < 0 {
             // Deletion dialog, user confirms deletion
@@ -92,7 +92,7 @@ import UIKit
         alert.show()
     }
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         if textField === name {
             latitude?.becomeFirstResponder()

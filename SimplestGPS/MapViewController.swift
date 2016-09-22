@@ -10,12 +10,12 @@ import Foundation
 import UIKit
 
 enum Mode: Int {
-    case MAP = 0
-    case MAPCOMPASS = 1
-    case COMPASS = 2
-    case MAP_H = 3
-    case MAPCOMPASS_H = 4
-    case COMPASS_H = 5
+    case map = 0
+    case mapcompass = 1
+    case compass = 2
+    case map_H = 3
+    case mapcompass_H = 4
+    case compass_H = 5
 }
 
 @objc class MapViewController: UIViewController, ModelListener
@@ -31,34 +31,34 @@ enum Mode: Int {
     @IBOutlet weak var accuracy: UILabel!
     @IBOutlet weak var longitude: UILabel!
     @IBOutlet weak var latitude: UILabel!
-    var scrw = CGFloat.NaN
-    var scrh = CGFloat.NaN
-    var width_height_proportion = CGFloat.NaN
-    var diag_height_proportion = CGFloat.NaN
+    var scrw = CGFloat.nan
+    var scrh = CGFloat.nan
+    var width_height_proportion = CGFloat.nan
+    var diag_height_proportion = CGFloat.nan
     
-    var mode: Mode = .MAPCOMPASS
-    let next_mode = [Mode.MAP: Mode.MAPCOMPASS,
-                     Mode.MAPCOMPASS: Mode.COMPASS,
-                     Mode.COMPASS: Mode.MAP_H,
-                     Mode.MAP_H: Mode.MAPCOMPASS_H,
-                     Mode.MAPCOMPASS_H: Mode.COMPASS_H,
-                     Mode.COMPASS_H: Mode.MAP]
-    let next_mode_nomap = [Mode.MAP: Mode.COMPASS,
-                           Mode.MAP_H: Mode.COMPASS,
-                           Mode.MAPCOMPASS: Mode.COMPASS,
-                           Mode.MAPCOMPASS_H: Mode.COMPASS,
-                           Mode.COMPASS_H: Mode.COMPASS,
-                           Mode.COMPASS: Mode.COMPASS_H]
-    let int_to_mode = [Mode.MAP.rawValue: Mode.MAP,
-                       Mode.MAPCOMPASS.rawValue: Mode.MAPCOMPASS,
-                       Mode.COMPASS.rawValue: Mode.COMPASS,
-                       Mode.MAP_H.rawValue: Mode.MAP_H,
-                       Mode.MAPCOMPASS_H.rawValue: Mode.MAPCOMPASS_H,
-                       Mode.COMPASS_H.rawValue: Mode.COMPASS_H]
-    let mode_name: [Mode:String] = [.MAP: "", .MAPCOMPASS: "", .COMPASS: "",
-                                    .MAP_H: "Follows heading",
-                                    .MAPCOMPASS_H: "Follows heading",
-                                    .COMPASS_H: "Follows heading"]
+    var mode: Mode = .mapcompass
+    let next_mode = [Mode.map: Mode.mapcompass,
+                     Mode.mapcompass: Mode.compass,
+                     Mode.compass: Mode.map_H,
+                     Mode.map_H: Mode.mapcompass_H,
+                     Mode.mapcompass_H: Mode.compass_H,
+                     Mode.compass_H: Mode.map]
+    let next_mode_nomap = [Mode.map: Mode.compass,
+                           Mode.map_H: Mode.compass,
+                           Mode.mapcompass: Mode.compass,
+                           Mode.mapcompass_H: Mode.compass,
+                           Mode.compass_H: Mode.compass,
+                           Mode.compass: Mode.compass_H]
+    let int_to_mode = [Mode.map.rawValue: Mode.map,
+                       Mode.mapcompass.rawValue: Mode.mapcompass,
+                       Mode.compass.rawValue: Mode.compass,
+                       Mode.map_H.rawValue: Mode.map_H,
+                       Mode.mapcompass_H.rawValue: Mode.mapcompass_H,
+                       Mode.compass_H.rawValue: Mode.compass_H]
+    let mode_name: [Mode:String] = [.map: "", .mapcompass: "", .compass: "",
+                                    .map_H: "Follows heading",
+                                    .mapcompass_H: "Follows heading",
+                                    .compass_H: "Follows heading"]
     var tgt_dist = 1
     var blink = 1
     
@@ -72,8 +72,8 @@ enum Mode: Int {
     let max_latitude = CGFloat(90.0 - 5.0 - 3600 / 3600.0)
     
     // Screen position (NaN = center follows GPS position)
-    var center_lat = CGFloat.NaN
-    var center_long = CGFloat.NaN
+    var center_lat = CGFloat.nan
+    var center_long = CGFloat.nan
     var touch_point: CGPoint? = nil
     
     // Current list of maps on screen
@@ -81,25 +81,25 @@ enum Mode: Int {
     var last_map_update: Double = 0;
     
     // Screen position for painting purposes (either screen position or GPS position)
-    var clat = CGFloat.NaN
-    var clong = CGFloat.NaN
+    var clat = CGFloat.nan
+    var clong = CGFloat.nan
     var longitude_latitude_proportion: CGFloat = 1
     
     // Most current GPS position
-    var gpslat = CGFloat.NaN
-    var gpslong = CGFloat.NaN
+    var gpslat = CGFloat.nan
+    var gpslong = CGFloat.nan
     
     var current_target = -1
     var last_label_target = -1
-    var last_label_update: NSDate? = nil
+    var last_label_update: Date? = nil
     var label_status = 0
-    var last_label_heading = CGFloat.NaN
+    var last_label_heading = CGFloat.nan
     
-    var update_timer: NSTimer? = nil
+    var update_timer: Timer? = nil
     
     var debug = false
     
-    func do_zoomauto(all_targets: Bool)
+    func do_zoomauto(_ all_targets: Bool)
     {
         // NSLog("zoom auto")
         calculate_zoom(all_targets)
@@ -108,8 +108,8 @@ enum Mode: Int {
     func do_centerme()
     {
         // NSLog("center me")
-        center_lat = CGFloat.NaN
-        center_long = CGFloat.NaN
+        center_lat = CGFloat.nan
+        center_long = CGFloat.nan
         recenter()
         repaint(false, gesture: false)
     }
@@ -143,22 +143,22 @@ enum Mode: Int {
         self.tgt_b.addGestureRecognizer(lp)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         if GPSModel2.model().show_welcome() {
-            let alert = UIAlertController(title: "Welcome!", message: "If you need instructions about this app, press 'PIN' at lower left corner, then 'Help' at the bottom.", preferredStyle: UIAlertControllerStyle.Alert)
-            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: nil))
-            self.presentViewController(alert, animated: true, completion: nil)
+            let alert = UIAlertController(title: "Welcome!", message: "If you need instructions about this app, press 'PIN' at lower left corner, then 'Help' at the bottom.", preferredStyle: UIAlertControllerStyle.alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         NSLog("     map will appear")
         super.viewWillAppear(animated)
         GPSModel2.model().addObs(self)
-        update_timer = NSTimer(timeInterval: 0.33, target: self,
+        update_timer = Timer(timeInterval: 0.33, target: self,
                                selector: #selector(MapViewController.update),
                         userInfo: nil, repeats: true)
-        NSRunLoop.currentRunLoop().addTimer(update_timer!, forMode: NSRunLoopCommonModes)
+        RunLoop.current.add(update_timer!, forMode: RunLoopMode.commonModes)
         
         if int_to_mode[GPSModel2.model().get_mode()] != nil {
             mode = int_to_mode[GPSModel2.model().get_mode()]!
@@ -174,10 +174,10 @@ enum Mode: Int {
         zoom_factor = min(zoom_factor, zoom_max)
 
         if !MapModel.model().are_there_maps() {
-            if mode == .MAP || mode == .MAPCOMPASS {
-                mode = .COMPASS
-            } else if mode == .MAP_H || mode == .MAPCOMPASS_H {
-                mode = .COMPASS_H
+            if mode == .map || mode == .mapcompass {
+                mode = .compass
+            } else if mode == .map_H || mode == .mapcompass_H {
+                mode = .compass_H
             }
         }
     }
@@ -190,7 +190,7 @@ enum Mode: Int {
         diag_height_proportion = sqrt(scrw * scrw + scrh * scrh) / scrh
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         NSLog("     map will disappear")
         super.viewWillDisappear(animated)
         GPSModel2.model().delObs(self)
@@ -245,29 +245,29 @@ enum Mode: Int {
         }
     }
     
-    func zoom_in_degrees(x: CGFloat) -> CGFloat
+    func zoom_in_degrees(_ x: CGFloat) -> CGFloat
     {
         // zoom is in seconds, convert to degrees
         return x / 3600.0
     }
     
-    func zoom_in_widthradius_m(x: CGFloat) -> CGFloat
+    func zoom_in_widthradius_m(_ x: CGFloat) -> CGFloat
     {
         return width_height_proportion * zoom_in_heightradius_m(x)
     }
     
-    func zoom_in_heightradius_m(x: CGFloat) -> CGFloat
+    func zoom_in_heightradius_m(_ x: CGFloat) -> CGFloat
     {
         // zoom is in latitude seconds, convert to minutes, then to distance
         return 1853.0 * x / 60.0 / 2.0
     }
     
-    func zoom_in_diagradius_m(x: CGFloat) -> CGFloat
+    func zoom_in_diagradius_m(_ x: CGFloat) -> CGFloat
     {
         return diag_height_proportion * zoom_in_heightradius_m(x)
     }
     
-    func to_raster(lat: CGFloat, long: CGFloat, clat: CGFloat, clong: CGFloat,
+    func to_raster(_ lat: CGFloat, long: CGFloat, clat: CGFloat, clong: CGFloat,
                          lat_height: CGFloat, scrh: CGFloat, scrw: CGFloat,
                          longitude_proportion: CGFloat)
         -> (CGFloat, CGFloat)
@@ -280,7 +280,7 @@ enum Mode: Int {
         return (dlong, dlat)
     }
     
-    func repaint(immediately: Bool, gesture: Bool)
+    func repaint(_ immediately: Bool, gesture: Bool)
     {
         if clat.isNaN {
             return
@@ -327,7 +327,7 @@ enum Mode: Int {
         
         if !gesture {
             var stext = self.mode_name[self.mode]!
-            if self.mode != .COMPASS && self.mode != .COMPASS_H {
+            if self.mode != .compass && self.mode != .compass_H {
                 stext = GPSModel2.format_distance_t(Double(scale_m),
                                     met: GPSModel2.model().get_metric()) +
                     (stext.isEmpty ? "" : " - ") + stext
@@ -343,7 +343,7 @@ enum Mode: Int {
         
         var map_list_changed = false
         
-        let now = NSDate().timeIntervalSince1970
+        let now = Date().timeIntervalSince1970
         if last_map_update == 0 {
             last_map_update = now - 0.5
         }
@@ -352,7 +352,7 @@ enum Mode: Int {
             // only recalculate map list when we are not in a hurry
             last_map_update = now
 
-            if mode == .COMPASS || mode == .COMPASS_H {
+            if mode == .compass || mode == .compass_H {
                 if current_maps.count > 0 {
                     current_maps = [:]
                     map_list_changed = true
@@ -412,8 +412,8 @@ enum Mode: Int {
         */
         
         var targets: [(CGFloat, CGFloat, CGFloat)] = []
-        var label_x = CGFloat.NaN
-        var label_y = CGFloat.NaN
+        var label_x = CGFloat.nan
+        var label_y = CGFloat.nan
         var changed_label = false
         var presenting_label = false
         var label_name = ""
@@ -454,11 +454,11 @@ enum Mode: Int {
                     changed_label = true
                     presenting_label = true
                     last_label_target = current_target
-                    last_label_update = NSDate().dateByAddingTimeInterval(2)
+                    last_label_update = Date().addingTimeInterval(2)
                     label_status = 1
                 } else if label_status == 1 {
                     presenting_label = true
-                    if NSDate().compare(last_label_update!) == .OrderedDescending {
+                    if Date().compare(last_label_update!) == .orderedDescending {
                         label_status = 2
                     }
                 } else if label_status == 2 {
@@ -467,7 +467,7 @@ enum Mode: Int {
                                                  clat: clat, clong: clong,
                                                 lat_height: zoom_height, scrh: scrh, scrw: scrw,
                                                 longitude_proportion: longitude_latitude_proportion)
-                    if mode == .MAP_H {
+                    if mode == .map_H {
                         // convert to polar, rotate, back to cartesian
                         // this is calculated manually since the label does not belong to map canvas
                         // and does not rotate along with maps and crosshairs
@@ -520,15 +520,15 @@ enum Mode: Int {
         }
     }
     
-    func calculate_zoom(all_targets: Bool)
+    func calculate_zoom(_ all_targets: Bool)
     {
         if scrw.isNaN || gpslat.isNaN || GPSModel2.model().target_count() <= 0 {
             return
         }
         
         // force current position in center
-        center_lat = CGFloat.NaN
-        center_long = CGFloat.NaN
+        center_lat = CGFloat.nan
+        center_long = CGFloat.nan
         recenter()
         
         var new_zoom_factor = zoom_min / zoom_step
@@ -569,18 +569,18 @@ enum Mode: Int {
         repaint(true, gesture: false)
     }
     
-    func pan(rec:UIPanGestureRecognizer)
+    func pan(_ rec:UIPanGestureRecognizer)
     {
         switch rec.state {
-        case .Began:
-            touch_point = rec.locationInView(canvas)
+        case .began:
+            touch_point = rec.location(in: canvas)
             // NSLog("Drag began at %f %f", touch_point!.x, touch_point!.y)
             
-        case .Changed:
+        case .changed:
             if scrw.isNaN || gpslat.isNaN {
                 return
             }
-            let new_point = rec.locationInView(canvas)
+            let new_point = rec.location(in: canvas)
             
             var dx = new_point.x - touch_point!.x
             var dy = new_point.y - touch_point!.y
@@ -622,7 +622,7 @@ enum Mode: Int {
         }
     }
     
-    func pinch(rec:UIPinchGestureRecognizer)
+    func pinch(_ rec:UIPinchGestureRecognizer)
     {
         zoom_factor /= rec.scale
         zoom_factor = max(zoom_factor, zoom_min)
@@ -632,43 +632,43 @@ enum Mode: Int {
         repaint(true, gesture: true)
     }
     
-    func onefinger(rec:UITapGestureRecognizer)
+    func onefinger(_ rec:UITapGestureRecognizer)
     {
         NSLog("One finger")
         switch rec.state {
-        case .Ended:
+        case .ended:
             do_centerme()
         default:
             break
         }
     }
     
-    func twofingers(rec:UITapGestureRecognizer)
+    func twofingers(_ rec:UITapGestureRecognizer)
     {
         NSLog("Two fingers")
         switch rec.state {
-        case .Ended:
+        case .ended:
             do_zoomauto(false)
         default:
             break
         }
     }
     
-    func threefingers(rec:UITapGestureRecognizer)
+    func threefingers(_ rec:UITapGestureRecognizer)
     {
         NSLog("Three fingers")
         switch rec.state {
-        case .Ended:
+        case .ended:
             do_zoomauto(true)
         default:
             break
         }
     }
     
-    @IBAction func tgd_button(sender: AnyObject)
+    @IBAction func tgd_button(_ sender: AnyObject)
     {
         NSLog("TGD button")
-        if mode == Mode.MAP || mode == Mode.MAP_H {
+        if mode == Mode.map || mode == Mode.map_H {
             blink += 1
             blink %= 2
             GPSModel2.model().set_blink(blink)
@@ -680,7 +680,7 @@ enum Mode: Int {
         repaint(false, gesture: false)
     }
     
-    @IBAction func mod_button(sender: AnyObject)
+    @IBAction func mod_button(_ sender: AnyObject)
     {
         if MapModel.model().are_there_maps() {
             mode = next_mode[mode]!
@@ -691,7 +691,7 @@ enum Mode: Int {
         repaint(false, gesture: false)
     }
     
-    @IBAction func tgt_button(sender: AnyObject)
+    @IBAction func tgt_button(_ sender: AnyObject)
     {
         current_target += 1
         if current_target >= GPSModel2.model().target_count() {
@@ -701,13 +701,13 @@ enum Mode: Int {
         repaint(false, gesture: false)
     }
     
-    func tgt_longpress(guesture: UILongPressGestureRecognizer) {
+    func tgt_longpress(_ guesture: UILongPressGestureRecognizer) {
         current_target = -1
         GPSModel2.model().set_currenttarget(current_target)
         repaint(false, gesture: false)
     }
     
-    @IBAction func backToMain(sender: UIStoryboardSegue)
+    @IBAction func backToMain(_ sender: UIStoryboardSegue)
     {
     }
 }

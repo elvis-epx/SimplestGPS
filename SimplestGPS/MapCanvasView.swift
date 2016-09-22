@@ -44,14 +44,14 @@ class MapCanvasView: UIView
     var locker: UITextView? = nil
     
     var updater: CADisplayLink? = nil
-    var last_update: CFTimeInterval = Double.NaN
-    var last_update_blink: CFTimeInterval = Double.NaN
+    var last_update: CFTimeInterval = Double.nan
+    var last_update_blink: CFTimeInterval = Double.nan
     var blink_status: Bool = false
     var immediate = false
 
     var target_count: Int = 0
     
-    var mode: Mode = .COMPASS
+    var mode: Mode = .compass
     var current_screen_rotation = CGFloat(0.0)
     var locked: Bool = false
     var blink_pos: Bool = true
@@ -64,12 +64,12 @@ class MapCanvasView: UIView
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
-        self.mode = .COMPASS
-        self.backgroundColor = UIColor.blackColor()
-        self.opaque = true
+        self.mode = .compass
+        self.backgroundColor = UIColor.black
+        self.isOpaque = true
         
         // at this point, frame is not stable yet
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             self.init2()
         }
     }
@@ -77,7 +77,7 @@ class MapCanvasView: UIView
     func init2() {
         updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.anim))
         updater!.frameInterval = 1
-        updater!.addToRunLoop(NSRunLoop.currentRunLoop(), forMode: NSRunLoopCommonModes)
+        updater!.add(to: RunLoop.current, forMode: RunLoopMode.commonModes)
 
         /* must be big enough to fit the screen even when rotated to any angle */
         map_plane = UIView.init(frame: CGRect(
@@ -85,17 +85,17 @@ class MapCanvasView: UIView
             y: -self.frame.height / 2,
             width: self.frame.height * 2,
             height: self.frame.height * 2))
-        map_plane!.opaque = true
-        map_plane!.backgroundColor = UIColor.darkGrayColor()
+        map_plane!.isOpaque = true
+        map_plane!.backgroundColor = UIColor.darkGray
         self.addSubview(map_plane!)
 
         accuracy_view = UIView.init(frame: CGRect(x: 0, y: 0, width: 2, height: 2))
         accuracy_view!.alpha = 0.25
-        accuracy_view!.backgroundColor = UIColor.yellowColor()
+        accuracy_view!.backgroundColor = UIColor.yellow
         map_plane!.addSubview(accuracy_view!)
         accuracy_anim = PositionAnim(name: "accuracy", view: accuracy_view!, size: map_plane!.frame)
     
-        location_view = MapPointView(frame: self.frame, color: UIColor.redColor(), out: true)
+        location_view = MapPointView(frame: self.frame, color: UIColor.red, out: true)
         map_plane!.addSubview(location_view!)
         location_anim = PositionAnim(name: "location", view: location_view!, size: map_plane!.frame)
         
@@ -112,17 +112,17 @@ class MapCanvasView: UIView
                                           y: compass_frame.origin.y + compass_frame.size.height * 0.85,
                                           width: compass_frame.size.width * 0.15,
                                           height: compass_frame.size.width * 0.15))
-        locker!.editable = false
-        locker!.selectable = false
-        locker!.userInteractionEnabled = false
-        locker!.backgroundColor = UIColor.clearColor()
-        locker!.font = UIFont.systemFontOfSize(frame.width / 10)
-        locker!.textAlignment = .Right
+        locker!.isEditable = false
+        locker!.isSelectable = false
+        locker!.isUserInteractionEnabled = false
+        locker!.backgroundColor = UIColor.clear
+        locker!.font = UIFont.systemFont(ofSize: frame.width / 10)
+        locker!.textAlignment = .right
         locker!.text = "🔒"
         self.addSubview(locker!)
     }
 
-    func send_img(list: [String:MapDescriptor], changed: Bool) -> Bool {
+    func send_img(_ list: [String:MapDescriptor], changed: Bool) -> Bool {
         if map_plane == nil {
             // init2() not called yet
             return false
@@ -134,11 +134,11 @@ class MapCanvasView: UIView
             for (name, image) in image_views {
                 if list[name] == nil {
                     NSLog("        removing %@", name)
-                    image.0.hidden = true
+                    image.0.isHidden = true
                     image.0.removeFromSuperview()
                     image.0.image = nil
-                    image_views.removeValueForKey(name)
-                    image_anims.removeValueForKey(name)
+                    image_views.removeValue(forKey: name)
+                    image_anims.removeValue(forKey: name)
                 }
             }
             
@@ -175,8 +175,8 @@ class MapCanvasView: UIView
                     let anim = PositionAnim(name: "img", view: image, size: map_plane!.bounds)
                     image_views[name] = (image, map)
                     image_anims[name] = anim
-                    image.hidden = true
-                    image.opaque = true
+                    image.isHidden = true
+                    image.isOpaque = true
 
                     map_plane!.insertSubview(image, belowSubview: below)
                 }
@@ -193,7 +193,7 @@ class MapCanvasView: UIView
                     view.0.image = view.1.img
                 }
                 view.0.bounds = CGRect(x: 0, y: 0, width: view.1.boundsx, height: view.1.boundsy)
-                view.0.hidden = false
+                view.0.isHidden = false
             })
         }
         
@@ -201,19 +201,19 @@ class MapCanvasView: UIView
     }
     
     func hide_location() -> Bool {
-        return self.mode == .COMPASS ||
-               self.mode == .COMPASS_H ||
-               ((self.mode == .MAPCOMPASS_H ||
-                 self.mode == .MAPCOMPASS) && self.locked)
+        return self.mode == .compass ||
+               self.mode == .compass_H ||
+               ((self.mode == .mapcompass_H ||
+                 self.mode == .mapcompass) && self.locked)
     }
     
     func hide_locker() -> Bool {
-        return self.mode == .COMPASS ||
-               self.mode == .COMPASS_H ||
+        return self.mode == .compass ||
+               self.mode == .compass_H ||
                !self.locked
     }
     
-    func send_pos_rel(xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat,
+    func send_pos_rel(_ xrel: CGFloat, yrel: CGFloat, accuracy: CGFloat,
                       locked: Bool, blink: Int)
     {
         if map_plane == nil {
@@ -223,7 +223,7 @@ class MapCanvasView: UIView
         
         self.blink_pos = blink == 1
         self.locked = locked
-        self.locker!.hidden = self.hide_locker()
+        self.locker!.isHidden = self.hide_locker()
         
         /* Point is relative: 0 ,0 = middle of screen */
         let pointrel = CGPoint(x: xrel, y: yrel)
@@ -239,13 +239,13 @@ class MapCanvasView: UIView
         accuracy_anim!.set_rel(pointrel, block: {
             self.accuracy_view!.layer.cornerRadius = accuracy
             self.accuracy_view!.bounds = CGRect(x: 0, y: 0, width: accuracy * 2, height: accuracy * 2)
-            self.accuracy_view!.hidden = self.hide_location()
+            self.accuracy_view!.isHidden = self.hide_location()
             })
         
         location_anim!.set_rel(pointrel, block: {})
     }
 
-    func send_targets_rel(list: [(CGFloat, CGFloat, CGFloat)],
+    func send_targets_rel(_ list: [(CGFloat, CGFloat, CGFloat)],
                           label_x: CGFloat, label_y: CGFloat,
                           changed_label: Bool,
                           presenting_label: Bool,
@@ -266,21 +266,21 @@ class MapCanvasView: UIView
         let updated_targets = target_views.count < target_count
 
         while target_views.count < target_count {
-            let target = MapPointView(frame: self.frame, color: UIColor.greenColor(), out: false)
-            target.hidden = true
+            let target = MapPointView(frame: self.frame, color: UIColor.green, out: false)
+            target.isHidden = true
             map_plane!.addSubview(target)
             target_views.append(target)
             let anim = PositionAnim(name: "tgt", view: target, size: map_plane!.bounds)
             target_anims.append(anim)
         }
         
-        if (label_x != label_x || (self.mode != .MAP && self.mode != .MAP_H)) {
+        if (label_x != label_x || (self.mode != .map && self.mode != .map_H)) {
             target_label_anim!.set_rel(CGPoint(x: label_x, y: label_y), block: {
-               self.target_label!.hidden = true
+               self.target_label!.isHidden = true
             })
-            self.target_label!.hidden = true
+            self.target_label!.isHidden = true
             
-        } else if self.mode == .MAP || self.mode == .MAP_H {
+        } else if self.mode == .map || self.mode == .map_H {
             // cast label to screen
             var lx = label_x
             var ly = label_y
@@ -325,7 +325,7 @@ class MapCanvasView: UIView
             target_label_anim!.set_rel(
                 CGPoint(x: lx, y: ly),
                 block: {
-                    self.target_label!.hidden = !(self.mode == .MAP || self.mode == .MAP_H)
+                    self.target_label!.isHidden = !(self.mode == .map || self.mode == .map_H)
                 })
         }
         
@@ -339,9 +339,9 @@ class MapCanvasView: UIView
                 target_anims[i].set_rel(CGPoint(x: list[i].0, y: list[i].1), block: nil)
                 target_views[i].angle = list[i].2
             } else {
-                target_anims[i].set_rel(CGPoint(x: CGFloat.NaN, y: CGFloat.NaN), block: nil)
+                target_anims[i].set_rel(CGPoint(x: CGFloat.nan, y: CGFloat.nan), block: nil)
                 // hide immediately because animation might be already stopped in NaN
-                self.target_views[i].hidden = true
+                self.target_views[i].isHidden = true
             }
         }
         
@@ -353,7 +353,7 @@ class MapCanvasView: UIView
         immediate = true
     }
     
-    func send_compass(mode: Mode, heading: CGFloat, altitude: String, speed: String,
+    func send_compass(_ mode: Mode, heading: CGFloat, altitude: String, speed: String,
                       current_target: Int,
                       targets: [(heading: CGFloat, name: String, distance: String)],
                       tgt_dist: Int)
@@ -363,23 +363,23 @@ class MapCanvasView: UIView
             return
         }
         
-        map_plane!.hidden = mode == .COMPASS || mode == .COMPASS_H
+        map_plane!.isHidden = mode == .compass || mode == .compass_H
         
         self.mode = mode
         
-        compass!.hidden = mode == .MAP || mode == .MAP_H
+        compass!.isHidden = mode == .map || mode == .map_H
         // need to send data even if compass hidden because we
         // use its animation to rotate the map
 
-        compass!.send_data(mode == .COMPASS || mode == .COMPASS_H,
-                            absolute: mode == .COMPASS || mode == .MAPCOMPASS || mode == .MAP,
-                           transparent: mode == .MAPCOMPASS || mode == .MAPCOMPASS_H,
+        compass!.send_data(mode == .compass || mode == .compass_H,
+                            absolute: mode == .compass || mode == .mapcompass || mode == .map,
+                           transparent: mode == .mapcompass || mode == .mapcompass_H,
                            heading: heading, altitude: altitude, speed: speed,
                            current_target: current_target,
                            targets: targets, tgt_dist: tgt_dist)
     }
     
-    func anim(sender: CADisplayLink)
+    func anim(_ sender: CADisplayLink)
     {
         // this is called only when CADisplayLink is active, which happens only
         // on init2()
@@ -394,13 +394,13 @@ class MapCanvasView: UIView
         if (this_update - last_update_blink) > 0.35 {
             let blink_loc_status = blink_status && self.blink_pos
             let blink_tgt_status = blink_status && self.blink_tgt
-            self.locker!.hidden = self.hide_locker()
-            self.location_view!.hidden = blink_loc_status ||
+            self.locker!.isHidden = self.hide_locker()
+            self.location_view!.isHidden = blink_loc_status ||
                     self.hide_location()
-            self.accuracy_view!.hidden = self.hide_location()
+            self.accuracy_view!.isHidden = self.hide_location()
             for i in 0..<target_count {
-                target_views[i].hidden = blink_tgt_status ||
-                        mode == .COMPASS || mode == .COMPASS_H
+                target_views[i].isHidden = blink_tgt_status ||
+                        mode == .compass || mode == .compass_H
             }
             blink_status = !blink_status
             last_update_blink = this_update
@@ -411,7 +411,7 @@ class MapCanvasView: UIView
         
         let (new_heading, new_needle) = compass!.anim(dt)
         // NSLog("Animated heading: %f", new_heading)
-        if mode == .MAPCOMPASS_H || mode == .MAP_H {
+        if mode == .mapcompass_H || mode == .map_H {
             current_screen_rotation = new_heading * CGFloat(M_PI / 180.0)
         } else {
             current_screen_rotation = 0
@@ -419,21 +419,21 @@ class MapCanvasView: UIView
         }
         
         /* All map and points rotate together because all belong to this view */
-        map_plane!.transform = CGAffineTransformMakeRotation(current_screen_rotation)
+        map_plane!.transform = CGAffineTransform(rotationAngle: current_screen_rotation)
         
         for i in 0..<target_count {
-            target_anims[i].tick(dt,
-                    t: CGAffineTransformMakeRotation(target_views[i].angle),
+            _ = target_anims[i].tick(dt,
+                    t: CGAffineTransform(rotationAngle: target_views[i].angle),
                     immediate: immediate)
         }
         for (_, anim) in image_anims {
-            anim.tick(dt, t: CGAffineTransformIdentity, immediate: immediate)
+            _ = anim.tick(dt, t: CGAffineTransform.identity, immediate: immediate)
         }
-        accuracy_anim!.tick(dt, t: CGAffineTransformIdentity, immediate: immediate)
-        location_anim!.tick(dt,
-                    t: CGAffineTransformMakeRotation(needle_rotation - current_screen_rotation),
+        _ = accuracy_anim!.tick(dt, t: CGAffineTransform.identity, immediate: immediate)
+        _ = location_anim!.tick(dt,
+                    t: CGAffineTransform(rotationAngle: needle_rotation - current_screen_rotation),
                     immediate: immediate)
-        target_label_anim!.tick(dt, t: CGAffineTransformIdentity, immediate: label_immediate)
+        _ = target_label_anim!.tick(dt, t: CGAffineTransform.identity, immediate: label_immediate)
 
         immediate = false
         label_immediate = false

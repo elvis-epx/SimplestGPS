@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		827E5B4C64313590EE373F66 /* Pods_SimplestGPS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A917B2320EB791A1F2E924A3 /* Pods_SimplestGPS.framework */; };
 		B90AAEEB184C1E59003A302E /* icon58.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEA184C1E59003A302E /* icon58.png */; };
 		B90AAEED184C1E5F003A302E /* icon80.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEC184C1E5F003A302E /* icon80.png */; };
 		B90AAEEF184C1E64003A302E /* icon120.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEE184C1E64003A302E /* icon120.png */; };
@@ -23,6 +24,7 @@
 		B95B68961C90D18D008E6CD3 /* TargetMiniNeedleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95B68951C90D18D008E6CD3 /* TargetMiniNeedleView.swift */; };
 		B95B68981C911A39008E6CD3 /* CompassAnim.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95B68971C911A39008E6CD3 /* CompassAnim.swift */; };
 		B963D9AC1C9A0294003D024D /* PositionAnim.swift in Sources */ = {isa = PBXBuildFile; fileRef = B963D9AB1C9A0294003D024D /* PositionAnim.swift */; };
+		B96776531D9428DB00286F85 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B96776521D9428DB00286F85 /* GoogleService-Info.plist */; };
 		B9692845184FB50A00998B77 /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692844184FB50A00998B77 /* icon114.png */; };
 		B9692847184FB51100998B77 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692846184FB51100998B77 /* icon29.png */; };
 		B9692849184FB51700998B77 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692848184FB51700998B77 /* icon57.png */; };
@@ -45,6 +47,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6B23B49C70D22B2A360F37EE /* Pods-SimplestGPS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimplestGPS.release.xcconfig"; path = "Pods/Target Support Files/Pods-SimplestGPS/Pods-SimplestGPS.release.xcconfig"; sourceTree = "<group>"; };
+		87B4D3740A175D52CA4A62BA /* Pods-SimplestGPS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimplestGPS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SimplestGPS/Pods-SimplestGPS.debug.xcconfig"; sourceTree = "<group>"; };
+		A917B2320EB791A1F2E924A3 /* Pods_SimplestGPS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SimplestGPS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B90AAEEA184C1E59003A302E /* icon58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon58.png; sourceTree = "<group>"; };
 		B90AAEEC184C1E5F003A302E /* icon80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon80.png; sourceTree = "<group>"; };
 		B90AAEEE184C1E64003A302E /* icon120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon120.png; sourceTree = "<group>"; };
@@ -62,6 +67,7 @@
 		B95B68951C90D18D008E6CD3 /* TargetMiniNeedleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetMiniNeedleView.swift; sourceTree = "<group>"; };
 		B95B68971C911A39008E6CD3 /* CompassAnim.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompassAnim.swift; sourceTree = "<group>"; };
 		B963D9AB1C9A0294003D024D /* PositionAnim.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PositionAnim.swift; sourceTree = "<group>"; };
+		B96776521D9428DB00286F85 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B9692844184FB50A00998B77 /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
 		B9692846184FB51100998B77 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		B9692848184FB51700998B77 /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
@@ -95,12 +101,22 @@
 				B9AD659F1849733200E9C380 /* CoreGraphics.framework in Frameworks */,
 				B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */,
 				B9AD659D1849733200E9C380 /* Foundation.framework in Frameworks */,
+				827E5B4C64313590EE373F66 /* Pods_SimplestGPS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7039D28D593333160FA1078A /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				87B4D3740A175D52CA4A62BA /* Pods-SimplestGPS.debug.xcconfig */,
+				6B23B49C70D22B2A360F37EE /* Pods-SimplestGPS.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		B9AD65901849733200E9C380 = {
 			isa = PBXGroup;
 			children = (
@@ -113,6 +129,7 @@
 				B9AD65A21849733200E9C380 /* SimplestGPS */,
 				B9AD659B1849733200E9C380 /* Frameworks */,
 				B9AD659A1849733200E9C380 /* Products */,
+				7039D28D593333160FA1078A /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -131,6 +148,7 @@
 				B9AD659C1849733200E9C380 /* Foundation.framework */,
 				B9AD659E1849733200E9C380 /* CoreGraphics.framework */,
 				B9AD65A01849733200E9C380 /* UIKit.framework */,
+				A917B2320EB791A1F2E924A3 /* Pods_SimplestGPS.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -170,6 +188,7 @@
 		B9AD65A31849733200E9C380 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				B96776521D9428DB00286F85 /* GoogleService-Info.plist */,
 				B9AD65A41849733200E9C380 /* SimplestGPS-Info.plist */,
 				B9AD65A51849733200E9C380 /* InfoPlist.strings */,
 				B9AD65AA1849733200E9C380 /* SimplestGPS-Prefix.pch */,
@@ -185,9 +204,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B9AD65CB1849733200E9C380 /* Build configuration list for PBXNativeTarget "SimplestGPS" */;
 			buildPhases = (
+				3A660807937841D4628F8DC5 /* [CP] Check Pods Manifest.lock */,
 				B9AD65951849733200E9C380 /* Sources */,
 				B9AD65961849733200E9C380 /* Frameworks */,
 				B9AD65971849733200E9C380 /* Resources */,
+				AC916437EB99879E59F6226C /* [CP] Embed Pods Frameworks */,
+				189E7CD395D1D75CB9A0C360 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -206,11 +228,12 @@
 			attributes = {
 				CLASSPREFIX = GPS;
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Elvis Pfutzenreuter";
 				TargetAttributes = {
 					B9AD65981849733200E9C380 = {
 						DevelopmentTeam = LUPFH54KMA;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -250,10 +273,59 @@
 				B9D4BAA91CD9467F00E8C8B7 /* 836.wav in Resources */,
 				B912A9AD1CD9108C00DF5768 /* 670.wav in Resources */,
 				B9692847184FB51100998B77 /* icon29.png in Resources */,
+				B96776531D9428DB00286F85 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		189E7CD395D1D75CB9A0C360 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SimplestGPS/Pods-SimplestGPS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3A660807937841D4628F8DC5 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		AC916437EB99879E59F6226C /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SimplestGPS/Pods-SimplestGPS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B9AD65951849733200E9C380 /* Sources */ = {
@@ -316,14 +388,19 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -355,13 +432,18 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -370,12 +452,14 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		B9AD65CC1849733200E9C380 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 87B4D3740A175D52CA4A62BA /* Pods-SimplestGPS.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -390,12 +474,14 @@
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "SimplestGPS/SimplestGPS-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
 		};
 		B9AD65CD1849733200E9C380 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6B23B49C70D22B2A360F37EE /* Pods-SimplestGPS.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -409,6 +495,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "SimplestGPS/SimplestGPS-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

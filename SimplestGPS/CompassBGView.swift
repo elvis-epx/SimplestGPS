@@ -12,29 +12,31 @@ import UIKit
 class CompassBGView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.clearColor()
+        self.backgroundColor = UIColor.clear
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func outer_circle(ctx: CGContextRef)
+    func outer_circle(_ ctx: CGContext)
     {
         let radius = self.bounds.size.width / 2
-        let center = CGPointMake(self.bounds.size.width / 2,
-                                 self.bounds.size.height / 2)
+        let center = CGPoint(x: self.bounds.size.width / 2,
+                                 y: self.bounds.size.height / 2)
         
-        CGContextSetStrokeColorWithColor(ctx, UIColor.redColor().CGColor)
-        CGContextSetLineWidth(ctx, 0)
+        ctx.setStrokeColor(UIColor.red.cgColor)
+        ctx.setLineWidth(0)
         let fc = UIColor.init(colorLiteralRed: 0, green: 0, blue: 0, alpha: 0.36)
-        CGContextSetFillColorWithColor(ctx, fc.CGColor)
+        ctx.setFillColor(fc.cgColor)
         
-        CGContextAddArc(ctx, center.x, center.y, radius, CGFloat(2 * M_PI), 0, 1)
-        CGContextDrawPath(ctx, .Fill)
+        ctx.addArc(center: center, radius: radius,
+                   startAngle: CGFloat(2 * M_PI), endAngle: 0,
+                   clockwise: true)
+        ctx.drawPath(using: .fill)
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         if context == nil {
             return

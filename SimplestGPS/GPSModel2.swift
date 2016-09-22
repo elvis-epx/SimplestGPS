@@ -19,10 +19,10 @@ import AVFoundation
 
 @objc class GPSModel2: NSObject, CLLocationManagerDelegate {
     var observers = [ModelListener]()
-    var names = [NSObject: AnyObject]()
-    var lats = [NSObject: AnyObject]()
-    var longs = [NSObject: AnyObject]()
-    var alts = [NSObject: AnyObject]()
+    var names = [AnyHashable: Any]()
+    var lats = [AnyHashable: Any]()
+    var longs = [AnyHashable: Any]()
+    var alts = [AnyHashable: Any]()
     var tdistances = [String: Double]()
     var tlastdistances = [String: Double]()
     var theadings = [String: Double]()
@@ -43,13 +43,13 @@ import AVFoundation
     var welcome: Int = 0
     var blink: Int = 1
     
-    var fwav_hi = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("1000", ofType: "wav")!)
-    var fwav_lo = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("670", ofType: "wav")!)
-    var fwav_side = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("836", ofType: "wav")!)
+    var fwav_hi = URL(fileURLWithPath: Bundle.main.path(forResource: "1000", ofType: "wav")!)
+    var fwav_lo = URL(fileURLWithPath: Bundle.main.path(forResource: "670", ofType: "wav")!)
+    var fwav_side = URL(fileURLWithPath: Bundle.main.path(forResource: "836", ofType: "wav")!)
     var wav_hi: AVAudioPlayer? = nil
     var wav_lo: AVAudioPlayer? = nil
     var wav_side: AVAudioPlayer? = nil
-    var last_side_played: NSDate? = nil
+    var last_side_played: Date? = nil
     
     var prefsObserver : NSObjectProtocol!
     
@@ -70,7 +70,7 @@ import AVFoundation
         held = false
     }
     
-    class func array_adapter(keys: Array<NSObject>) -> [String]
+    class func array_adapter(_ keys: Array<NSObject>) -> [String]
     {
         var ret = [String]();
         for k in keys {
@@ -81,7 +81,7 @@ import AVFoundation
     }
     
     // make sure that longitude is in range -180 <= x < +180
-    class func handle_cross_180(c: CGFloat) -> CGFloat
+    class func handle_cross_180(_ c: CGFloat) -> CGFloat
     {
         var x = c
         while x < -180 {
@@ -94,13 +94,13 @@ import AVFoundation
         }
         return x
     }
-    class func handle_cross_180f(x: Double) -> Double
+    class func handle_cross_180f(_ x: Double) -> Double
     {
         return Double(handle_cross_180(CGFloat(x)))
     }
     
     // Makes a - b taking into consideration the international date line
-    class func longitude_minus(a: CGFloat, minus: CGFloat) -> CGFloat
+    class func longitude_minus(_ a: CGFloat, minus: CGFloat) -> CGFloat
     {
         let c = a - minus
         // a difference above 180 degrees can be handled in the same
@@ -108,26 +108,26 @@ import AVFoundation
         return handle_cross_180(c)
     }
     
-    class func longitude_minusf(a: Double, minus: Double) -> Double
+    class func longitude_minusf(_ a: Double, minus: Double) -> Double
     {
         return Double(longitude_minus(CGFloat(a), minus: CGFloat(minus)))
     }
 
     // checks whether a coordinate is inside a circle
-    class func inside(lat: Double, long: Double, lat_circle: Double, long_circle: Double, radius: Double) -> Bool
+    class func inside(_ lat: Double, long: Double, lat_circle: Double, long_circle: Double, radius: Double) -> Bool
     {
         return harvesine(lat, lat2: lat_circle, long1: long, long2: long_circle) <= radius
     }
 
     // helper function for map_inside()
-    class func clamp_lat(x: Double, a: Double, b: Double) -> Double
+    class func clamp_lat(_ x: Double, a: Double, b: Double) -> Double
     {
         let (mini, maxi) = (min(a, b), max(a, b))
         return max(mini, min(maxi, x))
     }
 
     // helper function for map_inside()
-    class func clamp_long(x: Double, a: Double, b: Double) -> Double
+    class func clamp_long(_ x: Double, a: Double, b: Double) -> Double
     {
         // convert longitudes to relative coordinates (as if a = 0)
         let db = longitude_minusf(b, minus: a)
@@ -140,13 +140,13 @@ import AVFoundation
         return handle_cross_180f(dres + a)
     }
     
-    class func contains_latitude(a: Double, b: Double, c: Double, d: Double) -> Bool {
+    class func contains_latitude(_ a: Double, b: Double, c: Double, d: Double) -> Bool {
         let (_a, _b) = (min(a, b), max(a, b))
         let (_c, _d) = (min(c, d), max(c, d))
         return (_a + 0.0001) >= _c && (_b - 0.0001) <= _d
     }
 
-    class func contains_longitude(a: Double, b: Double, c: Double, d: Double) -> Bool {
+    class func contains_longitude(_ a: Double, b: Double, c: Double, d: Double) -> Bool {
         // convert longitudes to abstract coords relative to a
         let da = 0.0
         let db = longitude_minusf(b, minus: a)
@@ -156,7 +156,7 @@ import AVFoundation
         return contains_latitude(da, b: db, c: dc, d: dd)
     }
     
-    class func map_inside(maplata: Double, maplatmid: Double, maplatb: Double,
+    class func map_inside(_ maplata: Double, maplatmid: Double, maplatb: Double,
                           maplonga: Double, maplongmid: Double, maplongb: Double,
                           lat_circle: Double, long_circle: Double, radius: Double)
                     -> (Int, Double)
@@ -196,7 +196,7 @@ import AVFoundation
         return (1, dc)
     }
     
-    class func enclosing_box(clat: Double, clong: Double, radius: Double)
+    class func enclosing_box(_ clat: Double, clong: Double, radius: Double)
                     -> (Double, Double, Double, Double) {
         let radius_lat = radius / 1853.0 / 60.0
         let radius_long = radius_lat / longitude_proportion(clat)
@@ -208,7 +208,7 @@ import AVFoundation
         return (lat0_circle, lat1_circle, long0_circle, long1_circle)
     }
     
-    class func do_format_heading(n: Double) -> String
+    class func do_format_heading(_ n: Double) -> String
     {
         if n != n {
             return ""
@@ -216,7 +216,7 @@ import AVFoundation
         return String(format: "%.0f°", n);
     }
 
-    class func format_deg(p: Double) -> String
+    class func format_deg(_ p: Double) -> String
     {
         if p != p {
             return ""
@@ -228,7 +228,7 @@ import AVFoundation
         return String(format: "%d°%02d'", deg, minutes);
     }
     
-    class func format_deg2(p: Double) -> String
+    class func format_deg2(_ p: Double) -> String
     {
         if p != p {
             return ""
@@ -242,7 +242,7 @@ import AVFoundation
         return String( format: "%02d.%02d\"", seconds, cents);
     }
     
-    class func format_deg_t(p: Double) -> String
+    class func format_deg_t(_ p: Double) -> String
     {
         if p != p {
             return ""
@@ -259,7 +259,7 @@ import AVFoundation
     }
     
     
-    class func format_latitude_t(lat: Double) -> String
+    class func format_latitude_t(_ lat: Double) -> String
     {
         if lat != lat {
             return "---";
@@ -268,7 +268,7 @@ import AVFoundation
         return String(format: "%@%@", format_deg_t(fabs(lat)), suffix);
     }
     
-    class func format_longitude_t(lo: Double) -> String
+    class func format_longitude_t(_ lo: Double) -> String
     {
         if lo != lo {
             return "---";
@@ -277,7 +277,7 @@ import AVFoundation
         return String(format: "%@%@", format_deg_t(fabs(lo)), suffix);
     }
     
-    class func format_heading_t(course: Double) -> String
+    class func format_heading_t(_ course: Double) -> String
     {
         if course != course {
             return "---";
@@ -285,7 +285,7 @@ import AVFoundation
         return do_format_heading(course);
     }
     
-    class func format_heading_delta_t (course: Double) -> String
+    class func format_heading_delta_t (_ course: Double) -> String
     {
         if course != course {
             return "---";
@@ -295,7 +295,7 @@ import AVFoundation
         return String(format: "%@%@", plus, do_format_heading(course));
     }
     
-    class func format_altitude_t(alt: Double) -> String
+    class func format_altitude_t(_ alt: Double) -> String
     {
         if alt != alt {
             return "---";
@@ -303,7 +303,7 @@ import AVFoundation
         return String(format: "%.0f", alt);
     }
 
-    class func do_format_latitude(lat: Double) -> String
+    class func do_format_latitude(_ lat: Double) -> String
     {
         if lat != lat {
             return "---";
@@ -312,7 +312,7 @@ import AVFoundation
         return String(format: "%@%@", format_deg(fabs(lat)), suffix);
     }
 
-    class func do_format_latitude_full(lat: Double) -> String
+    class func do_format_latitude_full(_ lat: Double) -> String
     {
         if lat != lat {
             return "---";
@@ -321,7 +321,7 @@ import AVFoundation
         return String(format: "%@%@%@", format_deg(fabs(lat)), format_deg2(fabs(lat)), suffix);
     }
 
-    class func do_format_latitude2(lat: Double) -> String
+    class func do_format_latitude2(_ lat: Double) -> String
     {
         if lat != lat {
             return "---";
@@ -329,7 +329,7 @@ import AVFoundation
         return String(format: "%@", format_deg2(fabs(lat)));
     }
 
-    class func do_format_longitude(lon: Double) -> String
+    class func do_format_longitude(_ lon: Double) -> String
     {
         if lon != lon {
             return "---";
@@ -338,7 +338,7 @@ import AVFoundation
         return String(format: "%@%@", format_deg(fabs(lon)), suffix);
     }
 
-    class func do_format_longitude_full(lon: Double) -> String
+    class func do_format_longitude_full(_ lon: Double) -> String
     {
         if lon != lon {
             return "---";
@@ -348,7 +348,7 @@ import AVFoundation
     }
     
 
-    class func do_format_longitude2(lon: Double) -> String
+    class func do_format_longitude2(_ lon: Double) -> String
     {
         if lon != lon {
             return "---";
@@ -356,7 +356,7 @@ import AVFoundation
         return String(format: "%@", format_deg2(fabs(lon)));
     }
     
-    class func do_format_altitude(p: Double, met: Int) -> String
+    class func do_format_altitude(_ p: Double, met: Int) -> String
     {
         if p != p {
             return ""
@@ -370,17 +370,17 @@ import AVFoundation
         return String(format: "%.0f%@", alt, (met != 0 ? "m" : "ft"));
     }
     
-    class func format_distance_t(p: Double, met: Int) -> String
+    class func format_distance_t(_ p: Double, met: Int) -> String
     {
         var dst = p;
         if dst != dst {
             return "---";
         }
         
-        let f = NSNumberFormatter();
-        f.numberStyle = .DecimalStyle;
+        let f = NumberFormatter();
+        f.numberStyle = .decimal;
         f.maximumFractionDigits = 0;
-        f.roundingMode = .RoundHalfEven;
+        f.roundingMode = .halfEven;
         
         var m = "m";
         var i = "ft";
@@ -397,10 +397,12 @@ import AVFoundation
             }
         }
         
-        return String(format: "%@%@", f.stringFromNumber(Int(dst))!, (met != 0 ? m : i));
+        return String(format: "%d%@",
+            Int(dst),
+            (met != 0 ? m : i));
     }
     
-    class func do_format_speed(p: Double, met: Int) -> String
+    class func do_format_speed(_ p: Double, met: Int) -> String
     {
         if p != p || p == 0 {
             return ""
@@ -417,7 +419,7 @@ import AVFoundation
         return String(format: "%.0f%@", spd, (met != 0 ? "km/h " : "mi/h "));
     }
     
-    class func do_format_accuracy(h: Double, vertical v: Double, met: Int) -> String
+    class func do_format_accuracy(_ h: Double, vertical v: Double, met: Int) -> String
     {
         if h > 10000 || v > 10000 {
             return "imprecise";
@@ -431,7 +433,7 @@ import AVFoundation
         }
     }
     
-    class func harvesine(lat1: Double, lat2: Double, long1: Double, long2: Double) -> Double
+    class func harvesine(_ lat1: Double, lat2: Double, long1: Double, long2: Double) -> Double
     {
         // http://www.movable-type.co.uk/scripts/latlong.html
         
@@ -463,17 +465,17 @@ import AVFoundation
     /* Given a latitude, return the proportion of longitude distance
      e.g. 1 deg long / 1 deg lat (tends to 1.0 in tropics, to 0.0 in poles
      */
-    class func longitude_proportion(lat: Double) -> Double
+    class func longitude_proportion(_ lat: Double) -> Double
     {
         return cos(abs(lat) * M_PI / 180.0)
     }
 
-    class func longitude_proportion_cgfloat(lat: CGFloat) -> CGFloat
+    class func longitude_proportion_cgfloat(_ lat: CGFloat) -> CGFloat
     {
         return CGFloat(longitude_proportion(Double(lat)))
     }
     
-    class func azimuth(lat1: Double, lat2: Double, long1: Double, long2: Double) -> Double
+    class func azimuth(_ lat1: Double, lat2: Double, long1: Double, long2: Double) -> Double
     {
         let phi1 = lat1 * M_PI / 180.0;
         let phi2 = lat2 * M_PI / 180.0;
@@ -491,30 +493,30 @@ import AVFoundation
     }
     
     
-    class func parse_latz(lat: String) -> Double
+    class func parse_latz(_ lat: String) -> Double
     {
         return parse_coordz(lat, latitude: true);
     }
     
-    class func parse_longz(lo: String) -> Double
+    class func parse_longz(_ lo: String) -> Double
     {
         return parse_coordz(lo, latitude: false);
     }
     
     
-    class func parse_coordz(c: String, latitude is_lat: Bool) -> Double
+    class func parse_coordz(_ c: String, latitude is_lat: Bool) -> Double
     {
         var value: Double = 0.0 / 0.0;
         var deg: Int = 0
         var min: Int = 0
         var sec: Int = 0
         var cent: Int = 0
-        let coord = c.uppercaseString;
+        let coord = c.uppercased();
         
-        let s = NSScanner(string: coord);
-        s.charactersToBeSkipped = NSCharacterSet(charactersInString: ". ;,:/");
+        let s = Scanner(string: coord);
+        s.charactersToBeSkipped = CharacterSet(charactersIn: ". ;,:/");
         
-        if !s.scanInteger(&deg) {
+        if !s.scanInt(&deg) {
             NSLog("Did not find degree in %@", coord);
             return value;
         }
@@ -525,19 +527,19 @@ import AVFoundation
         }
         
         var bt = s.scanLocation;
-        if s.scanInteger(&min) {
+        if s.scanInt(&min) {
             if min < 0 || min > 59 {
                 NSLog("Invalid minute %ld", min);
                 return value;
             }
             bt = s.scanLocation;
-            if s.scanInteger(&sec) {
+            if s.scanInt(&sec) {
                 if sec < 0 || sec > 59 {
                     NSLog("Invalid second %ld", sec);
                     return value;
                 }
                 bt = s.scanLocation;
-                if s.scanInteger(&cent) {
+                if s.scanInt(&cent) {
                     if cent < 0 || cent > 99 {
                         NSLog("Invalid cent %ld", cent);
                         return value;
@@ -556,7 +558,7 @@ import AVFoundation
         }
         
         var cardinal: NSString?
-        if !s.scanUpToString("FOOBAR", intoString: &cardinal) {
+        if !s.scanUpTo("FOOBAR", into: &cardinal) {
             NSLog("Did not find cardinal in %@ (assuming positive)", coord);
             cardinal = "";
         }
@@ -596,44 +598,47 @@ import AVFoundation
 
     func latitude() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.coordinate.latitude) : Double.NaN
+        return self.curloc != nil ? (self.curloc!.coordinate.latitude) : Double.nan
     }
 
     func longitude() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.coordinate.longitude) : Double.NaN
+        return self.curloc != nil ? (self.curloc!.coordinate.longitude) : Double.nan
     }
     
     func speed() -> Double {
-        return self.curloc != nil ? (self.curloc!.speed < 0 ? Double.NaN : self.curloc!.speed) : Double.NaN
+        return self.curloc != nil ? (self.curloc!.speed < 0 ? Double.nan : self.curloc!.speed) : Double.nan
     }
     
     func horizontal_accuracy() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.horizontalAccuracy) : Double.NaN
+        return self.curloc != nil ? (self.curloc!.horizontalAccuracy) : Double.nan
     }
     
     func vertical_accuracy() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.verticalAccuracy) : Double.NaN
+        return self.curloc != nil ? (self.curloc!.verticalAccuracy) : Double.nan
     }
     
     func heading() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.course >= 0 ? self.curloc!.course : Double.NaN) : Double.NaN
+        return self.curloc != nil ? (self.curloc!.course >= 0 ? self.curloc!.course : Double.nan) : Double.nan
     }
     
     func altitude() -> Double {
-        return self.curloc != nil ? (self.curloc!.altitude) : Double.NaN
+        return self.curloc != nil ? (self.curloc!.altitude) : Double.nan
     }
 
-    func locationManager(manager: CLLocationManager, didUpdateToLocation newLocation: CLLocation, fromLocation oldLocation: CLLocation)
+    func locationManager(_ manager: CLLocationManager,
+                         didUpdateLocations locations: [CLLocation])
     {
-        if held {
-            self.curloc_new = newLocation
-        } else {
-            self.curloc = newLocation
-            self.update()
+        if let location = locations.last {
+            if self.held {
+                self.curloc_new = location
+            } else {
+                self.curloc = location
+                self.update()
+            }
         }
     }
 
@@ -692,7 +697,7 @@ import AVFoundation
         return target_list.count;
     }
     
-    func target_name(index: Int) -> String
+    func target_name(_ index: Int) -> String
     {
         if index < 0 || index >= target_list.count {
             return "Here";
@@ -700,21 +705,21 @@ import AVFoundation
         return names[target_list[index]] as! String;
     }
 
-    func target_altitude(index: Int) -> Double
+    func target_altitude(_ index: Int) -> Double
     {
         if index < 0 || index >= target_list.count {
-            return Double.NaN;
+            return Double.nan;
         }
         
         let alt = alts[target_list[index]] as! Double;
         if (alt == 0) {
-            return Double.NaN;
+            return Double.nan;
         }
         
         return -(altitude() - alt);
     }
 
-    func target_altitude_formatted(index: Int) -> String
+    func target_altitude_formatted(_ index: Int) -> String
     {
         var dn = target_altitude(index);
         if dn != dn {
@@ -730,7 +735,7 @@ import AVFoundation
         return String(format: "%@%@%@", esign, sn, unit);
     }
     
-    func target_altitude_input_formatted(index: Int) -> String
+    func target_altitude_input_formatted(_ index: Int) -> String
     {
         var dn: Double;
         
@@ -753,7 +758,7 @@ import AVFoundation
         return GPSModel2.format_altitude_t(dn);
     }
     
-    func target_latitude(index: Int) -> Double
+    func target_latitude(_ index: Int) -> Double
     {
         var n: Double;
         if index < 0 || index >= target_list.count {
@@ -767,12 +772,12 @@ import AVFoundation
         return n;
     }
    
-    func target_latitude_formatted(index: Int) -> String
+    func target_latitude_formatted(_ index: Int) -> String
     {
         return GPSModel2.format_latitude_t(self.target_latitude(index));
     }
 
-    func target_longitude(index: Int) -> Double
+    func target_longitude(_ index: Int) -> Double
     {
         var n: Double;
         if index < 0 || index >= target_list.count {
@@ -786,22 +791,22 @@ import AVFoundation
         return n;
     }
 
-    func target_longitude_formatted(index: Int) -> String
+    func target_longitude_formatted(_ index: Int) -> String
     {
         return GPSModel2.format_longitude_t(self.target_longitude(index));
     }
     
-    func target_calc_heading(index: Int) -> Double
+    func target_calc_heading(_ index: Int) -> Double
     {
         if index < 0 || index >= target_list.count {
-            return Double.NaN;
+            return Double.nan;
         }
         
         let lat1 = self.latitude();
         let long1 = self.longitude();
         
         if lat1 != lat1 || long1 != long1 {
-            return Double.NaN
+            return Double.nan
         }
         
         let key = target_list[index];
@@ -811,10 +816,10 @@ import AVFoundation
         return GPSModel2.azimuth(lat1, lat2: lat2, long1: long1, long2: long2);
     }
     
-    func target_heading(index: Int) -> Double
+    func target_heading(_ index: Int) -> Double
     {
         if index < 0 || index >= target_list.count {
-            return Double.NaN;
+            return Double.nan;
         }
         
         let key = target_list[index]
@@ -823,22 +828,22 @@ import AVFoundation
             return d
         }
         
-        return Double.NaN
+        return Double.nan
     }
 
-    func target_heading_formatted(index: Int) -> String
+    func target_heading_formatted(_ index: Int) -> String
     {
         return GPSModel2.format_heading_t(self.target_heading(index));
     }
     
-    func calc_heading_delta(tgt_heading: Double, cur_heading: Double) -> Double
+    func calc_heading_delta(_ tgt_heading: Double, cur_heading: Double) -> Double
     {
         if tgt_heading != tgt_heading {
-            return Double.NaN
+            return Double.nan
         }
         
         if cur_heading < 0 || cur_heading != cur_heading {
-            return Double.NaN
+            return Double.nan
         }
         
         var delta = tgt_heading - cur_heading
@@ -857,17 +862,17 @@ import AVFoundation
     }
     */
     
-    func target_calc_distance(index: Int) -> Double
+    func target_calc_distance(_ index: Int) -> Double
     {
         if index < 0 || index >= target_list.count {
-            return Double.NaN;
+            return Double.nan;
         }
         
         let lat1 = latitude()
         let long1 = longitude()
         
         if lat1 != lat1 || long1 != long1 {
-            return Double.NaN
+            return Double.nan
         }
         
         let key = target_list[index];
@@ -877,10 +882,10 @@ import AVFoundation
         return GPSModel2.harvesine(lat1, lat2: lat2, long1: long1, long2: long2);
     }
     
-    func target_distance(index: Int) -> Double
+    func target_distance(_ index: Int) -> Double
     {
         if index < 0 || index >= target_list.count {
-            return Double.NaN;
+            return Double.nan;
         }
 
         let key = target_list[index]
@@ -889,15 +894,15 @@ import AVFoundation
             return d
         }
         
-        return Double.NaN
+        return Double.nan
     }
     
-    func target_distance_formatted(index: Int) -> String
+    func target_distance_formatted(_ index: Int) -> String
     {
         return GPSModel2.format_distance_t(target_distance(index), met: metric);
     }
     
-    func target_set(pindex: Int, nam: String, latitude: String, longitude: String, altitude: String) -> String?
+    func target_set(_ pindex: Int, nam: String, latitude: String, longitude: String, altitude: String) -> String?
     {
         NSLog("Target_set %d", pindex)
         
@@ -951,16 +956,16 @@ import AVFoundation
         return nil;
     }
     
-    func target_delete(index: Int)
+    func target_delete(_ index: Int)
     {
         if index < 0 || index >= target_list.count {
             return;
         }
         let key = target_list[index];
-        names.removeValueForKey(key);
-        lats.removeValueForKey(key);
-        longs.removeValueForKey(key);
-        alts.removeValueForKey(key);
+        names.removeValue(forKey: key);
+        lats.removeValue(forKey: key);
+        longs.removeValue(forKey: key);
+        alts.removeValue(forKey: key);
 
         saveTargets();
         update();
@@ -969,12 +974,12 @@ import AVFoundation
     func saveTargets()
     {
         updateTargetList();
-        let prefs = NSUserDefaults.standardUserDefaults();
-        prefs.setObject(names, forKey: "names");
-        prefs.setObject(lats, forKey: "lats");
-        prefs.setObject(longs, forKey: "longs");
-        prefs.setObject(alts, forKey: "alts");
-        prefs.setInteger(next_target, forKey: "next_target");
+        let prefs = UserDefaults.standard;
+        prefs.set(names, forKey: "names");
+        prefs.set(lats, forKey: "lats");
+        prefs.set(longs, forKey: "longs");
+        prefs.set(alts, forKey: "alts");
+        prefs.set(next_target, forKey: "next_target");
     }
     
     func update()
@@ -1015,7 +1020,7 @@ import AVFoundation
         }
     }
     
-    func process_sidepass(abs_rel_angle: Double, distance: Double)
+    func process_sidepass(_ abs_rel_angle: Double, distance: Double)
     {
         // cone of warning that we are leaving a target sideways
         var fudge = 15.0
@@ -1029,16 +1034,16 @@ import AVFoundation
         
         if abs_rel_angle > (90.0 - fudge) && abs_rel_angle < (90.0 + fudge) {
             if last_side_played != nil {
-                if NSDate().compare(last_side_played!) == .OrderedAscending {
+                if Date().compare(last_side_played!) == .orderedAscending {
                     return
                 }
             }
             wav_side!.play()
-            last_side_played = NSDate().dateByAddingTimeInterval(3)
+            last_side_played = Date().addingTimeInterval(3)
         }
     }
     
-    func process_alarm(last: Double, cur: Double)
+    func process_alarm(_ last: Double, cur: Double)
     {
         var rnd = 1000.0
         if cur < 100 {
@@ -1060,7 +1065,7 @@ import AVFoundation
         return editing;
     }
     
-    func target_setEdit(index: Int)
+    func target_setEdit(_ index: Int)
     {
         editing = index;
     }
@@ -1079,8 +1084,8 @@ import AVFoundation
         }
         
         if dirty {
-            let prefs = NSUserDefaults.standardUserDefaults();
-            prefs.setObject(alts, forKey: "alts");
+            let prefs = UserDefaults.standard;
+            prefs.set(alts, forKey: "alts");
         }
     }
 
@@ -1096,16 +1101,16 @@ import AVFoundation
         super.init()
         
         try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
-        self.wav_hi = try? AVAudioPlayer(contentsOfURL: fwav_hi, fileTypeHint: nil)
-        self.wav_lo = try? AVAudioPlayer(contentsOfURL: fwav_lo, fileTypeHint: nil)
-        self.wav_side = try? AVAudioPlayer(contentsOfURL: fwav_side, fileTypeHint: nil)
+        self.wav_hi = try? AVAudioPlayer(contentsOf: fwav_hi, fileTypeHint: nil)
+        self.wav_lo = try? AVAudioPlayer(contentsOf: fwav_lo, fileTypeHint: nil)
+        self.wav_side = try? AVAudioPlayer(contentsOf: fwav_side, fileTypeHint: nil)
         self.wav_hi!.prepareToPlay()
         self.wav_lo!.prepareToPlay()
         self.wav_side!.prepareToPlay()
         
-        let prefs = NSUserDefaults.standardUserDefaults();
+        let prefs = UserDefaults.standard;
         
-        prefs.registerDefaults(["metric": 1,
+        prefs.register(defaults: ["metric": 1,
             "beep": 1,
             "next_target": 3,
             "mode": 1, // MAPCOMPASS
@@ -1122,23 +1127,23 @@ import AVFoundation
             "alts": ["2": 50.0],
             ])
         
-        names = prefs.dictionaryForKey("names")!
-        lats = prefs.dictionaryForKey("lats")!
-        longs = prefs.dictionaryForKey("longs")!
-        alts = prefs.dictionaryForKey("alts")!
-        mode = prefs.integerForKey("mode")
-        tgt_dist = prefs.integerForKey("tgt_dist")
-        current_target = prefs.integerForKey("current_target")
-        zoom = prefs.doubleForKey("zoom")
-        welcome = prefs.integerForKey("welcome")
-        blink = prefs.integerForKey("blink")
+        names = prefs.dictionary(forKey: "names")!
+        lats = prefs.dictionary(forKey: "lats")!
+        longs = prefs.dictionary(forKey: "longs")!
+        alts = prefs.dictionary(forKey: "alts")!
+        mode = prefs.integer(forKey: "mode")
+        tgt_dist = prefs.integer(forKey: "tgt_dist")
+        current_target = prefs.integer(forKey: "current_target")
+        zoom = prefs.double(forKey: "zoom")
+        welcome = prefs.integer(forKey: "welcome")
+        blink = prefs.integer(forKey: "blink")
         
         self.updateTargetList()
         self.upgradeAltitudes()
         
-        metric = prefs.integerForKey("metric")
-        beep = prefs.integerForKey("beep")
-        next_target = prefs.integerForKey("next_target")
+        metric = prefs.integer(forKey: "metric")
+        beep = prefs.integer(forKey: "beep")
+        next_target = prefs.integer(forKey: "next_target")
         curloc = nil
         
         lman = CLLocationManager()
@@ -1148,11 +1153,11 @@ import AVFoundation
         lman!.requestWhenInUseAuthorization()
         lman!.startUpdatingLocation()
         
-        let notifications = NSNotificationCenter.defaultCenter()
-        prefsObserver = notifications.addObserverForName(NSUserDefaultsDidChangeNotification,
+        let notifications = NotificationCenter.default
+        prefsObserver = notifications.addObserver(forName: UserDefaults.didChangeNotification,
                                 object: nil,
-                                queue: NSOperationQueue.mainQueue(),
-                                usingBlock: { [unowned self] (notification : NSNotification!) -> Void in
+                                queue: OperationQueue.main,
+                                using: { [unowned self] (notification : Notification!) -> Void in
                                     self.prefs_changed()
                                 }
         )
@@ -1161,8 +1166,8 @@ import AVFoundation
     func show_welcome() -> Bool {
         if welcome == 0 {
             welcome = 1;
-            let prefs = NSUserDefaults.standardUserDefaults();
-            prefs.setInteger(welcome, forKey: "welcome");
+            let prefs = UserDefaults.standard;
+            prefs.set(welcome, forKey: "welcome");
             return true;
         }
         return false;
@@ -1172,62 +1177,62 @@ import AVFoundation
         return mode
     }
     
-    func set_mode(new_mode: Int) {
+    func set_mode(_ new_mode: Int) {
         self.mode = new_mode
-        let prefs = NSUserDefaults.standardUserDefaults();
-        prefs.setObject(self.mode, forKey: "mode");
+        let prefs = UserDefaults.standard;
+        prefs.set(self.mode, forKey: "mode");
     }
     
     func get_tgtdist() -> Int {
         return tgt_dist
     }
     
-    func set_tgtdist(new_tgtdist: Int) {
+    func set_tgtdist(_ new_tgtdist: Int) {
         self.tgt_dist = new_tgtdist
-        let prefs = NSUserDefaults.standardUserDefaults();
-        prefs.setObject(self.tgt_dist, forKey: "tgt_dist");
+        let prefs = UserDefaults.standard;
+        prefs.set(self.tgt_dist, forKey: "tgt_dist");
     }
     
     func get_blink() -> Int {
         return blink
     }
     
-    func set_blink(new_blink: Int) {
+    func set_blink(_ new_blink: Int) {
         self.blink = new_blink
-        let prefs = NSUserDefaults.standardUserDefaults();
-        prefs.setObject(self.blink, forKey: "blink");
+        let prefs = UserDefaults.standard;
+        prefs.set(self.blink, forKey: "blink");
     }
    
     func get_currenttarget() -> Int {
         return current_target
     }
     
-    func set_currenttarget(new_currenttarget: Int) {
+    func set_currenttarget(_ new_currenttarget: Int) {
         self.current_target = new_currenttarget
-        let prefs = NSUserDefaults.standardUserDefaults();
-        prefs.setObject(self.current_target, forKey: "current_target");
+        let prefs = UserDefaults.standard;
+        prefs.set(self.current_target, forKey: "current_target");
     }
     
     func get_zoom() -> Double {
         return zoom
     }
     
-    func set_zoom(new_zoom: Double) {
+    func set_zoom(_ new_zoom: Double) {
         self.zoom = new_zoom
-        let prefs = NSUserDefaults.standardUserDefaults();
-        prefs.setObject(self.zoom, forKey: "zoom");
+        let prefs = UserDefaults.standard;
+        prefs.set(self.zoom, forKey: "zoom");
     }
     
     deinit {
-        let notifications = NSNotificationCenter.defaultCenter()
-        notifications.removeObserver(prefsObserver, name: NSUserDefaultsDidChangeNotification, object: nil)
+        let notifications = NotificationCenter.default
+        notifications.removeObserver(prefsObserver, name: UserDefaults.didChangeNotification, object: nil)
     }
     
     func prefs_changed()
     {
-        let prefs = NSUserDefaults.standardUserDefaults();
-        metric = prefs.integerForKey("metric")
-        beep = prefs.integerForKey("beep")
+        let prefs = UserDefaults.standard;
+        metric = prefs.integer(forKey: "metric")
+        beep = prefs.integer(forKey: "beep")
     }
     
     static let singleton = GPSModel2(1);
@@ -1239,9 +1244,9 @@ import AVFoundation
     
     func updateTargetList()
     {
-        target_list = GPSModel2.array_adapter(Array(names.keys));
-        target_list = target_list.sort({$0.localizedCaseInsensitiveCompare($1) ==
-            .OrderedAscending});
+        target_list = GPSModel2.array_adapter(Array(names.keys) as Array<NSObject>);
+        target_list = target_list.sorted(by: {$0.localizedCaseInsensitiveCompare($1) ==
+            .orderedAscending});
         NSLog("Number of targets: %ld", target_list.count);
     }
     
@@ -1250,7 +1255,7 @@ import AVFoundation
         return metric;
     }
     
-    func index_of_listener(haystack: [ModelListener], needle: ModelListener) -> Int
+    func index_of_listener(_ haystack: [ModelListener], needle: ModelListener) -> Int
     {
         for i in 0..<haystack.count {
             if haystack[i] === needle {
@@ -1260,12 +1265,12 @@ import AVFoundation
         return -1;
     }
     
-    func contains(haystack: [ModelListener], needle: ModelListener) -> Bool
+    func contains(_ haystack: [ModelListener], needle: ModelListener) -> Bool
     {
         return index_of_listener(haystack, needle: needle) >= 0;
     }
     
-    func addObs(observer: ModelListener)
+    func addObs(_ observer: ModelListener)
     {
         if !contains(observers, needle: observer) {
             observers.append(observer);
@@ -1274,17 +1279,17 @@ import AVFoundation
         self.update();
     }
     
-    func delObs(observer: ModelListener)
+    func delObs(_ observer: ModelListener)
     {
         while contains(observers, needle: observer) {
             NSLog("Removed observer %@", observer as! NSObject);
             let i = index_of_listener(observers, needle: observer);
-            observers.removeAtIndex(i);
+            observers.remove(at: i);
         }
     }
     
     // Failed to get current location
-    func locationManager(manager: CLLocationManager, didFailWithError error: NSError)
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error)
     {
         if held {
             self.curloc_new = nil
@@ -1296,7 +1301,7 @@ import AVFoundation
             observer.fail();
         }
         
-        if error.code == CLError.Denied.rawValue {
+        if error._code == CLError.Code.denied.rawValue {
             for observer in observers {
                 observer.permission();
             }
@@ -1304,7 +1309,7 @@ import AVFoundation
         }
     }
     
-    func locationManager(manager :CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus)
+    func locationManager(_ manager :CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus)
     {
         lman!.startUpdatingLocation()
     }

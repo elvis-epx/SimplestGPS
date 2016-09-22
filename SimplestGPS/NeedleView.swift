@@ -25,14 +25,14 @@ class NeedleView: UIView {
         let s = CGSize(width: frame.width / 6, height: frame.height)
         let p = CGPoint(x: frame.width / 2 - s.width / 2, y: 0)
         super.init(frame: CGRect(origin: p, size: s))
-        self.backgroundColor = UIColor.clearColor()
+        self.backgroundColor = UIColor.clear
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         // NSLog("NeedleView drawRect")
         let ctx = UIGraphicsGetCurrentContext()
         if ctx == nil {
@@ -40,31 +40,31 @@ class NeedleView: UIView {
         }
         let radius = self.bounds.size.height * 0.75 / 2
         let off = radius * 0.055
-        let center = CGPointMake(self.bounds.size.width / 2,
-                                 self.bounds.size.height / 2)
+        let center = CGPoint(x: self.bounds.size.width / 2,
+                                 y: self.bounds.size.height / 2)
 
-        CGContextSetStrokeColorWithColor(ctx, color.CGColor)
-        CGContextSetLineWidth(ctx, 1.5 * thickness)
+        ctx?.setStrokeColor(color.cgColor)
+        ctx?.setLineWidth(1.5 * thickness)
         
-        CGContextMoveToPoint(ctx, center.x + off, center.y - radius)
-        CGContextAddLineToPoint(ctx, center.x + off, center.y + radius + off * 3)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: center.x + off, y: center.y - radius))
+        ctx?.addLine(to: CGPoint(x: center.x + off, y: center.y + radius + off * 3))
+        ctx?.strokePath()
         
-        CGContextMoveToPoint(ctx, center.x - off, center.y - radius)
-        CGContextAddLineToPoint(ctx, center.x - off, center.y + radius + off * 3)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: center.x - off, y: center.y - radius))
+        ctx?.addLine(to: CGPoint(x: center.x - off, y: center.y + radius + off * 3))
+        ctx?.strokePath()
 
         // arrow point
         
         let al = CGFloat(4.0) // arrow angle
         let aa = CGFloat(2.0) // arrow height
         
-        CGContextMoveToPoint(ctx, center.x - al * off, center.y - radius + off * al * aa)
-        CGContextAddLineToPoint(ctx, center.x, center.y - radius - off * 3)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: center.x - al * off, y: center.y - radius + off * al * aa))
+        ctx?.addLine(to: CGPoint(x: center.x, y: center.y - radius - off * 3))
+        ctx?.strokePath()
 
-        CGContextMoveToPoint(ctx, center.x + al * off, center.y - radius + off * al * aa)
-        CGContextAddLineToPoint(ctx, center.x, center.y - radius - off * 3)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: center.x + al * off, y: center.y - radius + off * al * aa))
+        ctx?.addLine(to: CGPoint(x: center.x, y: center.y - radius - off * 3))
+        ctx?.strokePath()
     }
 }

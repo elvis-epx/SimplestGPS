@@ -20,12 +20,12 @@ class MapPointView: UIView
     init(frame: CGRect, color: UIColor, out: Bool)
     {
         // we expect the frame of the compass but build ourselves smaller
-        self.color = color.CGColor
+        self.color = color.cgColor
         self.out = out
         let s = CGSize(width: frame.width / 4, height: frame.width / 4)
         let p = CGPoint(x: frame.width / 2, y: frame.height / 2)
         super.init(frame: CGRect(origin: p, size: s))
-        self.backgroundColor = UIColor.clearColor()
+        self.backgroundColor = UIColor.clear
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -36,7 +36,7 @@ class MapPointView: UIView
         fatalError("init() has not been implemented")
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         let ctx = UIGraphicsGetCurrentContext()
         if ctx == nil {
             return
@@ -51,37 +51,37 @@ class MapPointView: UIView
         let arrow_x = radius * 0.20
         let shortening = 0.4 * radius
 
-        CGContextSetStrokeColorWithColor(ctx, color)
-        CGContextSetLineWidth(ctx, 3)
+        ctx?.setStrokeColor(color)
+        ctx?.setLineWidth(3)
 
         // cross
         
-        CGContextMoveToPoint(ctx, shortening / 2.0, ym)
-        CGContextAddLineToPoint(ctx, x1 - shortening / 2.0, ym)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: shortening / 2.0, y: ym))
+        ctx?.addLine(to: CGPoint(x: x1 - shortening / 2.0, y: ym))
+        ctx?.strokePath()
         
-        CGContextMoveToPoint(ctx, xm, 0)
-        CGContextAddLineToPoint(ctx, xm, y1 - shortening / 2.0)
-        CGContextStrokePath(ctx)
+        ctx?.move(to: CGPoint(x: xm, y: 0))
+        ctx?.addLine(to: CGPoint(x: xm, y: y1 - shortening / 2.0))
+        ctx?.strokePath()
         
         // arrow
 
         if out {
-            CGContextMoveToPoint(ctx, xm, 0)
-            CGContextAddLineToPoint(ctx, xm + arrow_x, 0 + arrow_y)
-            CGContextStrokePath(ctx)
+            ctx?.move(to: CGPoint(x: xm, y: 0))
+            ctx?.addLine(to: CGPoint(x: xm + arrow_x, y: 0 + arrow_y))
+            ctx?.strokePath()
 
-            CGContextMoveToPoint(ctx, xm, 0)
-            CGContextAddLineToPoint(ctx, xm - arrow_x, 0 + arrow_y)
-            CGContextStrokePath(ctx)
+            ctx?.move(to: CGPoint(x: xm, y: 0))
+            ctx?.addLine(to: CGPoint(x: xm - arrow_x, y: 0 + arrow_y))
+            ctx?.strokePath()
         } else {
-            CGContextMoveToPoint(ctx, xm + arrow_x, 0)
-            CGContextAddLineToPoint(ctx, xm, 0 + arrow_y)
-            CGContextStrokePath(ctx)
+            ctx?.move(to: CGPoint(x: xm + arrow_x, y: 0))
+            ctx?.addLine(to: CGPoint(x: xm, y: 0 + arrow_y))
+            ctx?.strokePath()
             
-            CGContextMoveToPoint(ctx, xm - arrow_x, 0)
-            CGContextAddLineToPoint(ctx, xm, 0 + arrow_y)
-            CGContextStrokePath(ctx)
+            ctx?.move(to: CGPoint(x: xm - arrow_x, y: 0))
+            ctx?.addLine(to: CGPoint(x: xm, y: 0 + arrow_y))
+            ctx?.strokePath()
         }
     }
 }

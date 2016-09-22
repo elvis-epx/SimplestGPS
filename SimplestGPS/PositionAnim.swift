@@ -31,8 +31,8 @@ class PositionAnim
         self.vspeed = CGVector(dx: 0.0, dy: 0.0)
         
         // coordinates are RELATIVE: 0.0 is the middle of CGRect size!
-        self.target = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
-        self.current = CGPoint(x: CGFloat.NaN, y: CGFloat.NaN)
+        self.target = CGPoint(x: CGFloat.nan, y: CGFloat.nan)
+        self.current = CGPoint(x: CGFloat.nan, y: CGFloat.nan)
         self.offset = CGPoint(x: 0, y: 0)
         self.last_offset = offset
 
@@ -44,12 +44,12 @@ class PositionAnim
         self.last_distance = 0
     }
 
-    func set_rel(target: CGPoint, block: Optional<() -> Void>)
+    func set_rel(_ target: CGPoint, block: Optional<() -> Void>)
     {
         set_rel(target, offset: CGPoint(x: 0, y: 0), block: block)
     }
 
-    func set_rel(target: CGPoint, offset: CGPoint, block: Optional<() -> Void>)
+    func set_rel(_ target: CGPoint, offset: CGPoint, block: Optional<() -> Void>)
     {
         self.target = target
         self.offset = offset
@@ -62,7 +62,7 @@ class PositionAnim
         }
     }
     
-    func tick(pdt: CGFloat, t: CGAffineTransform, immediate: Bool) -> Bool
+    func tick(_ pdt: CGFloat, t: CGAffineTransform, immediate: Bool) -> Bool
     {
         if self.block != nil {
             block!();
