@@ -1155,7 +1155,7 @@ import AVFoundation
         
         let notifications = NotificationCenter.default
         prefsObserver = notifications.addObserver(forName: UserDefaults.didChangeNotification,
-                                object: nil,
+                                object: UserDefaults.standard,
                                 queue: OperationQueue.main,
                                 using: { [unowned self] (notification : Notification!) -> Void in
                                     self.prefs_changed()

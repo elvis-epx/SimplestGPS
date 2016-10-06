@@ -39,6 +39,8 @@
 		B9AD65B51849733200E9C380 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9AD65B41849733200E9C380 /* Images.xcassets */; };
 		B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD65D118497AAB00E9C380 /* CoreLocation.framework */; };
 		B9B7ECCC1CD81C78006ED4B0 /* MapLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B7ECCB1CD81C78006ED4B0 /* MapLabelView.swift */; };
+		B9C85A0D1DA5EE72008F095A /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9C85A0C1DA5EE72008F095A /* GameKit.framework */; };
+		B9C85A0F1DA5EE7B008F095A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9C85A0E1DA5EE7B008F095A /* StoreKit.framework */; };
 		B9D4BAA91CD9467F00E8C8B7 /* 836.wav in Resources */ = {isa = PBXBuildFile; fileRef = B9D4BAA81CD9467F00E8C8B7 /* 836.wav */; };
 		B9D542991C80CBD70063DCD8 /* MapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */; };
 		B9D672B21BBF6D85003DF8CF /* TargetViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */; };
@@ -85,6 +87,9 @@
 		B9AD65B41849733200E9C380 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		B9AD65D118497AAB00E9C380 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		B9B7ECCB1CD81C78006ED4B0 /* MapLabelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapLabelView.swift; sourceTree = "<group>"; };
+		B9C85A0B1DA5E8DF008F095A /* SimplestGPS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SimplestGPS.entitlements; sourceTree = "<group>"; };
+		B9C85A0C1DA5EE72008F095A /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
+		B9C85A0E1DA5EE7B008F095A /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B9D4BAA81CD9467F00E8C8B7 /* 836.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 836.wav; sourceTree = "<group>"; };
 		B9D542981C80CBD70063DCD8 /* MapCanvasView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapCanvasView.swift; sourceTree = "<group>"; };
 		B9D672B11BBF6D85003DF8CF /* TargetViewController2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetViewController2.swift; sourceTree = "<group>"; };
@@ -98,8 +103,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9AD65D218497AAB00E9C380 /* CoreLocation.framework in Frameworks */,
+				B9C85A0F1DA5EE7B008F095A /* StoreKit.framework in Frameworks */,
 				B9AD659F1849733200E9C380 /* CoreGraphics.framework in Frameworks */,
 				B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */,
+				B9C85A0D1DA5EE72008F095A /* GameKit.framework in Frameworks */,
 				B9AD659D1849733200E9C380 /* Foundation.framework in Frameworks */,
 				827E5B4C64313590EE373F66 /* Pods_SimplestGPS.framework in Frameworks */,
 			);
@@ -144,6 +151,8 @@
 		B9AD659B1849733200E9C380 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B9C85A0E1DA5EE7B008F095A /* StoreKit.framework */,
+				B9C85A0C1DA5EE72008F095A /* GameKit.framework */,
 				B9AD65D118497AAB00E9C380 /* CoreLocation.framework */,
 				B9AD659C1849733200E9C380 /* Foundation.framework */,
 				B9AD659E1849733200E9C380 /* CoreGraphics.framework */,
@@ -156,6 +165,7 @@
 		B9AD65A21849733200E9C380 /* SimplestGPS */ = {
 			isa = PBXGroup;
 			children = (
+				B9C85A0B1DA5E8DF008F095A /* SimplestGPS.entitlements */,
 				B9D4BAA81CD9467F00E8C8B7 /* 836.wav */,
 				B912A9AB1CD9108C00DF5768 /* 670.wav */,
 				B912A9AC1CD9108C00DF5768 /* 1000.wav */,
@@ -234,6 +244,21 @@
 					B9AD65981849733200E9C380 = {
 						DevelopmentTeam = LUPFH54KMA;
 						LastSwiftMigration = 0800;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.GameCenter = {
+								enabled = 1;
+							};
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -394,6 +419,8 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = SimplestGPS/SimplestGPS.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -438,6 +465,8 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = SimplestGPS/SimplestGPS.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -464,6 +493,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = LUPFH54KMA;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
 				INFOPLIST_FILE = "SimplestGPS/SimplestGPS-Info.plist";
@@ -486,6 +516,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = LUPFH54KMA;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "SimplestGPS/SimplestGPS-Prefix.pch";
 				INFOPLIST_FILE = "SimplestGPS/SimplestGPS-Info.plist";
