@@ -713,6 +713,13 @@ open class MapDescriptor {
             NSLog("%@", directoryUrls)
             for url in directoryUrls {
                 let f = url.lastPathComponent
+                
+                if f.hasSuffix("txt") {
+                    NSLog("    Found target file");
+                    GPSModel2.model().read_targets(url)
+                    continue
+                }
+                
                 let coords = MapModel.parse_map_name(f)
                 if !coords.ok {
                     continue

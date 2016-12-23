@@ -697,6 +697,16 @@ import AVFoundation
         return target_list.count;
     }
     
+    func target_index(_ name: String) -> Int
+    {
+        for i in 0..<target_list.count {
+            if (names[target_list[i]] as! String) == name {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
     func target_name(_ index: Int) -> String
     {
         if index < 0 || index >= target_list.count {
@@ -919,7 +929,7 @@ import AVFoundation
     
         let dlongitude = GPSModel2.parse_longz(longitude);
         if dlongitude != dlongitude {
-            return "Longitude ixs invalid.";
+            return "Longitude is invalid.";
         }
     
         var daltitude = 0.0;
@@ -1312,5 +1322,60 @@ import AVFoundation
     func locationManager(_ manager :CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus)
     {
         lman!.startUpdatingLocation()
+    }
+    
+    func read_targets(_ url: URL)
+    {
+        var data = ""
+        
+        do {
+            data = try String(contentsOf: url, encoding: String.Encoding.utf8)
+        } catch {
+            NSLog("Could not read target file " + url.absoluteString)
+            return
+        }
+        
+        let lines = data.components(separatedBy: .newlines)
+        for line in lines {
+            read_target(line);
+        }
+        
+        do {
+            try FileManager.default.removeItem(at: url)
+            NSLog("Target file removed")
+        } catch {
+            NSLog("Could not remove target file " + url.absoluteString)
+        }
+    }
+    
+    func read_target(_ data: String)
+    {
+        let tokens = data.replacingOccurrences(of: "\t", with: " ")
+                    .components(separatedBy: .whitespacesAndNewlines)
+        if tokens.count <= 0 || data.characters.count <= 0 {
+            return
+        }
+        NSLog("target data: " + data)
+        if tokens.count < 3 {
+            NSLog("not enough tokens")
+            return
+        }
+        var name = tokens[0]
+        let latitude = tokens[1]
+        let longitude = tokens[2]
+        var altitude = ""
+        if tokens.count > 3 {
+            altitude = tokens[3]
+        }
+        if name.characters.count > 15 {
+            let i = name.index(name.startIndex, offsetBy: 15)
+            name = name.substring(to: i)
+        }
+        
+        let err = target_set(target_index(name), nam: name, latitude: latitude,
+                             longitude: longitude, altitude: altitude)
+        if err != nil {
+            NSLog("error: " + err!)
+        }
     }
 }
