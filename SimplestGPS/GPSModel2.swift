@@ -1245,7 +1245,9 @@ import AVFoundation
     
     deinit {
         let notifications = NotificationCenter.default
-        notifications.removeObserver(prefsObserver, name: UserDefaults.didChangeNotification, object: nil)
+        notifications.removeObserver(prefsObserver!,
+                                     name: UserDefaults.didChangeNotification,
+                                     object: nil)
     }
     
     func prefs_changed()

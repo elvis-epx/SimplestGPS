@@ -76,7 +76,6 @@ class MapCanvasView: UIView
     
     func init2() {
         updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.anim))
-        updater!.frameInterval = 1
         updater!.add(to: RunLoop.current, forMode: RunLoop.Mode.common)
 
         /* must be big enough to fit the screen even when rotated to any angle */

@@ -1,6 +1,6 @@
 # SimplestGPS, source code 
 
-This is the source code of the SimplestGPS app (https://epxx.co/ctb/SimplestGPS). This application
+This is the source code of the SimplestGPS app (https://epxx.co/SimplestGPS). This application
 shows typical GPS data and can plot positions on a chart.
 
 Here are some screenshots from the app:

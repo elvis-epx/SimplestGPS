@@ -42,7 +42,7 @@ import UIKit
     }
 
     @IBAction func getHelp(_ sender: AnyObject) {
-        UIApplication.shared.openURL(URL(string: "http://epxx.co/ctb/SimplestGPS/")!)
+        UIApplication.shared.openURL(URL(string: "http://epxx.co/SimplestGPS/")!)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

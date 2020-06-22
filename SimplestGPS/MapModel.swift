@@ -764,7 +764,9 @@ open class MapDescriptor {
     
     deinit {
         let notifications = NotificationCenter.default
-        notifications.removeObserver(memoryWarningObserver, name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
+        notifications.removeObserver(memoryWarningObserver!,
+                                     name: UIApplication.didReceiveMemoryWarningNotification,
+                                     object: nil)
     }
     
     func memory_low() {
