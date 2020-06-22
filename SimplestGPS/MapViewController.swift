@@ -145,8 +145,8 @@ enum Mode: Int {
     
     override func viewDidAppear(_ animated: Bool) {
         if GPSModel2.model().show_welcome() {
-            let alert = UIAlertController(title: "Welcome!", message: "If you need instructions about this app, press 'PIN' at lower left corner, then 'Help' at the bottom.", preferredStyle: UIAlertControllerStyle.alert)
-            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler: nil))
+            let alert = UIAlertController(title: "Welcome!", message: "If you need instructions about this app, press 'PIN' at lower left corner, then 'Help' at the bottom.", preferredStyle: UIAlertController.Style.alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         }
     }
@@ -158,7 +158,7 @@ enum Mode: Int {
         update_timer = Timer(timeInterval: 0.33, target: self,
                                selector: #selector(MapViewController.update),
                         userInfo: nil, repeats: true)
-        RunLoop.current.add(update_timer!, forMode: RunLoopMode.commonModes)
+        RunLoop.current.add(update_timer!, forMode: RunLoop.Mode.common)
         
         if int_to_mode[GPSModel2.model().get_mode()] != nil {
             mode = int_to_mode[GPSModel2.model().get_mode()]!
@@ -422,8 +422,8 @@ enum Mode: Int {
         for tgt in 0..<GPSModel2.model().target_count() {
             let tlat = GPSModel2.model().target_latitude(tgt)
             let tlong = GPSModel2.model().target_longitude(tgt)
-            let tangle1 = CGFloat(GPSModel2.model().target_heading(tgt) * M_PI / 180.0)
-            let tangle = CGFloat(M_PI) + tangle1
+            let tangle1 = CGFloat(GPSModel2.model().target_heading(tgt) * .pi / 180.0)
+            let tangle = CGFloat.pi + tangle1
             if GPSModel2.inside(tlat, long: tlong,
                                 lat_circle: Double(clat),
                                 long_circle: Double(clong),
@@ -478,7 +478,7 @@ enum Mode: Int {
                         } else {
                             last_label_heading = he
                         }
-                        let phi = atan2(yrel, xrel) - he * CGFloat(M_PI / 180.0)
+                        let phi = atan2(yrel, xrel) - he * CGFloat(.pi / 180.0)
                         let vlen = hypot(xrel, yrel)
                         label_x = vlen * cos(phi)
                         label_y = vlen * sin(phi)
@@ -569,7 +569,7 @@ enum Mode: Int {
         repaint(true, gesture: false)
     }
     
-    func pan(_ rec:UIPanGestureRecognizer)
+    @objc func pan(_ rec:UIPanGestureRecognizer)
     {
         switch rec.state {
         case .began:
@@ -622,7 +622,7 @@ enum Mode: Int {
         }
     }
     
-    func pinch(_ rec:UIPinchGestureRecognizer)
+    @objc func pinch(_ rec:UIPinchGestureRecognizer)
     {
         zoom_factor /= rec.scale
         zoom_factor = max(zoom_factor, zoom_min)
@@ -632,7 +632,7 @@ enum Mode: Int {
         repaint(true, gesture: true)
     }
     
-    func onefinger(_ rec:UITapGestureRecognizer)
+    @objc func onefinger(_ rec:UITapGestureRecognizer)
     {
         NSLog("One finger")
         switch rec.state {
@@ -643,7 +643,7 @@ enum Mode: Int {
         }
     }
     
-    func twofingers(_ rec:UITapGestureRecognizer)
+    @objc func twofingers(_ rec:UITapGestureRecognizer)
     {
         NSLog("Two fingers")
         switch rec.state {
@@ -654,7 +654,7 @@ enum Mode: Int {
         }
     }
     
-    func threefingers(_ rec:UITapGestureRecognizer)
+    @objc func threefingers(_ rec:UITapGestureRecognizer)
     {
         NSLog("Three fingers")
         switch rec.state {
@@ -701,7 +701,7 @@ enum Mode: Int {
         repaint(false, gesture: false)
     }
     
-    func tgt_longpress(_ guesture: UILongPressGestureRecognizer) {
+    @objc func tgt_longpress(_ guesture: UILongPressGestureRecognizer) {
         current_target = -1
         GPSModel2.model().set_currenttarget(current_target)
         repaint(false, gesture: false)

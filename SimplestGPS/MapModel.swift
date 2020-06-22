@@ -136,11 +136,11 @@ open class MapDescriptor {
                 self.reset_cur()
             }
             
-            let blat0 = ((info as! NSDictionary)["lat0"] as! NSNumber) as Double
-            let blat1 = ((info as! NSDictionary)["lat1"] as! NSNumber) as Double
-            let blong0 = ((info as! NSDictionary)["long0"] as! NSNumber) as Double
-            let blong1 = ((info as! NSDictionary)["long1"] as! NSNumber) as Double
-            let screenh = ((info as! NSDictionary)["screenh"] as! NSNumber) as Double
+            let blat0 = ((info as! NSDictionary)["lat0"] as! NSNumber) as! Double
+            let blat1 = ((info as! NSDictionary)["lat1"] as! NSNumber) as! Double
+            let blong0 = ((info as! NSDictionary)["long0"] as! NSNumber) as! Double
+            let blong1 = ((info as! NSDictionary)["long1"] as! NSNumber) as! Double
+            let screenh = ((info as! NSDictionary)["screenh"] as! NSNumber) as! Double
             self.Load(blat0, blat1: blat1, blong0: blong0, blong1: blong1,
                       screenh: CGFloat(screenh), cb: { model.dequeue_load() })
             return true
@@ -444,32 +444,32 @@ open class MapDescriptor {
         var dy: Double? = 0.0
         
         let e = f.lowercased()
-        let g = (e.characters.split(separator: ".").map{ String($0) }).first!
-        var h = (g.characters.split(separator: "+").map{ String($0) })
+        let g = (e.split(separator: ".").map{ String($0) }).first!
+        var h = (g.split(separator: "+").map{ String($0) })
         
         if h.count != 4 && h.count != 6 {
             NSLog("    did not find 4/6 tokens")
             return (false, 0, 0, 0, 0, 0, 0)
         }
-        if h[0].characters.count < 4 || h[0].characters.count > 6 {
+        if h[0].count < 4 || h[0].count > 6 {
             NSLog("    latitude with <3 or >5 chars")
             return (false, 0, 0, 0, 0, 0, 0)
         }
         
-        if h[1].characters.count < 4 || h[1].characters.count > 6 {
+        if h[1].count < 4 || h[1].count > 6 {
             NSLog("    latitude with <3 or >5 chars")
             return (false, 0, 0, 0, 0, 0, 0)
         }
-        if h[2].characters.count < 2 || h[2].characters.count > 4 {
+        if h[2].count < 2 || h[2].count > 4 {
             NSLog("    latheight with <3 or >4 chars")
             return (false, 0, 0, 0, 0, 0, 0)
         }
-        if h[3].characters.count < 2 || h[3].characters.count > 4 {
+        if h[3].count < 2 || h[3].count > 4 {
             NSLog("    longwidth with <3 or >4 chars")
             return (false, 0, 0, 0, 0, 0, 0)
         }
         
-        let ns = h[0].characters.last
+        let ns = h[0].last
         
         if (ns != "n" && ns != "s") {
             NSLog("    latitude with no N or S suffix")
@@ -479,7 +479,7 @@ open class MapDescriptor {
             lat = -1;
         }
         
-        let ew = h[1].characters.last
+        let ew = h[1].last
         
         if (ew != "e" && ew != "w") {
             NSLog("    longitude with no W or E suffix")
@@ -488,8 +488,8 @@ open class MapDescriptor {
         if (ew == "w") {
             long = -1;
         }
-        h[0] = h[0].substring(to: h[0].characters.index(before: h[0].endIndex))
-        h[1] = h[1].substring(to: h[1].characters.index(before: h[1].endIndex))
+        h[0] = String(h[0][..<h[0].index(before: h[0].endIndex)])
+        h[1] = String(h[1][..<h[1].index(before: h[1].endIndex)])
         let ilat = Int(h[0])
         if (ilat == nil) {
             NSLog("    lat not parsable")
@@ -686,10 +686,10 @@ open class MapDescriptor {
     
     init(_: Int)
     {
-        i_notloaded = MapModel.simple_image(UIColor(colorLiteralRed: 0, green: 1.0, blue: 0, alpha: 0.33))
-        i_oom = MapModel.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 0.0, alpha: 0.33))
-        i_loading = MapModel.simple_image(UIColor(colorLiteralRed: 0, green: 0.0, blue: 1.0, alpha: 0.33))
-        i_cantload = MapModel.simple_image(UIColor(colorLiteralRed: 1.0, green: 0, blue: 1.0, alpha: 0.33))
+        i_notloaded = MapModel.simple_image(UIColor(red: 0, green: 1.0, blue: 0, alpha: 0.33))
+        i_oom = MapModel.simple_image(UIColor(red: 1.0, green: 0, blue: 0.0, alpha: 0.33))
+        i_loading = MapModel.simple_image(UIColor(red: 0, green: 0.0, blue: 1.0, alpha: 0.33))
+        i_cantload = MapModel.simple_image(UIColor(red: 1.0, green: 0, blue: 1.0, alpha: 0.33))
         super.init()
         
         maps = []
@@ -697,7 +697,7 @@ open class MapDescriptor {
         let fileManager = FileManager.default
         let documentsUrl = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0] as URL
         
-        #if (arch(i386) || arch(x86_64)) && os(iOS)
+        #if targetEnvironment(simulator)
         // Write a canary file to find the app's Documents folder in Simulator
         let w = documentsUrl.appendingPathComponent("canary666.txt")
         let text = "bla"
@@ -748,7 +748,7 @@ open class MapDescriptor {
         }
         
         let notifications = NotificationCenter.default
-        memoryWarningObserver = notifications.addObserver(forName: NSNotification.Name.UIApplicationDidReceiveMemoryWarning,
+        memoryWarningObserver = notifications.addObserver(forName: UIApplication.didReceiveMemoryWarningNotification,
                                                                  object: nil,
                                                                  queue: OperationQueue.main,
                                                                  using: { [unowned self] (notification : Notification!) -> Void in
@@ -764,7 +764,7 @@ open class MapDescriptor {
     
     deinit {
         let notifications = NotificationCenter.default
-        notifications.removeObserver(memoryWarningObserver, name: NSNotification.Name.UIApplicationDidReceiveMemoryWarning, object: nil)
+        notifications.removeObserver(memoryWarningObserver, name: UIApplication.didReceiveMemoryWarningNotification, object: nil)
     }
     
     func memory_low() {
