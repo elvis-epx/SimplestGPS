@@ -633,6 +633,9 @@ import AVFoundation
                          didUpdateLocations locations: [CLLocation])
     {
         if let location = locations.last {
+            let utm = location.coordinate.utmCoordinate()
+            NSLog("Lat \(location.coordinate.latitude) Long \(location.coordinate.longitude) " +
+                    "UTM E \(utm.easting) W \(utm.northing) zone \(utm.zone) hemi \(utm.hemisphere)")
             if self.held {
                 self.curloc_new = location
             } else {
