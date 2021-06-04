@@ -141,6 +141,12 @@ enum Mode: Int {
         
         let lp = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.tgt_longpress(_:)))
         self.tgt_b.addGestureRecognizer(lp)
+        
+        let ll = UITapGestureRecognizer(target: self, action: #selector(MapViewController.latlongchange(_:)))
+        ll.numberOfTapsRequired = 1
+        ll.numberOfTouchesRequired = 1
+        self.latitude.addGestureRecognizer(ll)
+        self.longitude.addGestureRecognizer(ll)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -333,8 +339,8 @@ enum Mode: Int {
                     (stext.isEmpty ? "" : " - ") + stext
             }
             scale.text = stext
-            latitude.text = GPSModel2.model().latitude_formatted()
-            longitude.text = GPSModel2.model().longitude_formatted()
+            latitude.text = GPSModel2.model().latitude_formatted_main()
+            longitude.text = GPSModel2.model().longitude_formatted_main()
             accuracy.text = GPSModel2.model().altitude_formatted() + "↑ " +
                 GPSModel2.model().accuracy_formatted()
         }
@@ -701,7 +707,7 @@ enum Mode: Int {
         repaint(false, gesture: false)
     }
     
-    @objc func tgt_longpress(_ guesture: UILongPressGestureRecognizer) {
+    @objc func tgt_longpress(_ gesture: UILongPressGestureRecognizer) {
         current_target = -1
         GPSModel2.model().set_currenttarget(current_target)
         repaint(false, gesture: false)
@@ -709,5 +715,10 @@ enum Mode: Int {
     
     @IBAction func backToMain(_ sender: UIStoryboardSegue)
     {
+    }
+    
+    @objc func latlongchange(_ sender: UIGestureRecognizer)
+    {
+        GPSModel2.model().toggle_latlong()
     }
 }

@@ -31,6 +31,7 @@ import AVFoundation
     var next_target: Int = 0
     var curloc: CLLocation? = nil
     var curloc_new: CLLocation? = nil
+    var utm_format = false
     var held: Bool = false
     var lman: CLLocationManager? = nil
     var metric: Int = 1;
@@ -311,6 +312,19 @@ import AVFoundation
         let suffix = lat < 0 ? "S" : "N";
         return String(format: "%@%@", format_deg(fabs(lat)), suffix);
     }
+    
+    class func do_format_latitude_utm(_ loc: CLLocationCoordinate2D?) -> String
+    {
+        if loc == nil {
+            return "???"
+        }
+        let utm = loc!.utmCoordinate()
+        var s = String(format: "%.1f N", utm.northing)
+        while s.count < 11 {
+            s = " " + s
+        }
+        return s
+    }
 
     class func do_format_latitude_full(_ lat: Double) -> String
     {
@@ -326,7 +340,7 @@ import AVFoundation
         if lat != lat {
             return "---";
         }
-        return String(format: "%@", format_deg2(fabs(lat)));
+        return String(format: "%@", format_deg2(fabs(lat)))
     }
 
     class func do_format_longitude(_ lon: Double) -> String
@@ -337,6 +351,20 @@ import AVFoundation
         let suffix = lon < 0 ? "W" : "E";
         return String(format: "%@%@", format_deg(fabs(lon)), suffix);
     }
+    
+    class func do_format_longitude_utm(_ loc: CLLocationCoordinate2D?) -> String
+    {
+        if loc == nil {
+            return "???"
+        }
+        let utm = loc!.utmCoordinate()
+        var s = String(format: "%.1f E", utm.easting)
+        while s.count < 11 {
+            s = " " + s
+        }
+        return s
+    }
+
 
     class func do_format_longitude_full(_ lon: Double) -> String
     {
@@ -596,6 +624,11 @@ import AVFoundation
         return value;
     }
 
+    func location() -> CLLocationCoordinate2D?
+    {
+        return self.curloc?.coordinate
+    }
+    
     func latitude() -> Double
     {
         return self.curloc != nil ? (self.curloc!.coordinate.latitude) : Double.nan
@@ -633,9 +666,6 @@ import AVFoundation
                          didUpdateLocations locations: [CLLocation])
     {
         if let location = locations.last {
-            let utm = location.coordinate.utmCoordinate()
-            NSLog("Lat \(location.coordinate.latitude) Long \(location.coordinate.longitude) " +
-                    "UTM E \(utm.easting) W \(utm.northing) zone \(utm.zone) hemi \(utm.hemisphere)")
             if self.held {
                 self.curloc_new = location
             } else {
@@ -644,10 +674,19 @@ import AVFoundation
             }
         }
     }
+    
+    func toggle_latlong() {
+        utm_format = !utm_format
+        self.update()
+    }
 
-    func latitude_formatted() -> String
+    func latitude_formatted_main() -> String
     {
-        return GPSModel2.do_format_latitude_full(latitude());
+        if utm_format {
+            return GPSModel2.do_format_latitude_utm(location())
+        } else {
+            return GPSModel2.do_format_latitude_full(latitude())
+        }
     }
 
     func latitude_formatted_part1() -> String
@@ -665,9 +704,13 @@ import AVFoundation
         return GPSModel2.do_format_heading(self.heading())
     }
     
-    func longitude_formatted() -> String
+    func longitude_formatted_main() -> String
     {
-        return GPSModel2.do_format_longitude_full(self.longitude())
+        if utm_format {
+            return GPSModel2.do_format_longitude_utm(location())
+        } else {
+            return GPSModel2.do_format_longitude_full(self.longitude())
+        }
     }
     
     func longitude_formatted_part1() -> String
