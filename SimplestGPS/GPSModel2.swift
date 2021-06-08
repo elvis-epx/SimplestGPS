@@ -1459,7 +1459,7 @@ import AVFoundation
     
     func parse_curloc()
     {
-        let weight = 0.0002
+        let weight = 0.00075
         let cweight = (1.0 - weight)
 
         if self.curloc_raw == nil {
@@ -1473,9 +1473,9 @@ import AVFoundation
             self.longitudev = self.curloc_raw!.coordinate.longitude
         } else {
             let diff_a = self.curloc_raw!.altitude - self.altitudev!
-            let diff_lat = self.curloc_raw!.coordinate.latitude - self.latitudev!
-            let diff_long = self.curloc_raw!.coordinate.longitude - self.longitudev!
-            NSLog("avg: Update moving avg \(diff_a) \(diff_lat) \(diff_long)")
+            let diff_lat = 1852 * 60 * (self.curloc_raw!.coordinate.latitude - self.latitudev!)
+            let diff_long = 1852 * 60 * (self.curloc_raw!.coordinate.longitude - self.longitudev!)
+            NSLog("avg: Update moving avg a=\(diff_a) la=\(diff_lat)'' lo=\(diff_long)''")
             self.altitudev = self.altitudev! * cweight + self.curloc_raw!.altitude * weight
             self.latitudev = self.latitudev! * cweight + self.curloc_raw!.coordinate.latitude * weight
             self.longitudev = self.longitudev! * cweight + self.curloc_raw!.coordinate.longitude * weight
