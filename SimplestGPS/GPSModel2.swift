@@ -29,8 +29,13 @@ import AVFoundation
     var trelheadings = [String: Double]()
     var target_list = [String]()
     var next_target: Int = 0
-    var curloc: CLLocation? = nil
-    var curloc_new: CLLocation? = nil
+
+    var curloc_raw: CLLocation? = nil
+    var curloc_raw_new: CLLocation? = nil
+    var latitudev: Double? = nil
+    var longitudev: Double? = nil
+    var altitudev: Double? = nil
+    
     var utm_format = false
     var held: Bool = false
     var lman: CLLocationManager? = nil
@@ -43,6 +48,7 @@ import AVFoundation
     var zoom: Double = 0.0
     var welcome: Int = 0
     var blink: Int = 1
+    var is_avg = false
     
     var fwav_hi = URL(fileURLWithPath: Bundle.main.path(forResource: "1000", ofType: "wav")!)
     var fwav_lo = URL(fileURLWithPath: Bundle.main.path(forResource: "670", ofType: "wav")!)
@@ -56,17 +62,18 @@ import AVFoundation
     
     func hold() -> Bool
     {
-        if curloc == nil {
+        if curloc_raw == nil {
             return false
         }
         held = true
-        curloc_new = curloc
+        curloc_raw_new = curloc_raw
         return true
     }
     
     func releas()
     {
-        curloc = curloc_new
+        curloc_raw = curloc_raw_new
+        parse_curloc()
         // TODO call update() when curloc changed and is not nil?
         held = false
     }
@@ -626,40 +633,43 @@ import AVFoundation
 
     func location() -> CLLocationCoordinate2D?
     {
-        return self.curloc?.coordinate
+        if self.latitudev == nil || self.longitudev == nil {
+            return nil
+        }
+        return CLLocationCoordinate2D(latitude: latitude(), longitude: longitude())
     }
-    
+
     func latitude() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.coordinate.latitude) : Double.nan
+        return self.latitudev ?? Double.nan
     }
 
     func longitude() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.coordinate.longitude) : Double.nan
+        return self.longitudev ?? Double.nan
     }
     
     func speed() -> Double {
-        return self.curloc != nil ? (self.curloc!.speed < 0 ? Double.nan : self.curloc!.speed) : Double.nan
+        return self.curloc_raw != nil ? (self.curloc_raw!.speed < 0 ? Double.nan : self.curloc_raw!.speed) : Double.nan
     }
     
     func horizontal_accuracy() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.horizontalAccuracy) : Double.nan
+        return self.curloc_raw != nil ? (self.curloc_raw!.horizontalAccuracy) : Double.nan
     }
     
     func vertical_accuracy() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.verticalAccuracy) : Double.nan
+        return self.curloc_raw != nil ? (self.curloc_raw!.verticalAccuracy) : Double.nan
     }
     
     func heading() -> Double
     {
-        return self.curloc != nil ? (self.curloc!.course >= 0 ? self.curloc!.course : Double.nan) : Double.nan
+        return self.curloc_raw != nil ? (self.curloc_raw!.course >= 0 ? self.curloc_raw!.course : Double.nan) : Double.nan
     }
     
     func altitude() -> Double {
-        return self.curloc != nil ? (self.curloc!.altitude) : Double.nan
+        return self.altitudev ?? Double.nan
     }
 
     func locationManager(_ manager: CLLocationManager,
@@ -667,9 +677,10 @@ import AVFoundation
     {
         if let location = locations.last {
             if self.held {
-                self.curloc_new = location
+                self.curloc_raw_new = location
             } else {
-                self.curloc = location
+                self.curloc_raw = location
+                parse_curloc()
                 self.update()
             }
         }
@@ -1210,7 +1221,10 @@ import AVFoundation
         metric = prefs.integer(forKey: "metric")
         beep = prefs.integer(forKey: "beep")
         next_target = prefs.integer(forKey: "next_target")
-        curloc = nil
+        curloc_raw = nil
+        latitudev = nil
+        longitudev = nil
+        altitudev = nil
         
         lman = CLLocationManager()
         lman!.delegate = self
@@ -1360,9 +1374,9 @@ import AVFoundation
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error)
     {
         if held {
-            self.curloc_new = nil
+            self.curloc_raw_new = nil
         } else {
-            self.curloc = nil
+            self.curloc_raw = nil
         }
         
         for observer in observers {
@@ -1434,6 +1448,37 @@ import AVFoundation
                              longitude: longitude, altitude: altitude)
         if err != nil {
             NSLog("error: " + err!)
+        }
+    }
+    
+    func toggle_avg() -> Bool
+    {
+        is_avg = !is_avg
+        return is_avg
+    }
+    
+    func parse_curloc()
+    {
+        let weight = 0.0002
+        let cweight = (1.0 - weight)
+
+        if self.curloc_raw == nil {
+            return
+        }
+
+        if self.altitudev == nil || self.latitudev == nil || self.longitudev == nil || !is_avg {
+            NSLog("avg: Update instant")
+            self.altitudev = self.curloc_raw!.altitude
+            self.latitudev = self.curloc_raw!.coordinate.latitude
+            self.longitudev = self.curloc_raw!.coordinate.longitude
+        } else {
+            let diff_a = self.curloc_raw!.altitude - self.altitudev!
+            let diff_lat = self.curloc_raw!.coordinate.latitude - self.latitudev!
+            let diff_long = self.curloc_raw!.coordinate.longitude - self.longitudev!
+            NSLog("avg: Update moving avg \(diff_a) \(diff_lat) \(diff_long)")
+            self.altitudev = self.altitudev! * cweight + self.curloc_raw!.altitude * weight
+            self.latitudev = self.latitudev! * cweight + self.curloc_raw!.coordinate.latitude * weight
+            self.longitudev = self.longitudev! * cweight + self.curloc_raw!.coordinate.longitude * weight
         }
     }
 }

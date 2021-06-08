@@ -50,7 +50,7 @@
                                 </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
                                 <state key="normal" title="MOD">
-                                    <color key="titleColor" systemColor="systemOrangeColor"/>
+                                    <color key="titleColor" systemColor="systemBlueColor"/>
                                     <color key="titleShadowColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
                                 <connections>
@@ -70,29 +70,37 @@
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZJU-aR-bMo">
                                 <rect key="frame" x="20" y="770" width="70" height="70"/>
-                                <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="jG4-5Y-PgZ"/>
                                     <constraint firstAttribute="width" constant="70" id="kbr-6s-1vi"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
                                 <state key="normal" title="PIN">
-                                    <color key="titleColor" systemColor="systemOrangeColor"/>
+                                    <color key="titleColor" systemColor="systemBlueColor"/>
                                 </state>
                                 <connections>
                                     <segue destination="nfc-wt-9rG" kind="showDetail" id="yvk-rb-iEw"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GKg-Gp-1GS">
+                                <rect key="frame" x="343" y="710" width="51" height="42"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
+                                <state key="normal" title="AVG">
+                                    <color key="titleColor" systemColor="systemBlueColor"/>
+                                </state>
+                                <connections>
+                                    <action selector="avg_toggl:" destination="MWM-Gl-hMW" eventType="touchUpInside" id="4uW-Mz-piR"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kAI-ob-o5A">
                                 <rect key="frame" x="324" y="769" width="70" height="70"/>
-                                <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="Atr-dF-CmT"/>
                                     <constraint firstAttribute="width" constant="70" id="LZV-cF-vmz"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
                                 <state key="normal" title="THF">
-                                    <color key="titleColor" systemColor="systemOrangeColor"/>
+                                    <color key="titleColor" systemColor="systemBlueColor"/>
                                 </state>
                                 <connections>
                                     <action selector="tgd_button:" destination="MWM-Gl-hMW" eventType="touchUpInside" id="vcM-zJ-TJf"/>
@@ -108,7 +116,7 @@
                                 </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
                                 <state key="normal" title="TGT">
-                                    <color key="titleColor" systemColor="systemOrangeColor"/>
+                                    <color key="titleColor" systemColor="systemBlueColor"/>
                                 </state>
                                 <connections>
                                     <action selector="tgt_button:" destination="MWM-Gl-hMW" eventType="touchUpInside" id="LeE-yc-Jmd"/>
@@ -147,15 +155,18 @@
                             <constraint firstItem="rHf-S5-0lu" firstAttribute="trailing" secondItem="ruK-YN-pqb" secondAttribute="trailing" id="k4J-k4-hJ8"/>
                             <constraint firstItem="kAI-ob-o5A" firstAttribute="leading" secondItem="5bS-wD-aZy" secondAttribute="trailing" id="krq-Ys-dGy"/>
                             <constraint firstItem="Ehl-KC-tZl" firstAttribute="top" secondItem="ZJU-aR-bMo" secondAttribute="bottom" id="mI0-Es-8fD"/>
+                            <constraint firstItem="kAI-ob-o5A" firstAttribute="top" secondItem="GKg-Gp-1GS" secondAttribute="bottom" constant="17" id="mRG-FD-0gp"/>
                             <constraint firstItem="Sci-7l-XQp" firstAttribute="width" secondItem="gC6-W2-cIs" secondAttribute="width" id="qm3-nQ-zWX"/>
                             <constraint firstItem="Sci-7l-XQp" firstAttribute="centerX" secondItem="gC6-W2-cIs" secondAttribute="centerX" id="rOi-3o-9vr"/>
                             <constraint firstItem="rHf-S5-0lu" firstAttribute="trailing" secondItem="kAI-ob-o5A" secondAttribute="trailing" constant="20" id="tD4-m4-b6Q"/>
                             <constraint firstItem="rHf-S5-0lu" firstAttribute="trailing" secondItem="Ehl-KC-tZl" secondAttribute="trailing" id="uOa-4p-98R"/>
                             <constraint firstItem="Sci-7l-XQp" firstAttribute="top" secondItem="gC6-W2-cIs" secondAttribute="bottom" id="vUK-y9-E4C"/>
+                            <constraint firstItem="rHf-S5-0lu" firstAttribute="trailing" secondItem="GKg-Gp-1GS" secondAttribute="trailing" constant="20" id="zsK-BM-BCc"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="accuracy" destination="5bS-wD-aZy" id="rMO-PC-2Ke"/>
+                        <outlet property="avg_b" destination="GKg-Gp-1GS" id="vn8-vt-1X7"/>
                         <outlet property="canvas" destination="ruK-YN-pqb" id="Ypl-9m-aJS"/>
                         <outlet property="latitude" destination="gC6-W2-cIs" id="XrH-JR-8ro"/>
                         <outlet property="longitude" destination="Sci-7l-XQp" id="rmp-cU-WFt"/>
@@ -477,8 +488,8 @@
     </scenes>
     <color key="tintColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
     <resources>
-        <systemColor name="systemOrangeColor">
-            <color red="1" green="0.58431372549019611" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        <systemColor name="systemBlueColor">
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

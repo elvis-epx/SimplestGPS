@@ -22,6 +22,7 @@ enum Mode: Int {
 {
     @IBOutlet weak var canvas: MapCanvasView!
     @IBOutlet weak var scale: UILabel!
+    @IBOutlet weak var avg_b: UIButton!
     
     @IBOutlet weak var new_target: UIButton!
     @IBOutlet weak var thf_b: UIButton!
@@ -720,5 +721,14 @@ enum Mode: Int {
     @objc func latlongchange(_ sender: UIGestureRecognizer)
     {
         GPSModel2.model().toggle_latlong()
+    }
+    
+    @IBAction func avg_toggl(_ sender: Any) {
+        var title = "MOV"
+        if !GPSModel2.model().toggle_avg() {
+            title = "AVG"
+        }
+        avg_b.setTitle(title, for: .normal)
+        avg_b.setTitle(title, for: .selected)
     }
 }
