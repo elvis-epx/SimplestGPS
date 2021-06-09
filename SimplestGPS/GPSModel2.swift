@@ -326,8 +326,8 @@ import AVFoundation
             return "???"
         }
         let utm = loc!.utmCoordinate()
-        var s = String(format: "%.1f N", utm.northing)
-        while s.count < 11 {
+        var s = String(format: "%.3f E", utm.easting)
+        while s.count < 13 {
             s = " " + s
         }
         return s
@@ -365,8 +365,8 @@ import AVFoundation
             return "???"
         }
         let utm = loc!.utmCoordinate()
-        var s = String(format: "%.1f E", utm.easting)
-        while s.count < 11 {
+        var s = String(format: "%.3f N", utm.northing)
+        while s.count < 13 {
             s = " " + s
         }
         return s

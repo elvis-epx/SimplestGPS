@@ -147,7 +147,11 @@ enum Mode: Int {
         ll.numberOfTapsRequired = 1
         ll.numberOfTouchesRequired = 1
         self.latitude.addGestureRecognizer(ll)
-        self.longitude.addGestureRecognizer(ll)
+
+        let ll2 = UITapGestureRecognizer(target: self, action: #selector(MapViewController.latlongchange(_:)))
+        ll2.numberOfTapsRequired = 1
+        ll2.numberOfTouchesRequired = 1
+        self.longitude.addGestureRecognizer(ll2)
     }
     
     override func viewDidAppear(_ animated: Bool) {
