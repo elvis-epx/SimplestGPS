@@ -118,3 +118,8 @@ class BareCompassView: UIView {
                   r: radius, sides: 12, color: UIColor.white)
     }
 }
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}

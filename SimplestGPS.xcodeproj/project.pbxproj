@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		827E5B4C64313590EE373F66 /* Pods_SimplestGPS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A917B2320EB791A1F2E924A3 /* Pods_SimplestGPS.framework */; };
 		B90AAEEB184C1E59003A302E /* icon58.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEA184C1E59003A302E /* icon58.png */; };
 		B90AAEED184C1E5F003A302E /* icon80.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEC184C1E5F003A302E /* icon80.png */; };
 		B90AAEEF184C1E64003A302E /* icon120.png in Resources */ = {isa = PBXBuildFile; fileRef = B90AAEEE184C1E64003A302E /* icon120.png */; };
@@ -26,11 +25,14 @@
 		B95B68961C90D18D008E6CD3 /* TargetMiniNeedleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95B68951C90D18D008E6CD3 /* TargetMiniNeedleView.swift */; };
 		B95B68981C911A39008E6CD3 /* CompassAnim.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95B68971C911A39008E6CD3 /* CompassAnim.swift */; };
 		B963D9AC1C9A0294003D024D /* PositionAnim.swift in Sources */ = {isa = PBXBuildFile; fileRef = B963D9AB1C9A0294003D024D /* PositionAnim.swift */; };
-		B96776531D9428DB00286F85 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B96776521D9428DB00286F85 /* GoogleService-Info.plist */; };
 		B9692845184FB50A00998B77 /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692844184FB50A00998B77 /* icon114.png */; };
 		B9692847184FB51100998B77 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692846184FB51100998B77 /* icon29.png */; };
 		B9692849184FB51700998B77 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = B9692848184FB51700998B77 /* icon57.png */; };
 		B97E8DF41C91A4FA00B3291C /* TargetMiniInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97E8DF31C91A4FA00B3291C /* TargetMiniInfoView.swift */; };
+		B98A095D26680C3600EB4268 /* CLLocationCoordinate2D+UTMCoordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98A095926680C3600EB4268 /* CLLocationCoordinate2D+UTMCoordinate.swift */; };
+		B98A095E26680C3600EB4268 /* TMCoordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98A095A26680C3600EB4268 /* TMCoordinate.swift */; };
+		B98A095F26680C3600EB4268 /* UTMCoordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98A095B26680C3600EB4268 /* UTMCoordinate.swift */; };
+		B98A096026680C3600EB4268 /* CLLocation+UTMCoordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98A095C26680C3600EB4268 /* CLLocation+UTMCoordinate.swift */; };
 		B99D01151C9F9A0D00FA1FC2 /* MapModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99D01141C9F9A0D00FA1FC2 /* MapModel.swift */; };
 		B9AAA5DC1C9236190050F390 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B9AAA5DB1C9236190050F390 /* Settings.bundle */; };
 		B9AD659D1849733200E9C380 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B9AD659C1849733200E9C380 /* Foundation.framework */; };
@@ -51,9 +53,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		6B23B49C70D22B2A360F37EE /* Pods-SimplestGPS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimplestGPS.release.xcconfig"; path = "Pods/Target Support Files/Pods-SimplestGPS/Pods-SimplestGPS.release.xcconfig"; sourceTree = "<group>"; };
-		87B4D3740A175D52CA4A62BA /* Pods-SimplestGPS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SimplestGPS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SimplestGPS/Pods-SimplestGPS.debug.xcconfig"; sourceTree = "<group>"; };
-		A917B2320EB791A1F2E924A3 /* Pods_SimplestGPS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SimplestGPS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B90AAEEA184C1E59003A302E /* icon58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon58.png; sourceTree = "<group>"; };
 		B90AAEEC184C1E5F003A302E /* icon80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon80.png; sourceTree = "<group>"; };
 		B90AAEEE184C1E64003A302E /* icon120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon120.png; sourceTree = "<group>"; };
@@ -73,11 +72,14 @@
 		B95B68951C90D18D008E6CD3 /* TargetMiniNeedleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetMiniNeedleView.swift; sourceTree = "<group>"; };
 		B95B68971C911A39008E6CD3 /* CompassAnim.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompassAnim.swift; sourceTree = "<group>"; };
 		B963D9AB1C9A0294003D024D /* PositionAnim.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PositionAnim.swift; sourceTree = "<group>"; };
-		B96776521D9428DB00286F85 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B9692844184FB50A00998B77 /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
 		B9692846184FB51100998B77 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		B9692848184FB51700998B77 /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
 		B97E8DF31C91A4FA00B3291C /* TargetMiniInfoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetMiniInfoView.swift; sourceTree = "<group>"; };
+		B98A095926680C3600EB4268 /* CLLocationCoordinate2D+UTMCoordinate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CLLocationCoordinate2D+UTMCoordinate.swift"; sourceTree = "<group>"; };
+		B98A095A26680C3600EB4268 /* TMCoordinate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TMCoordinate.swift; sourceTree = "<group>"; };
+		B98A095B26680C3600EB4268 /* UTMCoordinate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UTMCoordinate.swift; sourceTree = "<group>"; };
+		B98A095C26680C3600EB4268 /* CLLocation+UTMCoordinate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CLLocation+UTMCoordinate.swift"; sourceTree = "<group>"; };
 		B99D01141C9F9A0D00FA1FC2 /* MapModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapModel.swift; sourceTree = "<group>"; };
 		B9AAA5DB1C9236190050F390 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		B9AD65991849733200E9C380 /* SimplestGPS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimplestGPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,22 +114,12 @@
 				B9AD65A11849733200E9C380 /* UIKit.framework in Frameworks */,
 				B9C85A0D1DA5EE72008F095A /* GameKit.framework in Frameworks */,
 				B9AD659D1849733200E9C380 /* Foundation.framework in Frameworks */,
-				827E5B4C64313590EE373F66 /* Pods_SimplestGPS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7039D28D593333160FA1078A /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				87B4D3740A175D52CA4A62BA /* Pods-SimplestGPS.debug.xcconfig */,
-				6B23B49C70D22B2A360F37EE /* Pods-SimplestGPS.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 		B9AD65901849733200E9C380 = {
 			isa = PBXGroup;
 			children = (
@@ -140,7 +132,6 @@
 				B9AD65A21849733200E9C380 /* SimplestGPS */,
 				B9AD659B1849733200E9C380 /* Frameworks */,
 				B9AD659A1849733200E9C380 /* Products */,
-				7039D28D593333160FA1078A /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -161,7 +152,6 @@
 				B9AD659C1849733200E9C380 /* Foundation.framework */,
 				B9AD659E1849733200E9C380 /* CoreGraphics.framework */,
 				B9AD65A01849733200E9C380 /* UIKit.framework */,
-				A917B2320EB791A1F2E924A3 /* Pods_SimplestGPS.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -169,6 +159,10 @@
 		B9AD65A21849733200E9C380 /* SimplestGPS */ = {
 			isa = PBXGroup;
 			children = (
+				B98A095C26680C3600EB4268 /* CLLocation+UTMCoordinate.swift */,
+				B98A095926680C3600EB4268 /* CLLocationCoordinate2D+UTMCoordinate.swift */,
+				B98A095A26680C3600EB4268 /* TMCoordinate.swift */,
+				B98A095B26680C3600EB4268 /* UTMCoordinate.swift */,
 				B924577D1DB1DB92007B21C4 /* logo.png */,
 				B9C85A0B1DA5E8DF008F095A /* SimplestGPS.entitlements */,
 				B9D4BAA81CD9467F00E8C8B7 /* 836.wav */,
@@ -204,7 +198,6 @@
 		B9AD65A31849733200E9C380 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				B96776521D9428DB00286F85 /* GoogleService-Info.plist */,
 				B9AD65A41849733200E9C380 /* SimplestGPS-Info.plist */,
 				B9AD65A51849733200E9C380 /* InfoPlist.strings */,
 				B9AD65AA1849733200E9C380 /* SimplestGPS-Prefix.pch */,
@@ -220,7 +213,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B9AD65CB1849733200E9C380 /* Build configuration list for PBXNativeTarget "SimplestGPS" */;
 			buildPhases = (
-				3A660807937841D4628F8DC5 /* [CP] Check Pods Manifest.lock */,
 				B9AD65951849733200E9C380 /* Sources */,
 				B9AD65961849733200E9C380 /* Frameworks */,
 				B9AD65971849733200E9C380 /* Resources */,
@@ -247,7 +239,7 @@
 				TargetAttributes = {
 					B9AD65981849733200E9C380 = {
 						DevelopmentTeam = LUPFH54KMA;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 1150;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.GameCenter = {
@@ -304,7 +296,6 @@
 				B924577E1DB1DB92007B21C4 /* logo.png in Resources */,
 				B912A9AD1CD9108C00DF5768 /* 670.wav in Resources */,
 				B9692847184FB51100998B77 /* icon29.png in Resources */,
-				B96776531D9428DB00286F85 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +327,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B98A095F26680C3600EB4268 /* UTMCoordinate.swift in Sources */,
 				B97E8DF41C91A4FA00B3291C /* TargetMiniInfoView.swift in Sources */,
 				B93D61091BBF574A0092CD5C /* GPSAppDelegate2.swift in Sources */,
 				B93D610D1BBF60DB0092CD5C /* TargetsViewController2.swift in Sources */,
@@ -344,15 +336,18 @@
 				B95B68921C90BF30008E6CD3 /* NeedleView.swift in Sources */,
 				B9D542991C80CBD70063DCD8 /* MapCanvasView.swift in Sources */,
 				B95B68901C90BC92008E6CD3 /* CompassBGView.swift in Sources */,
+				B98A095D26680C3600EB4268 /* CLLocationCoordinate2D+UTMCoordinate.swift in Sources */,
 				B9E3A2CC1BBE467100A5267C /* TargetCell2.swift in Sources */,
 				B99D01151C9F9A0D00FA1FC2 /* MapModel.swift in Sources */,
 				B95B68981C911A39008E6CD3 /* CompassAnim.swift in Sources */,
 				B95B688C1C908DF0008E6CD3 /* CompassView.swift in Sources */,
+				B98A096026680C3600EB4268 /* CLLocation+UTMCoordinate.swift in Sources */,
 				B9F0F78C1CA8B1510038F50E /* MapPointView.swift in Sources */,
 				B95B68961C90D18D008E6CD3 /* TargetMiniNeedleView.swift in Sources */,
 				B912BBED1B73394400C3C09C /* GPSModel2.swift in Sources */,
 				B91E5F9F1C7F83A2000CB068 /* MapViewController.swift in Sources */,
 				B963D9AC1C9A0294003D024D /* PositionAnim.swift in Sources */,
+				B98A095E26680C3600EB4268 /* TMCoordinate.swift in Sources */,
 				B95B688E1C90B6AF008E6CD3 /* BareCompassView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -487,7 +482,6 @@
 		};
 		B9AD65CC1849733200E9C380 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 87B4D3740A175D52CA4A62BA /* Pods-SimplestGPS.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -510,7 +504,6 @@
 		};
 		B9AD65CD1849733200E9C380 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6B23B49C70D22B2A360F37EE /* Pods-SimplestGPS.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";

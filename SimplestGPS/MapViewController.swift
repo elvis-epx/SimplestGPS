@@ -22,6 +22,7 @@ enum Mode: Int {
 {
     @IBOutlet weak var canvas: MapCanvasView!
     @IBOutlet weak var scale: UILabel!
+    @IBOutlet weak var avg_b: UIButton!
     
     @IBOutlet weak var new_target: UIButton!
     @IBOutlet weak var thf_b: UIButton!
@@ -141,6 +142,16 @@ enum Mode: Int {
         
         let lp = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.tgt_longpress(_:)))
         self.tgt_b.addGestureRecognizer(lp)
+        
+        let ll = UITapGestureRecognizer(target: self, action: #selector(MapViewController.latlongchange(_:)))
+        ll.numberOfTapsRequired = 1
+        ll.numberOfTouchesRequired = 1
+        self.latitude.addGestureRecognizer(ll)
+
+        let ll2 = UITapGestureRecognizer(target: self, action: #selector(MapViewController.latlongchange(_:)))
+        ll2.numberOfTapsRequired = 1
+        ll2.numberOfTouchesRequired = 1
+        self.longitude.addGestureRecognizer(ll2)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -333,8 +344,8 @@ enum Mode: Int {
                     (stext.isEmpty ? "" : " - ") + stext
             }
             scale.text = stext
-            latitude.text = GPSModel2.model().latitude_formatted()
-            longitude.text = GPSModel2.model().longitude_formatted()
+            latitude.text = GPSModel2.model().latitude_formatted_main()
+            longitude.text = GPSModel2.model().longitude_formatted_main()
             accuracy.text = GPSModel2.model().altitude_formatted() + "↑ " +
                 GPSModel2.model().accuracy_formatted()
         }
@@ -709,5 +720,19 @@ enum Mode: Int {
     
     @IBAction func backToMain(_ sender: UIStoryboardSegue)
     {
+    }
+    
+    @objc func latlongchange(_ sender: UIGestureRecognizer)
+    {
+        GPSModel2.model().toggle_latlong()
+    }
+    
+    @IBAction func avg_toggl(_ sender: Any) {
+        var title = "MOV"
+        if !GPSModel2.model().toggle_avg() {
+            title = "AVG"
+        }
+        avg_b.setTitle(title, for: .normal)
+        avg_b.setTitle(title, for: .selected)
     }
 }
