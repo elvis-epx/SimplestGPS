@@ -22,7 +22,7 @@ class BareCompassView: UIView {
     }
     
     func toRad(_ a: CGFloat) -> CGFloat {
-        return CGFloat(Double(a) * M_PI / 180.0)
+        return CGFloat(Double(a) * .pi / 180.0)
     }
     
     // from http://sketchytech.blogspot.com.br/2014/11/swift-how-to-draw-clock-face-using.html
@@ -76,13 +76,14 @@ class BareCompassView: UIView {
         // An adjustment of 270 degrees to position numbers correctly
         let points = genpoints(sides, cx: cx, cy: cy, r: r - inset, adj: 270)
         let aFont = UIFont(name: "Helvetica", size: r / 5)
-        let attr = [NSFontAttributeName:aFont!,NSForegroundColorAttributeName:UIColor.white]
+        let attr = [NSAttributedString.Key.font:aFont!,
+                    NSAttributedString.Key.foregroundColor:UIColor.white]
         
         for (index, element) in points.enumerated() {
             if index > 0 {
                 let text = CFAttributedStringCreate(nil,
-                                labels[index] as CFString!,
-                                attr as CFDictionary!)
+                                labels[index] as CFString,
+                                attr as CFDictionary)
                 let line = CTLineCreateWithAttributedString(text!)
                 
                 let bounds = CTLineGetBoundsWithOptions(line, CTLineBoundsOptions.useOpticalBounds)

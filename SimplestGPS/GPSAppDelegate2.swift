@@ -8,16 +8,14 @@
 
 import Foundation
 import UIKit
-import Firebase
 
 @UIApplicationMain
 @objc class GPSAppDelegate2: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
     
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?)
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?)
         -> Bool {
-            FIRApp.configure()
             return true
     }
 }

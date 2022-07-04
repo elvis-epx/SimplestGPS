@@ -76,8 +76,8 @@ class MapCanvasView: UIView
     
     func init2() {
         updater = CADisplayLink(target: self, selector: #selector(MapCanvasView.anim))
-        updater!.frameInterval = 1
-        updater!.add(to: RunLoop.current, forMode: RunLoopMode.commonModes)
+        // updater!.frameInterval = 1
+        updater!.add(to: RunLoop.current, forMode: RunLoop.Mode.common)
 
         /* must be big enough to fit the screen even when rotated to any angle */
         map_plane = UIView.init(frame: CGRect(
@@ -379,7 +379,7 @@ class MapCanvasView: UIView
                            targets: targets, tgt_dist: tgt_dist)
     }
     
-    func anim(_ sender: CADisplayLink)
+    @objc func anim(_ sender: CADisplayLink)
     {
         // this is called only when CADisplayLink is active, which happens only
         // on init2()
@@ -412,10 +412,10 @@ class MapCanvasView: UIView
         let (new_heading, new_needle) = compass!.anim(dt)
         // NSLog("Animated heading: %f", new_heading)
         if mode == .mapcompass_H || mode == .map_H {
-            current_screen_rotation = new_heading * CGFloat(M_PI / 180.0)
+            current_screen_rotation = new_heading * CGFloat(Double.pi / 180.0)
         } else {
             current_screen_rotation = 0
-            needle_rotation = new_needle * CGFloat(M_PI / 180.0)
+            needle_rotation = new_needle * CGFloat(Double.pi / 180.0)
         }
         
         /* All map and points rotate together because all belong to this view */

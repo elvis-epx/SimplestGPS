@@ -151,7 +151,7 @@ class CompassAnim
             self.xlate = CGPoint(x: pivot.x - view.center.x, y: pivot.y - view.center.y)
         }
         var transform = CGAffineTransform(translationX: xlate!.x, y: xlate!.y)
-        transform = transform.rotated(by: current * CGFloat(M_PI / 180.0))
+        transform = transform.rotated(by: current * CGFloat(Double.pi / 180.0))
         transform = transform.translatedBy(x: -xlate!.x, y: -xlate!.y)
         
         view.transform = transform

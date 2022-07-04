@@ -443,10 +443,10 @@ import AVFoundation
         }
         
         let R = 6371000.0; // metres
-        let phi1 = lat1 * M_PI / 180.0;
-        let phi2 = lat2 * M_PI / 180.0;
-        let deltaphi = (lat2-lat1) * M_PI / 180.0;
-        let deltalambda = (long2-long1) * M_PI / 180.0;
+        let phi1 = lat1 * .pi / 180.0;
+        let phi2 = lat2 * .pi / 180.0;
+        let deltaphi = (lat2-lat1) * .pi / 180.0;
+        let deltalambda = (long2-long1) * .pi / 180.0;
         
         let a = sin(deltaphi/2) * sin(deltaphi/2) +
             cos(phi1) * cos(phi2) *
@@ -467,7 +467,7 @@ import AVFoundation
      */
     class func longitude_proportion(_ lat: Double) -> Double
     {
-        return cos(abs(lat) * M_PI / 180.0)
+        return cos(abs(lat) * .pi / 180.0)
     }
 
     class func longitude_proportion_cgfloat(_ lat: CGFloat) -> CGFloat
@@ -477,15 +477,15 @@ import AVFoundation
     
     class func azimuth(_ lat1: Double, lat2: Double, long1: Double, long2: Double) -> Double
     {
-        let phi1 = lat1 * M_PI / 180.0;
-        let phi2 = lat2 * M_PI / 180.0;
-        let lambda1 = long1 * M_PI / 180.0;
-        let lambda2 = long2 * M_PI / 180.0;
+        let phi1 = lat1 * .pi / 180.0;
+        let phi2 = lat2 * .pi / 180.0;
+        let lambda1 = long1 * .pi / 180.0;
+        let lambda2 = long2 * .pi / 180.0;
         
         let y = sin(lambda2-lambda1) * cos(phi2);
         let x = cos(phi1) * sin(phi2) -
             sin(phi1) * cos(phi2) * cos(lambda2 - lambda1);
-        var brng = atan2(y, x) * 180.0 / M_PI;
+        var brng = atan2(y, x) * 180.0 / .pi;
         if brng < 0 {
             brng += 360.0;
         }
@@ -1110,7 +1110,7 @@ import AVFoundation
     {
         super.init()
         
-        try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
+        try! AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.ambient)
         self.wav_hi = try? AVAudioPlayer(contentsOf: fwav_hi, fileTypeHint: nil)
         self.wav_lo = try? AVAudioPlayer(contentsOf: fwav_lo, fileTypeHint: nil)
         self.wav_side = try? AVAudioPlayer(contentsOf: fwav_side, fileTypeHint: nil)
@@ -1235,7 +1235,7 @@ import AVFoundation
     
     deinit {
         let notifications = NotificationCenter.default
-        notifications.removeObserver(prefsObserver, name: UserDefaults.didChangeNotification, object: nil)
+        notifications.removeObserver(prefsObserver!, name: UserDefaults.didChangeNotification, object: nil)
     }
     
     func prefs_changed()
@@ -1352,7 +1352,7 @@ import AVFoundation
     {
         let tokens = data.replacingOccurrences(of: "\t", with: " ")
                     .components(separatedBy: .whitespacesAndNewlines)
-        if tokens.count <= 0 || data.characters.count <= 0 {
+        if tokens.count <= 0 || data.count <= 0 {
             return
         }
         NSLog("target data: " + data)
@@ -1367,9 +1367,9 @@ import AVFoundation
         if tokens.count > 3 {
             altitude = tokens[3]
         }
-        if name.characters.count > 15 {
+        if name.count > 15 {
             let i = name.index(name.startIndex, offsetBy: 15)
-            name = name.substring(to: i)
+            name = String(name[..<i])
         }
         
         let err = target_set(target_index(name), nam: name, latitude: latitude,

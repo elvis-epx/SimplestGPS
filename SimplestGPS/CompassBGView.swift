@@ -27,11 +27,11 @@ class CompassBGView: UIView {
         
         ctx.setStrokeColor(UIColor.red.cgColor)
         ctx.setLineWidth(0)
-        let fc = UIColor.init(colorLiteralRed: 0, green: 0, blue: 0, alpha: 0.36)
+        let fc = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.36)
         ctx.setFillColor(fc.cgColor)
         
         ctx.addArc(center: center, radius: radius,
-                   startAngle: CGFloat(2 * M_PI), endAngle: 0,
+                   startAngle: CGFloat(2 * Double.pi), endAngle: 0,
                    clockwise: true)
         ctx.drawPath(using: .fill)
     }
