@@ -4,3 +4,4 @@ xcshareddata/
 *.mode1v3
 *.pbxuser
 GoogleService-Info.plist
+Pods/
